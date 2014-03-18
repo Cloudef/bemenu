@@ -20,3 +20,12 @@
 # Vim swap files
 .*.swp
 .swp
+
+# Archives
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
