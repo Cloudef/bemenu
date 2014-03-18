@@ -29,3 +29,7 @@
 *.tar.xz
 *.zip
 *.rar
+
+# Build directories
+build/
+bin/
