@@ -4,5 +4,6 @@ bemenu
 Dynamic menu library and client program inspired by dmenu
 
 ## License
-* GPL for client program
-* LGPL for library
+* [GNU GPLv3 (or any later version)](LICENSE-CLIENT) for client program[s] and
+  other sources except library and bindings
+* [GNU LGPLv3 (or any later version)](LICENSE-LIB) for library and bindings
