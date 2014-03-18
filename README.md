@@ -18,3 +18,10 @@ Dynamic menu library and client program inspired by dmenu
 * **Build system** - [CMake](http://www.cmake.org/)
 * **API documentation** - [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html)
   (JavaDoc style comments)
+* **Branches**
+  * **master** - stable releases (permanent)
+  * **develop** - development (permanent), merge back to **master**
+  * **dev/topic** - topic related development (temporary), branch off from
+    **develop** and merge to **develop**
+  * **hotfix/issue** - stable release bugfixes (temporary), branch off from
+    **master** and merge to **master** and **develop**
