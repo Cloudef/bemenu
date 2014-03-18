@@ -16,3 +16,25 @@
 *.exe
 *.out
 *.app
+
+# Vim swap files
+.*.swp
+.swp
+
+# Archives
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tar.xz
+*.zip
+*.rar
+
+# Build directories
+build/
+bin/
+
+# Backup files
+*~
+*.backup
+*.old
