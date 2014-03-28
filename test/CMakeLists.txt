@@ -14,4 +14,6 @@ FOREACH (test ${TESTS})
     ENDIF ()
 ENDFOREACH (test)
 
+MESSAGE("-!- Use 'make test' to run tests")
+
 # vim: set ts=8 sw=4 tw=0 :
