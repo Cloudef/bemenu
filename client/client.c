@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+#include <bemenu.h>
 
 /**
  * Main method
@@ -20,9 +21,14 @@ int main(int argc, char **argv)
 {
     (void)argc, (void)argv;
 
-    /*
-     * code goes here
-     */
+    bmMenu *menu = bmMenuNew(BM_DRAW_MODE_NONE);
+
+    if (!menu)
+        return EXIT_FAILURE;
+
+    bmMenuRender(menu);
+
+    bmMenuFree(menu);
 
     return EXIT_SUCCESS;
 }
