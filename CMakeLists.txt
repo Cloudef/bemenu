@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(bemenu)
+INCLUDE(CTest)
 SET(BEMENU_NAME "bemenu")
 SET(BEMENU_DESCRIPTION "Dynamic menu library and client program inspired by dmenu")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${chck_SOURCE_DIR}/CMake/modules)

@@ -6,9 +6,13 @@
 
 /**
  * Draw mode constants for setting bmMenu instance draw mode.
+ *
+ * BM_DRAW_MODE_LAST is provided for enumerating draw modes.
+ * Instancing with it however provides exactly same functionality as BM_DRAW_MODE_NONE.
  */
 typedef enum bmDrawMode {
-    BM_DRAW_MODE_NONE
+    BM_DRAW_MODE_NONE,
+    BM_DRAW_MODE_LAST
 } bmDrawMode;
 
 typedef struct _bmMenu bmMenu;
