@@ -36,6 +36,10 @@ bmMenu* bmMenuNew(bmDrawMode drawMode)
 void bmMenuFree(bmMenu *menu)
 {
     assert(menu != NULL);
+
+    if (menu->renderApi.free)
+        menu->renderApi.free();
+
     free(menu);
 }
 
