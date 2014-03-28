@@ -31,7 +31,4 @@ struct _bmMenu {
     unsigned int itemsCount;
 } _bmMenu;
 
-
-void bmRenderNullInit(struct _bmRenderApi *api);
-
 /* vim: set ts=8 sw=4 tw=0 :*/
