@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     {
         bmDrawMode i;
         for (i = 0; i < BM_DRAW_MODE_LAST; ++i) {
-            bmMenu *menu = bmMenuNew(BM_DRAW_MODE_NONE);
+            bmMenu *menu = bmMenuNew(i);
             assert(menu != NULL);
             bmMenuRender(menu);
             bmMenuFree(menu);
