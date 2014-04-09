@@ -98,6 +98,9 @@ void bmMenuFree(bmMenu *menu)
     if (menu->title)
         free(menu->title);
 
+    if (menu->filteredItems)
+        free(menu->filteredItems);
+
     bmMenuFreeItems(menu);
     free(menu);
 }
