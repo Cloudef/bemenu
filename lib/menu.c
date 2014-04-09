@@ -272,7 +272,7 @@ bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
     unsigned int count;
     bmItem **items = bmMenuGetFilteredItems(menu, &count);
 
-    if (!items || count < menu->index)
+    if (!items || count <= menu->index)
         return NULL;
 
     return items[menu->index];
