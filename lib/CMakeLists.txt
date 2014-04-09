@@ -1,6 +1,9 @@
 # Sources
 SET(BEMENU_SOURCE
-    bemenu.c
+    menu.c
+    item.c
+    filter.c
+    util.c
     draw/curses.c
     )
 SET(BEMENU_INCLUDE)
@@ -22,6 +25,6 @@ ENDIF ()
 # Compile
 INCLUDE_DIRECTORIES(${BEMENU_INCLUDE})
 ADD_LIBRARY(bemenu ${BEMENU_SOURCE})
-TARGET_LINK_LIBRARIES(bemenu ${BEMENU_LIBRARIES})
+TARGET_LINK_LIBRARIES(bemenu ${BEMENU_LIBRARIES} dl)
 
 # vim: set ts=8 sw=4 tw=0 :
