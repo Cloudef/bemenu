@@ -31,7 +31,7 @@ bmItem* bmItemNew(const char *text)
  */
 void bmItemFree(bmItem *item)
 {
-    assert(item != NULL);
+    assert(item);
 
     if (item->text)
         free(item->text);
@@ -47,7 +47,7 @@ void bmItemFree(bmItem *item)
  */
 int bmItemSetText(bmItem *item, const char *text)
 {
-    assert(item != NULL);
+    assert(item);
 
     char *copy = NULL;
     if (text && !(copy = _bmStrdup(text)))
@@ -68,7 +68,7 @@ int bmItemSetText(bmItem *item, const char *text)
  */
 const char* bmItemGetText(const bmItem *item)
 {
-    assert(item != NULL);
+    assert(item);
     return item->text;
 }
 

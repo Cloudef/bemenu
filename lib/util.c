@@ -18,6 +18,8 @@
  */
 char* _bmStrdup(const char *string)
 {
+    assert(string);
+
     size_t len = strlen(string);
     if (len == 0)
         return NULL;
@@ -41,6 +43,8 @@ char* _bmStrdup(const char *string)
  */
 bmItem** _bmShrinkItemList(bmItem ***list, size_t osize, size_t nsize)
 {
+    assert(list);
+
     if (nsize >= osize)
         return *list;
 
@@ -62,8 +66,7 @@ bmItem** _bmShrinkItemList(bmItem ***list, size_t osize, size_t nsize)
  */
 int _bmUtf8StringScreenWidth(const char *string)
 {
-    if (!string)
-        return 0;
+    assert(string);
 
     int num_char = mbstowcs(NULL, string, 0) + 1;
     wchar_t *wstring = malloc((num_char + 1) * sizeof (wstring[0]));
@@ -87,7 +90,7 @@ int _bmUtf8StringScreenWidth(const char *string)
  */
 size_t _bmUtf8RuneNext(const char *string, size_t start)
 {
-    assert(string != NULL);
+    assert(string);
 
     size_t len = strlen(string), i = start;
     if (len == 0 || len <= i || !*string)
@@ -106,7 +109,7 @@ size_t _bmUtf8RuneNext(const char *string, size_t start)
  */
 size_t _bmUtf8RunePrev(const char *string, size_t start)
 {
-    assert(string != NULL);
+    assert(string);
 
     size_t len = strlen(string), i = start;
     if (i == 0 || len < start || !*string)
@@ -125,7 +128,7 @@ size_t _bmUtf8RunePrev(const char *string, size_t start)
  */
 size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len)
 {
-    assert(rune != NULL);
+    assert(rune);
     char mb[5] = { 0, 0, 0, 0, 0 };
     memcpy(mb, rune, (u8len > 4 ? 4 : u8len));
     return _bmUtf8StringScreenWidth(mb);
@@ -141,7 +144,7 @@ size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len)
  */
 size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth)
 {
-    assert(string != NULL);
+    assert(string);
 
     if (runeWidth)
         *runeWidth = 0;
@@ -173,7 +176,7 @@ size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth)
  */
 size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *runeWidth)
 {
-    assert(string != NULL);
+    assert(string);
 
     if (runeWidth)
         *runeWidth = 0;
@@ -206,7 +209,7 @@ size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char 
  */
 size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *runeWidth)
 {
-    assert(string != NULL);
+    assert(string);
 
     char u8len = ((unicode < 0x80) ? 1 : ((unicode < 0x800) ? 2 : ((unicode < 0x10000) ? 3 : 4)));
     char mb[5] = { 0, 0, 0, 0 };

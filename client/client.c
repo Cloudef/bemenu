@@ -17,22 +17,22 @@ static ptrdiff_t getLine(char **outLine, size_t *outAllocated, FILE *stream)
     size_t len = 0, allocated;
     char *s, *buffer;
 
-    assert(outLine != NULL);
-    assert(outAllocated != NULL);
+    assert(outLine);
+    assert(outAllocated);
 
-    if (stream == NULL || feof(stream) || ferror(stream))
+    if (!stream || feof(stream) || ferror(stream))
         return -1;
 
     allocated = *outAllocated;
     buffer = *outLine;
 
-    if (buffer == NULL || allocated == 0) {
+    if (!buffer || allocated == 0) {
         if (!(buffer = calloc(1, (allocated = 1024) + 1)))
             return -1;
     }
 
     for (s = buffer;;) {
-        if (fgets(s, allocated - (s - buffer), stream) == NULL) {
+        if (!fgets(s, allocated - (s - buffer), stream)) {
             *outAllocated = allocated;
             *outLine = buffer;
             return -1;

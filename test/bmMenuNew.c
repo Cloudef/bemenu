@@ -11,7 +11,7 @@ int main(int argc, char **argv)
         bmDrawMode i;
         for (i = 0; i < BM_DRAW_MODE_LAST; ++i) {
             bmMenu *menu = bmMenuNew(i);
-            assert(menu != NULL);
+            assert(menu);
             bmMenuRender(menu);
             bmMenuFree(menu);
         }

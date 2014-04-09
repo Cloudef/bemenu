@@ -139,7 +139,7 @@ static void _bmDrawCursesEndWin(void)
 
 static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
 {
-    assert(unicode != NULL);
+    assert(unicode);
     *unicode = 0;
 
     if (!curses.stdscr)

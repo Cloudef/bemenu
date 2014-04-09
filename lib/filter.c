@@ -17,9 +17,9 @@
  */
 bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selected)
 {
-    assert(menu != NULL);
-    assert(count != NULL);
-    assert(selected != NULL);
+    assert(menu);
+    assert(count);
+    assert(selected);
     *count = *selected = 0;
 
     /* FIXME: not real dmenu like filtering at all */
@@ -51,9 +51,9 @@ bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selecte
  */
 bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *count, unsigned int *selected)
 {
-    assert(menu != NULL);
-    assert(count != NULL);
-    assert(selected != NULL);
+    assert(menu);
+    assert(count);
+    assert(selected);
     *count = *selected = 0;
 
     /* FIXME: stub */

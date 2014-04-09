@@ -15,7 +15,7 @@ static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *c
 
 static void _bmMenuFilter(bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     if (menu->filteredItems)
         free(menu->filteredItems);
@@ -90,7 +90,7 @@ bmMenu* bmMenuNew(bmDrawMode drawMode)
  */
 void bmMenuFree(bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     if (menu->renderApi.free)
         menu->renderApi.free();
@@ -112,7 +112,7 @@ void bmMenuFree(bmMenu *menu)
  */
 void bmMenuFreeItems(bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     unsigned int i;
     for (i = 0; i < menu->itemsCount; ++i)
@@ -131,7 +131,7 @@ void bmMenuFreeItems(bmMenu *menu)
  */
 void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     bmFilterMode oldMode = mode;
     menu->filterMode = (mode >= BM_FILTER_MODE_LAST ? BM_FILTER_MODE_DMENU : mode);
@@ -148,7 +148,7 @@ void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode)
  */
 bmFilterMode bmMenuGetFilterMode(const bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
     return menu->filterMode;
 }
 
@@ -160,7 +160,7 @@ bmFilterMode bmMenuGetFilterMode(const bmMenu *menu)
  */
 int bmMenuSetTitle(bmMenu *menu, const char *title)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     char *copy = NULL;
     if (title && !(copy = _bmStrdup(title)))
@@ -181,7 +181,7 @@ int bmMenuSetTitle(bmMenu *menu, const char *title)
  */
 const char* bmMenuGetTitle(const bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
     return menu->title;
 }
 
@@ -195,8 +195,8 @@ const char* bmMenuGetTitle(const bmMenu *menu)
  */
 int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
 {
-    assert(menu != NULL);
-    assert(item != NULL);
+    assert(menu);
+    assert(item);
 
     if (menu->itemsCount >= menu->allocatedCount && !_bmMenuGrowItems(menu))
         return 0;
@@ -232,7 +232,7 @@ int bmMenuAddItem(bmMenu *menu, bmItem *item)
  */
 int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     unsigned int i = index;
     if (i >= menu->itemsCount)
@@ -251,8 +251,8 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
  */
 int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
 {
-    assert(menu != NULL);
-    assert(item != NULL);
+    assert(menu);
+    assert(item);
 
     unsigned int i;
     for (i = 0; i < menu->itemsCount && menu->items[i] != item; ++i);
@@ -267,7 +267,7 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
  */
 bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     unsigned int count;
     bmItem **items = bmMenuGetFilteredItems(menu, &count);
@@ -287,7 +287,7 @@ bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
  */
 bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *nmemb)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     if (nmemb)
         *nmemb = menu->itemsCount;
@@ -307,7 +307,7 @@ bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *nmemb)
  */
 bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *nmemb)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     if (nmemb)
         *nmemb = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
@@ -326,9 +326,9 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *nmemb)
  */
 int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
 {
-    assert(menu != NULL);
+    assert(menu);
 
-    if (items == NULL || nmemb == 0) {
+    if (!items || nmemb == 0) {
         bmMenuFreeItems(menu);
         return 1;
     }
@@ -353,7 +353,7 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
  */
 void bmMenuRender(const bmMenu *menu)
 {
-    assert(menu != NULL);
+    assert(menu);
 
     if (menu->renderApi.render)
         menu->renderApi.render(menu);
@@ -370,8 +370,8 @@ void bmMenuRender(const bmMenu *menu)
  */
 bmKey bmMenuGetKey(bmMenu *menu, unsigned int *unicode)
 {
-    assert(menu != NULL);
-    assert(unicode != NULL);
+    assert(menu);
+    assert(unicode);
 
     *unicode = 0;
     bmKey key = BM_KEY_NONE;
@@ -390,7 +390,7 @@ bmKey bmMenuGetKey(bmMenu *menu, unsigned int *unicode)
  */
 bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 {
-    assert(menu != NULL);
+    assert(menu);
     char *oldFilter = _bmStrdup(menu->filter);
     unsigned int itemsCount = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
 
