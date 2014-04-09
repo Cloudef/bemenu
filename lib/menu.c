@@ -510,12 +510,6 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             }
             break;
 
-        case BM_KEY_RETURN:
-            return BM_RUN_RESULT_SELECTED;
-
-        case BM_KEY_ESCAPE:
-            return BM_RUN_RESULT_CANCEL;
-
         default: break;
     }
 
@@ -524,6 +518,13 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
     if (oldFilter)
         free(oldFilter);
+
+    switch (key) {
+        case BM_KEY_RETURN: return BM_RUN_RESULT_SELECTED;
+        case BM_KEY_ESCAPE: return BM_RUN_RESULT_CANCEL;
+        default: break;
+    }
+
     return BM_RUN_RESULT_RUNNING;
 }
 
