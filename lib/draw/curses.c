@@ -128,6 +128,9 @@ static void _bmDrawCursesRender(const bmMenu *menu)
 
 static void _bmDrawCursesEndWin(void)
 {
+    if (curses.refresh)
+        curses.refresh();
+
     if (curses.endwin)
         curses.endwin();
 
