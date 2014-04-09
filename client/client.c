@@ -114,7 +114,9 @@ int main(int argc, char **argv)
 
     if (status == BM_RUN_RESULT_SELECTED) {
         bmItem *item = bmMenuGetSelectedItem(menu);
-        printf("%s\n", bmItemGetText(item));
+
+        if (item)
+            printf("%s\n", bmItemGetText(item));
     }
 
     bmMenuFree(menu);
