@@ -32,8 +32,11 @@ static ptrdiff_t getLine(char **outLine, size_t *outAllocated, FILE *stream)
     }
 
     for (s = buffer;;) {
-        if (fgets(s, allocated - (s - buffer), stream) == NULL)
+        if (fgets(s, allocated - (s - buffer), stream) == NULL) {
+            *outAllocated = allocated;
+            *outLine = buffer;
             return -1;
+        }
 
         len = strlen(s);
         if (feof(stream))
@@ -68,7 +71,7 @@ static ptrdiff_t getLine(char **outLine, size_t *outAllocated, FILE *stream)
 static void readItemsToMenuFromStdin(bmMenu *menu)
 {
     ptrdiff_t len;
-    size_t size;
+    size_t size = 0;
     char *line = NULL;
 
     while ((len = getLine(&line, &size, stdin)) != -1) {
