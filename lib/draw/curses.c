@@ -20,6 +20,9 @@
 #undef getmaxy
 #undef timeout
 
+/**
+ * Dynamically loaded curses API.
+ */
 static struct curses {
     void *handle;
     WINDOW *stdscr;
