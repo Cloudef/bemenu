@@ -345,10 +345,9 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
 }
 
 /**
- * Create new bmMenu instance.
+ * Render bmMenu instance using chosen draw method.
  *
- * @param drawMode Render method to be used for this menu instance.
- * @return bmMenu for new menu instance, NULL if creation failed.
+ * @param menu bmMenu instance to be rendered.
  */
 void bmMenuRender(const bmMenu *menu)
 {
