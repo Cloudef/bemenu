@@ -488,12 +488,10 @@ void bmMenuFilter(bmMenu *menu)
     _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
     menu->index = selected;
 
-    if (count) {
-        if (menu->oldFilter)
-            free(menu->oldFilter);
+    if (menu->oldFilter)
+        free(menu->oldFilter);
 
-        menu->oldFilter = _bmStrdup(menu->filter);
-    }
+    menu->oldFilter = _bmStrdup(menu->filter);
 }
 
 /**
