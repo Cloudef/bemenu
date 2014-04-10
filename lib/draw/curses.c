@@ -1,10 +1,12 @@
 #include "../internal.h"
+#define _XOPEN_SOURCE 700
 #include <wchar.h>
 #include <string.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <ncurses.h>
 #include <dlfcn.h>
+#include <signal.h>
 #include <assert.h>
 
 /* ncurses.h likes to define stuff for us.
@@ -24,6 +26,7 @@
  * Dynamically loaded curses API.
  */
 static struct curses {
+    struct sigaction action;
     void *handle;
     WINDOW *stdscr;
     WINDOW* (*initscr)(void);
@@ -87,7 +90,7 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 static void _bmDrawCursesRender(const bmMenu *menu)
 {
     if (!curses.stdscr) {
-        freopen("/dev/tty", "rw", stdin);
+        freopen("/dev/tty", "r", stdin);
         setlocale(LC_CTYPE, "");
         if ((curses.stdscr = curses.initscr()) == NULL)
             return;
@@ -134,6 +137,7 @@ static void _bmDrawCursesEndWin(void)
         curses.endwin();
 
     curses.stdscr = NULL;
+    freopen("/dev/tty", "w", stdout);
 }
 
 static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
@@ -218,7 +222,15 @@ static void _bmDrawCursesFree(void)
     if (curses.handle)
         dlclose(curses.handle);
 
+    sigaction(SIGABRT, &curses.action, NULL);
+    sigaction(SIGSEGV, &curses.action, NULL);
     memset(&curses, 0, sizeof(curses));
+}
+
+static void _bmDrawCursesCrashHandler(int sig)
+{
+    (void)sig;
+    _bmDrawCursesFree();
 }
 
 int _bmDrawCursesInit(struct _bmRenderApi *api)
@@ -270,6 +282,11 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     api->render = _bmDrawCursesRender;
     api->free = _bmDrawCursesFree;
 
+    struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = _bmDrawCursesCrashHandler;
+    sigaction(SIGABRT, &action, &curses.action);
+    sigaction(SIGSEGV, &action, &curses.action);
     return 1;
 
 function_pointer_exception:
