@@ -227,6 +227,8 @@ bmKey bmMenuGetKey(bmMenu *menu, unsigned int *unicode);
  * Advances menu logic with key and unicode as input.
  *
  * @param menu bmMenu instance to be advanced.
+ * @param key Key input that will advance menu logic.
+ * @param unicode Unicode input that will advance menu logic.
  * @return bmRunResult for menu state.
  */
 bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode);
