@@ -266,25 +266,6 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
 }
 
 /**
- * Get highlighted item from bmMenu instance.
- *
- * @param menu bmMenu instance from where to get highlighted item.
- * @return Selected bmItem instance, **NULL** if none highlighted.
- */
-bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
-{
-    assert(menu);
-
-    unsigned int count;
-    bmItem **items = bmMenuGetFilteredItems(menu, &count);
-
-    if (!items || count <= menu->index)
-        return NULL;
-
-    return items[menu->index];
-}
-
-/**
  * Highlight item in menu by index.
  *
  * @param menu bmMenu instance from where to highlight item.
@@ -323,16 +304,22 @@ int bmMenuSetHighlighted(bmMenu *menu, bmItem *item)
 }
 
 /**
- * Get selected items from bmMenu instance.
+ * Get highlighted item from bmMenu instance.
  *
- * @param menu bmMenu instance from where to get selected items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
+ * @param menu bmMenu instance from where to get highlighted item.
+ * @return Selected bmItem instance, **NULL** if none highlighted.
  */
-bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb)
+bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
 {
     assert(menu);
-    return _bmItemListGetItems(&menu->selection, outNmemb);
+
+    unsigned int count;
+    bmItem **items = bmMenuGetFilteredItems(menu, &count);
+
+    if (!items || count <= menu->index)
+        return NULL;
+
+    return items[menu->index];
 }
 
 /**
@@ -352,38 +339,16 @@ int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb)
 }
 
 /**
- * Get filtered (displayed) items from bmMenu instance.
+ * Get selected items from bmMenu instance.
  *
- * @warning The pointer returned by this function _will_ be invalid when menu internally filters its list again.
- *          Do not store this pointer.
- *
- * @param menu bmMenu instance from where to get filtered items.
+ * @param menu bmMenu instance from where to get selected items.
  * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
+bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
-
-    if (menu->filtered.list)
-        return _bmItemListGetItems(&menu->filtered, outNmemb);
-
-    return _bmItemListGetItems(&menu->items, outNmemb);
-}
-
-/**
- * Get items from bmMenu instance.
- *
- * @warning The pointer returned by this function may be invalid after removing or adding new items.
- *
- * @param menu bmMenu instance from where to get items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
- */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
-{
-    assert(menu);
-    return _bmItemListGetItems(&menu->items, outNmemb);
+    return _bmItemListGetItems(&menu->selection, outNmemb);
 }
 
 /**
@@ -409,6 +374,41 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
     }
 
     return ret;
+}
+
+/**
+ * Get items from bmMenu instance.
+ *
+ * @warning The pointer returned by this function may be invalid after removing or adding new items.
+ *
+ * @param menu bmMenu instance from where to get items.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
+ * @return Pointer to array of bmItem pointers.
+ */
+bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
+{
+    assert(menu);
+    return _bmItemListGetItems(&menu->items, outNmemb);
+}
+
+/**
+ * Get filtered (displayed) items from bmMenu instance.
+ *
+ * @warning The pointer returned by this function _will_ be invalid when menu internally filters its list again.
+ *          Do not store this pointer.
+ *
+ * @param menu bmMenu instance from where to get filtered items.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
+ * @return Pointer to array of bmItem pointers.
+ */
+bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
+{
+    assert(menu);
+
+    if (menu->filtered.list)
+        return _bmItemListGetItems(&menu->filtered, outNmemb);
+
+    return _bmItemListGetItems(&menu->items, outNmemb);
 }
 
 /**
