@@ -48,16 +48,16 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 {
     static int ncols = 0;
     static char *buffer = NULL;
-    int new_ncols = curses.getmaxx(curses.stdscr);
+    int newNcols = curses.getmaxx(curses.stdscr);
 
-    if (new_ncols <= 0)
+    if (newNcols <= 0)
         return;
 
-    if (!buffer || new_ncols > ncols) {
+    if (!buffer || newNcols > ncols) {
         if (buffer)
             free(buffer);
 
-        ncols = new_ncols;
+        ncols = newNcols;
 
         if (!(buffer = calloc(1, ncols + 1)))
             return;
