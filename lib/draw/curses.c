@@ -148,37 +148,54 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
     curses.get_wch(unicode);
     switch (*unicode) {
         case 16: /* C-p */
-        case KEY_UP: return BM_KEY_UP;
+        case KEY_UP:
+            return BM_KEY_UP;
 
         case 14: /* C-n */
-        case KEY_DOWN: return BM_KEY_DOWN;
+        case KEY_DOWN:
+            return BM_KEY_DOWN;
 
         case 2: /* C-b */
-        case KEY_LEFT: return BM_KEY_LEFT;
+        case KEY_LEFT:
+            return BM_KEY_LEFT;
 
         case 6: /* C-f */
-        case KEY_RIGHT: return BM_KEY_RIGHT;
+        case KEY_RIGHT:
+            return BM_KEY_RIGHT;
 
         case 1: /* C-a */
-        case KEY_HOME: return BM_KEY_HOME;
+        case KEY_HOME:
+            return BM_KEY_HOME;
 
         case 5: /* C-e */
-        case KEY_END: return BM_KEY_END;
+        case KEY_END:
+            return BM_KEY_END;
 
-        case KEY_PPAGE: return BM_KEY_PAGE_UP;
-        case KEY_NPAGE: return BM_KEY_PAGE_DOWN;
+        case KEY_PPAGE: /* PAGE UP */
+            return BM_KEY_PAGE_UP;
+
+        case KEY_NPAGE: /* PAGE DOWN */
+            return BM_KEY_PAGE_DOWN;
 
         case 8: /* C-h */
-        case KEY_BACKSPACE: return BM_KEY_BACKSPACE;
+        case KEY_BACKSPACE:
+            return BM_KEY_BACKSPACE;
 
         case 4: /* C-d */
-        case KEY_DC: return BM_KEY_DELETE;
+        case KEY_DC:
+            return BM_KEY_DELETE;
 
-        case 21: return BM_KEY_LINE_DELETE_LEFT; /* C-u */
-        case 11: return BM_KEY_LINE_DELETE_RIGHT; /* C-k */
-        case 23: return BM_KEY_WORD_DELETE; /* C-w */
+        case 21: /* C-u */
+            return BM_KEY_LINE_DELETE_LEFT;
 
-        case 9: return BM_KEY_TAB; /* Tab */
+        case 11: /* C-k */
+            return BM_KEY_LINE_DELETE_RIGHT;
+
+        case 23: /* C-w */
+            return BM_KEY_WORD_DELETE;
+
+        case 9: /* Tab */
+            return BM_KEY_TAB;
 
         case 10: /* Return */
             _bmDrawCursesEndWin();
