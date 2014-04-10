@@ -16,7 +16,7 @@ static void _bmMenuFilter(bmMenu *menu)
 {
     assert(menu);
 
-    if (!menu->items.list || menu->items.count <= 0) {
+    if (!strlen(menu->filter) || !menu->items.list || menu->items.count <= 0) {
         _bmItemListFreeList(&menu->filtered);
         return;
     }
