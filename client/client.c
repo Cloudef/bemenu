@@ -63,6 +63,8 @@ static ptrdiff_t getLine(char **outLine, size_t *outAllocated, FILE *stream)
 
 static void readItemsToMenuFromStdin(bmMenu *menu)
 {
+    assert(menu);
+
     ptrdiff_t len;
     size_t size = 0;
     char *line = NULL;
@@ -84,7 +86,6 @@ int main(int argc, char **argv)
     (void)argc, (void)argv;
 
     bmMenu *menu = bmMenuNew(BM_DRAW_MODE_CURSES);
-
     if (!menu)
         return EXIT_FAILURE;
 
@@ -107,7 +108,6 @@ int main(int argc, char **argv)
     }
 
     bmMenuFree(menu);
-
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
