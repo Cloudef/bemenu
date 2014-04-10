@@ -7,7 +7,7 @@
 /**
  * Filter function map.
  */
-static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected) = {
+static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted) = {
     _bmFilterDmenu, /* BM_FILTER_DMENU */
     _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
@@ -16,37 +16,22 @@ static void _bmMenuFilter(bmMenu *menu)
 {
     assert(menu);
 
-    if (menu->filteredItems)
-        free(menu->filteredItems);
-
-    menu->filteredCount = 0;
-    menu->filteredItems = NULL;
-
     unsigned int count, selected;
     bmItem **filtered = filterFunc[menu->filterMode](menu, &count, &selected);
 
-    menu->filteredItems = filtered;
-    menu->filteredCount = count;
+    _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
     menu->index = selected;
 }
 
-static int _bmMenuGrowItems(bmMenu *menu)
+int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item)
 {
-    void *tmp;
-    static const unsigned int step = 32;
-    unsigned int nsize = sizeof(bmItem*) * (menu->allocatedCount + step);
+    assert(menu);
+    assert(item);
 
-    if (!(tmp = realloc(menu->items, nsize))) {
-        if (!(tmp = malloc(nsize)))
-            return 0;
-
-        memcpy(tmp, menu->items, sizeof(bmItem*) * menu->allocatedCount);
-    }
-
-    menu->items = tmp;
-    menu->allocatedCount += step;
-    memset(&menu->items[menu->itemsCount], 0, sizeof(bmItem*) * (menu->allocatedCount - menu->itemsCount));
-    return 1;
+    unsigned int i, count;
+    bmItem **items = bmMenuGetSelectedItems(menu, &count);
+    for (i = 0; i < count && items[i] != item; ++i);
+    return (i < count);
 }
 
 /**
@@ -97,8 +82,8 @@ void bmMenuFree(bmMenu *menu)
     if (menu->title)
         free(menu->title);
 
-    if (menu->filteredItems)
-        free(menu->filteredItems);
+    if (menu->filtered.list)
+        free(menu->filtered.list);
 
     bmMenuFreeItems(menu);
     free(menu);
@@ -112,14 +97,9 @@ void bmMenuFree(bmMenu *menu)
 void bmMenuFreeItems(bmMenu *menu)
 {
     assert(menu);
-
-    unsigned int i;
-    for (i = 0; i < menu->itemsCount; ++i)
-        bmItemFree(menu->items[i]);
-
-    free(menu->items);
-    menu->allocatedCount = menu->itemsCount = 0;
-    menu->items = NULL;
+    _bmItemListFreeList(&menu->selection);
+    _bmItemListFreeList(&menu->filtered);
+    _bmItemListFreeItems(&menu->items);
 }
 
 /**
@@ -195,19 +175,7 @@ const char* bmMenuGetTitle(const bmMenu *menu)
 int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
 {
     assert(menu);
-    assert(item);
-
-    if (menu->itemsCount >= menu->allocatedCount && !_bmMenuGrowItems(menu))
-        return 0;
-
-    if (index + 1 != menu->itemsCount) {
-        unsigned int i = index;
-        memmove(&menu->items[i + 1], &menu->items[i], sizeof(bmItem*) * (menu->itemsCount - i));
-    }
-
-    menu->items[index] = item;
-    menu->itemsCount++;
-    return 1;
+    return _bmItemListAddItemAt(&menu->items, item, index);;
 }
 
 /**
@@ -219,7 +187,7 @@ int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
  */
 int bmMenuAddItem(bmMenu *menu, bmItem *item)
 {
-    return bmMenuAddItemAt(menu, item, menu->itemsCount);
+    return _bmItemListAddItem(&menu->items, item);
 }
 
 /**
@@ -235,12 +203,18 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
 {
     assert(menu);
 
-    unsigned int i = index;
-    if (i >= menu->itemsCount)
+    if (!menu->items.list || menu->items.count <= index)
         return 0;
 
-    memmove(&menu->items[i], &menu->items[i], sizeof(bmItem*) * (menu->itemsCount - i));
-    return 1;
+    bmItem *item = menu->items.list[index];
+    int ret = _bmItemListRemoveItemAt(&menu->items, index);
+
+    if (ret) {
+        _bmItemListRemoveItem(&menu->selection, item);
+        _bmItemListRemoveItem(&menu->filtered, item);
+    }
+
+    return ret;
 }
 
 /**
@@ -255,20 +229,24 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
 int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
 {
     assert(menu);
-    assert(item);
 
-    unsigned int i;
-    for (i = 0; i < menu->itemsCount && menu->items[i] != item; ++i);
-    return bmMenuRemoveItemAt(menu, i);
+    int ret = _bmItemListRemoveItem(&menu->items, item);
+
+    if (ret) {
+        _bmItemListRemoveItem(&menu->selection, item);
+        _bmItemListRemoveItem(&menu->filtered, item);
+    }
+
+    return ret;
 }
 
 /**
- * Get selected item from bmMenu instance.
+ * Get highlighted item from bmMenu instance.
  *
- * @param menu bmMenu instance from where to get selected item.
- * @return Selected bmItem instance, **NULL** if none selected.
+ * @param menu bmMenu instance from where to get highlighted item.
+ * @return Selected bmItem instance, **NULL** if none highlighted.
  */
-bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
+bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
 {
     assert(menu);
 
@@ -282,22 +260,70 @@ bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
 }
 
 /**
- * Get items from bmMenu instance.
+ * Highlight item in menu by index.
  *
- * @warning The pointer returned by this function may be invalid after removing or adding new items.
- *
- * @param menu bmMenu instance from where to get items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
+ * @param menu bmMenu instance from where to highlight item.
+ * @return 1 on successful highlight, 0 on failure.
  */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
+int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index)
+{
+    assert(menu);
+    unsigned int itemsCount = (menu->filtered.list ? menu->filtered.count : menu->items.count);
+
+    if (itemsCount <= index)
+        return 0;
+
+    return (menu->index = index);
+}
+
+/**
+ * Highlight item in menu.
+ *
+ * @param menu bmMenu instance from where to highlight item.
+ * @param item bmItem instance to highlight.
+ * @return 1 on successful highlight, 0 on failure.
+ */
+int bmMenuSetHighlighted(bmMenu *menu, bmItem *item)
 {
     assert(menu);
 
-    if (outNmemb)
-        *outNmemb = menu->itemsCount;
+    unsigned int i, itemsCount;
+    bmItem **items = bmMenuGetFilteredItems(menu, &itemsCount);
+    for (i = 0; i < itemsCount && items[i] != item; ++i);
 
-    return menu->items;
+    if (itemsCount <= i)
+        return 0;
+
+    return (menu->index = i);
+}
+
+/**
+ * Get selected items from bmMenu instance.
+ *
+ * @param menu bmMenu instance from where to get selected items.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
+ * @return Pointer to array of bmItem pointers.
+ */
+bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb)
+{
+    assert(menu);
+    return _bmItemListGetItems(&menu->selection, outNmemb);
+}
+
+/**
+ * Set selected items to bmMenu instance.
+ *
+ * @warning The list won't be copied.
+ *
+ * @param menu bmMenu instance where items will be set.
+ * @param items Array of bmItem pointers to set.
+ * @param nmemb Total count of items in array.
+ * @return 1 on successful set, 0 on failure.
+ */
+int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb)
+{
+    assert(menu);
+    return _bmItemListSetItemsNoCopy(&menu->selection, items, nmemb);
 }
 
 /**
@@ -314,10 +340,25 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
 
-    if (outNmemb)
-        *outNmemb = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
+    if (menu->filtered.list)
+        return _bmItemListGetItems(&menu->filtered, outNmemb);
 
-    return (menu->filteredItems ? menu->filteredItems : menu->items);
+    return _bmItemListGetItems(&menu->items, outNmemb);
+}
+
+/**
+ * Get items from bmMenu instance.
+ *
+ * @warning The pointer returned by this function may be invalid after removing or adding new items.
+ *
+ * @param menu bmMenu instance from where to get items.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
+ * @return Pointer to array of bmItem pointers.
+ */
+bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
+{
+    assert(menu);
+    return _bmItemListGetItems(&menu->items, outNmemb);
 }
 
 /**
@@ -335,21 +376,14 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
 {
     assert(menu);
 
-    if (!items || nmemb == 0) {
-        bmMenuFreeItems(menu);
-        return 1;
+    int ret = _bmItemListSetItems(&menu->items, items, nmemb);
+
+    if (ret) {
+        _bmItemListFreeList(&menu->selection);
+        _bmItemListFreeList(&menu->filtered);
     }
 
-    bmItem **newItems;
-    if (!(newItems = calloc(sizeof(bmItem*), nmemb)))
-        return 0;
-
-    memcpy(newItems, items, sizeof(bmItem*) * nmemb);
-    bmMenuFreeItems(menu);
-
-    menu->items = newItems;
-    menu->allocatedCount = menu->itemsCount = nmemb;
-    return 1;
+    return ret;
 }
 
 /**
@@ -400,7 +434,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 {
     assert(menu);
     char *oldFilter = _bmStrdup(menu->filter);
-    unsigned int itemsCount = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
+    unsigned int itemsCount = (menu->filtered.list ? menu->filtered.count : menu->items.count);
 
     switch (key) {
         case BM_KEY_LEFT:
@@ -502,9 +536,9 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
         case BM_KEY_TAB:
             {
-                bmItem *selected = bmMenuGetSelectedItem(menu);
-                if (selected && bmItemGetText(selected)) {
-                    const char *text = bmItemGetText(selected);
+                bmItem *highlighted = bmMenuGetHighlightedItem(menu);
+                if (highlighted && bmItemGetText(highlighted)) {
+                    const char *text = bmItemGetText(highlighted);
                     size_t len = strlen(text);
 
                     if (len > sizeof(menu->filter) - 1)
@@ -516,6 +550,19 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
                     menu->cursesCursor = _bmUtf8StringScreenWidth(menu->filter);
                 }
             }
+            break;
+
+        case BM_KEY_SHIFT_RETURN:
+        case BM_KEY_RETURN:
+            {
+                bmItem *highlighted = bmMenuGetHighlightedItem(menu);
+                if (highlighted && !_bmMenuItemIsSelected(menu, highlighted))
+                    _bmItemListAddItem(&menu->selection, highlighted);
+            }
+            break;
+
+        case BM_KEY_ESCAPE:
+            _bmItemListFreeList(&menu->selection);
             break;
 
         default: break;

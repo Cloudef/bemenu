@@ -3,6 +3,7 @@ SET(BEMENU_SOURCE
     menu.c
     item.c
     filter.c
+    list.c
     util.c
     draw/curses.c
     )

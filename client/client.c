@@ -101,10 +101,10 @@ int main(int argc, char **argv)
     } while ((status = bmMenuRunWithKey(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
 
     if (status == BM_RUN_RESULT_SELECTED) {
-        bmItem *item = bmMenuGetSelectedItem(menu);
-
-        if (item)
-            printf("%s\n", bmItemGetText(item));
+        unsigned int i, count;
+        bmItem **items = bmMenuGetSelectedItems(menu, &count);
+        for (i = 0; i < count; ++i)
+            printf("%s\n", bmItemGetText(items[i]));
     }
 
     bmMenuFree(menu);

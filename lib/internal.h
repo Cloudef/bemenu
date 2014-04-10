@@ -38,6 +38,23 @@ struct _bmRenderApi {
     void (*free)(void);
 };
 
+struct _bmItemList {
+    /**
+     * Items in the list.
+     */
+    struct _bmItem **list;
+
+    /**
+     * Number of items.
+     */
+    unsigned int count;
+
+    /**
+     * Number of allocated items.
+     */
+    unsigned int allocated;
+};
+
 /**
  * Internal bmMenu struct that is not exposed to public.
  */
@@ -48,14 +65,19 @@ struct _bmMenu {
     struct _bmRenderApi renderApi;
 
     /**
-     * All items contained in menu instance.
+     * Items contained in menu instance.
      */
-    struct _bmItem **items;
+    struct _bmItemList items;
 
     /**
      * Filtered/displayed items contained in menu instance.
      */
-    struct _bmItem **filteredItems;
+    struct _bmItemList filtered;
+
+    /**
+     * Selected items.
+     */
+    struct _bmItemList selection;
 
     /**
      * Menu instance title.
@@ -79,22 +101,7 @@ struct _bmMenu {
     unsigned int cursesCursor;
 
     /**
-     * Number of items in menu instance.
-     */
-    unsigned int itemsCount;
-
-    /**
-     * Number of filtered items in menu instance.
-     */
-    unsigned int filteredCount;
-
-    /**
-     * Number of allocated items in menu instance.
-     */
-    unsigned int allocatedCount;
-
-    /**
-     * Current filtered item index in menu instance.
+     * Current filtered/highlighted item index in menu instance.
      * This index is valid for the list returned by bmMenuGetFilteredItems.
      */
     unsigned int index;
@@ -113,9 +120,24 @@ struct _bmMenu {
 /* draw/curses.c */
 int _bmDrawCursesInit(struct _bmRenderApi *api);
 
+/* menu.c */
+int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item);
+
 /* filter.c */
-bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected);
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected);
+bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted);
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted);
+
+/* list.c */
+void _bmItemListFreeList(struct _bmItemList *list);
+void _bmItemListFreeItems(struct _bmItemList *list);
+bmItem** _bmItemListGetItems(const struct _bmItemList *list, unsigned int *outNmemb);
+int _bmItemListSetItemsNoCopy(struct _bmItemList *list, bmItem **items, unsigned int nmemb);
+int _bmItemListSetItems(struct _bmItemList *list, const bmItem **items, unsigned int nmemb);
+int _bmItemListGrow(struct _bmItemList *list, unsigned int step);
+int _bmItemListAddItemAt(struct _bmItemList *list, bmItem *item, unsigned int index);
+int _bmItemListAddItem(struct _bmItemList *list, bmItem *item);
+int _bmItemListRemoveItemAt(struct _bmItemList *list, unsigned int index);
+int _bmItemListRemoveItem(struct _bmItemList *list, const bmItem *item);
 
 /* util.c */
 char* _bmStrdup(const char *s);

@@ -120,8 +120,9 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     unsigned int itemsCount;
     bmItem **items = bmMenuGetFilteredItems(menu, &itemsCount);
     for (i = (menu->index / (lines - 1)) * (lines - 1); i < itemsCount && cl < lines; ++i) {
-        int selected = (items[i] == bmMenuGetSelectedItem(menu));
-        _bmDrawCursesDrawLine((selected ? 2 : 0), cl++, "%s%s", (selected ? ">> " : "   "), items[i]->text);
+        int highlighted = (items[i] == bmMenuGetHighlightedItem(menu));
+        int color = (highlighted ? 2 : (_bmMenuItemIsSelected(menu, items[i]) ? 1 : 0));
+        _bmDrawCursesDrawLine(color, cl++, "%s%s", (highlighted ? ">> " : "   "), items[i]->text);
     }
 
     curses.move(0, titleLen + menu->cursesCursor);
@@ -199,6 +200,9 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
 
         case 9: /* Tab */
             return BM_KEY_TAB;
+
+        case 18: /* C-r */
+            return BM_KEY_SHIFT_RETURN;
 
         case 10: /* Return */
             _bmDrawCursesEndWin();

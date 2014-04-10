@@ -85,6 +85,7 @@ typedef enum bmKey {
     BM_KEY_TAB,
     BM_KEY_ESCAPE,
     BM_KEY_RETURN,
+    BM_KEY_SHIFT_RETURN,
     BM_KEY_UNICODE,
     BM_KEY_LAST
 } bmKey;
@@ -200,24 +201,52 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index);
  */
 int bmMenuRemoveItem(bmMenu *menu, bmItem *item);
 
-/**
- * Get selected item from bmMenu instance.
- *
- * @param menu bmMenu instance from where to get selected item.
- * @return Selected bmItem instance, **NULL** if none selected.
- */
-bmItem* bmMenuGetSelectedItem(const bmMenu *menu);
 
 /**
- * Get items from bmMenu instance.
+ * Get highlighted item from bmMenu instance.
  *
- * @warning The pointer returned by this function may be invalid after removing or adding new items.
+ * @param menu bmMenu instance from where to get highlighted item.
+ * @return Selected bmItem instance, **NULL** if none highlighted.
+ */
+bmItem* bmMenuGetHighlightedItem(const bmMenu *menu);
+
+/**
+ * Highlight item in menu by index.
  *
- * @param menu bmMenu instance from where to get items.
+ * @param menu bmMenu instance from where to highlight item.
+ * @return 1 on successful highlight, 0 on failure.
+ */
+int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index);
+
+/**
+ * Highlight item in menu.
+ *
+ * @param menu bmMenu instance from where to highlight item.
+ * @param item bmItem instance to highlight.
+ * @return 1 on successful highlight, 0 on failure.
+ */
+int bmMenuSetHighlighted(bmMenu *menu, bmItem *item);
+
+/**
+ * Get selected items from bmMenu instance.
+ *
+ * @param menu bmMenu instance from where to get selected items.
  * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb);
+bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb);
+
+/**
+ * Set selected items to bmMenu instance.
+ *
+ * @warning The list won't be copied.
+ *
+ * @param menu bmMenu instance where items will be set.
+ * @param items Array of bmItem pointers to set.
+ * @param nmemb Total count of items in array.
+ * @return 1 on successful set, 0 on failure.
+ */
+int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb);
 
 /**
  * Get filtered (displayed) items from bmMenu instance.
@@ -230,6 +259,17 @@ bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb);
  * @return Pointer to array of bmItem pointers.
  */
 bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb);
+
+/**
+ * Get items from bmMenu instance.
+ *
+ * @warning The pointer returned by this function may be invalid after removing or adding new items.
+ *
+ * @param menu bmMenu instance from where to get items.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
+ * @return Pointer to array of bmItem pointers.
+ */
+bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb);
 
 /**
  * Set items to bmMenu instance.
