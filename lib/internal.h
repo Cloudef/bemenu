@@ -9,6 +9,10 @@
  * Represents a single item in menu.
  */
 struct _bmItem {
+    /**
+     * Primary text shown on item as null terminated C "string".
+     * Matching will be done against this text as well.
+     */
     char *text;
 };
 
@@ -17,8 +21,20 @@ struct _bmItem {
  * Renderers should be able to fill this one as they see fit.
  */
 struct _bmRenderApi {
+    /**
+     * If the underlying renderer is a UI toolkit. (curses, etc...)
+     * There might be possibility to get user input, and this should be thus implemented.
+     */
     bmKey (*getKey)(unsigned int *unicode);
+
+    /**
+     * Tells underlying renderer to draw the menu.
+     */
     void (*render)(const bmMenu *menu);
+
+    /**
+     * Release underlying renderer.
+     */
     void (*free)(void);
 };
 
@@ -26,14 +42,72 @@ struct _bmRenderApi {
  * Internal bmMenu struct that is not exposed to public.
  */
 struct _bmMenu {
+    /**
+     * Underlying renderer access.
+     */
     struct _bmRenderApi renderApi;
-    struct _bmItem **items, **filteredItems;
-    char *title, filter[1024];
-    unsigned int cursor, cursesCursor;
-    unsigned int itemsCount, allocatedCount;
+
+    /**
+     * All items contained in menu instance.
+     */
+    struct _bmItem **items;
+
+    /**
+     * Filtered/displayed items contained in menu instance.
+     */
+    struct _bmItem **filteredItems;
+
+    /**
+     * Menu instance title.
+     */
+    char *title;
+
+    /**
+     * Text used to filter matches.
+     *
+     * XXX: Change this to a pointer?
+     */
+    char filter[1024];
+
+    /**
+     * Current byte offset on filter text.
+     */
+    unsigned int cursor;
+
+    /**
+     * Current column/cursor position on filter text.
+     */
+    unsigned int cursesCursor;
+
+    /**
+     * Number of items in menu instance.
+     */
+    unsigned int itemsCount;
+
+    /**
+     * Number of filtered items in menu instance.
+     */
     unsigned int filteredCount;
+
+    /**
+     * Number of allocated items in menu instance.
+     */
+    unsigned int allocatedCount;
+
+    /**
+     * Current filtered item index in menu instance.
+     * This index is valid for the list returned by bmMenuGetFilteredItems.
+     */
     unsigned int index;
+
+    /**
+     * Current filtering method in menu instance.
+     */
     bmFilterMode filterMode;
+
+    /**
+     * Drawing mode used in menu instance.
+     */
     bmDrawMode drawMode;
 };
 
