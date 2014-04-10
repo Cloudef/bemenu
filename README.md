@@ -14,6 +14,7 @@ Dynamic menu library and client program inspired by dmenu
 	  for C sources with following exceptions:
 	  * spaces not tabs
 	  * indentation size is 4 characters (spaces)
+	  * function and variable names are camelCase except for global constants
 	* [Standard style](http://legacy.python.org/dev/peps/pep-0008/) for Python
 * **Build system** - [CMake](http://www.cmake.org/)
 * **API documentation** - [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html)
