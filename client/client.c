@@ -1,10 +1,3 @@
-/**
- * @file client.c
- *
- * Sample client using the libbemenu.
- * Also usable as dmenu replacement.
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -86,15 +79,6 @@ static void readItemsToMenuFromStdin(bmMenu *menu)
         free(line);
 }
 
-/**
- * Main method
- *
- * This function gives and takes the life of our program.
- *
- * @param argc Number of arguments from command line
- * @param argv Pointer to array of the arguments
- * @return exit status of the program
- */
 int main(int argc, char **argv)
 {
     (void)argc, (void)argv;

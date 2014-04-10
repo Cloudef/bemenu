@@ -6,8 +6,8 @@
 /**
  * Allocate a new item.
  *
- * @param text Pointer to null terminated C "string", can be NULL for empty text.
- * @return bmItem instance.
+ * @param text Pointer to null terminated C "string", can be **NULL** for empty text.
+ * @return bmItem for new item instance, **NULL** if creation failed.
  */
 bmItem* bmItemNew(const char *text)
 {
@@ -39,7 +39,7 @@ void bmItemFree(bmItem *item)
  * Set text to bmItem instance.
  *
  * @param item bmItem instance where to set text.
- * @param text C "string" to set as text, can be NULL for empty text.
+ * @param text C "string" to set as text, can be **NULL** for empty text.
  */
 int bmItemSetText(bmItem *item, const char *text)
 {
@@ -60,7 +60,7 @@ int bmItemSetText(bmItem *item, const char *text)
  * Get text from bmItem instance.
  *
  * @param item bmItem instance where to get text from.
- * @return Pointer to null terminated C "string", can be NULL for empty text.
+ * @return Pointer to null terminated C "string", can be **NULL** for empty text.
  */
 const char* bmItemGetText(const bmItem *item)
 {

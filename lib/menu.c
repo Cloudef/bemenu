@@ -7,7 +7,7 @@
 /**
  * Filter function map.
  */
-static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *count, unsigned int *selected) = {
+static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected) = {
     _bmFilterDmenu, /* BM_FILTER_DMENU */
     _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
@@ -53,7 +53,7 @@ static int _bmMenuGrowItems(bmMenu *menu)
  * Create new bmMenu instance.
  *
  * @param drawMode Render method to be used for this menu instance.
- * @return bmMenu for new menu instance, NULL if creation failed.
+ * @return bmMenu for new menu instance, **NULL** if creation failed.
  */
 bmMenu* bmMenuNew(bmDrawMode drawMode)
 {
@@ -155,7 +155,7 @@ bmFilterMode bmMenuGetFilterMode(const bmMenu *menu)
  * Set title to bmMenu instance.
  *
  * @param menu bmMenu instance where to set title.
- * @param title C "string" to set as title, can be NULL for empty title.
+ * @param title C "string" to set as title, can be **NULL** for empty title.
  */
 int bmMenuSetTitle(bmMenu *menu, const char *title)
 {
@@ -176,7 +176,7 @@ int bmMenuSetTitle(bmMenu *menu, const char *title)
  * Get title from bmMenu instance.
  *
  * @param menu bmMenu instance where to get title from.
- * @return Pointer to null terminated C "string", can be NULL for empty title.
+ * @return Pointer to null terminated C "string", can be **NULL** for empty title.
  */
 const char* bmMenuGetTitle(const bmMenu *menu)
 {
@@ -225,6 +225,8 @@ int bmMenuAddItem(bmMenu *menu, bmItem *item)
 /**
  * Remove item from bmMenu instance at specific index.
  *
+ * @warning The item won't be freed, use bmItemFree to do that.
+ *
  * @param menu bmMenu instance from where item will be removed.
  * @param index Index of item to remove.
  * @return 1 on successful add, 0 on failure.
@@ -244,6 +246,8 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
 /**
  * Remove item from bmMenu instance.
  *
+ * @warning The item won't be freed, use bmItemFree to do that.
+ *
  * @param menu bmMenu instance from where item will be removed.
  * @param item bmItem instance to remove.
  * @return 1 on successful add, 0 on failure.
@@ -262,7 +266,7 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
  * Get selected item from bmMenu instance.
  *
  * @param menu bmMenu instance from where to get selected item.
- * @return Selected bmItem instance, NULL if none selected.
+ * @return Selected bmItem instance, **NULL** if none selected.
  */
 bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
 {
@@ -280,16 +284,18 @@ bmItem* bmMenuGetSelectedItem(const bmMenu *menu)
 /**
  * Get items from bmMenu instance.
  *
+ * @warning The pointer returned by this function may be invalid after removing or adding new items.
+ *
  * @param menu bmMenu instance from where to get items.
- * @param nmemb Reference to unsigned int where total count of returned items will be stored.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *nmemb)
+bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
 
-    if (nmemb)
-        *nmemb = menu->itemsCount;
+    if (outNmemb)
+        *outNmemb = menu->itemsCount;
 
     return menu->items;
 }
@@ -301,15 +307,15 @@ bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *nmemb)
  *          Do not store this pointer.
  *
  * @param menu bmMenu instance from where to get filtered items.
- * @param nmemb Reference to unsigned int where total count of returned items will be stored.
+ * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *nmemb)
+bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
 
-    if (nmemb)
-        *nmemb = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
+    if (outNmemb)
+        *outNmemb = (menu->filteredItems ? menu->filteredCount : menu->itemsCount);
 
     return (menu->filteredItems ? menu->filteredItems : menu->items);
 }
@@ -317,6 +323,8 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *nmemb)
 /**
  * Set items to bmMenu instance.
  * Will replace all the old items on bmMenu instance.
+ *
+ * If items is **NULL**, or nmemb is zero, all items will be freed from the menu.
  *
  * @param menu bmMenu instance where items will be set.
  * @param items Array of bmItem pointers to set.
@@ -360,22 +368,22 @@ void bmMenuRender(const bmMenu *menu)
 /**
  * Poll key and unicode from underlying UI toolkit.
  *
- * This function will block on CURSES draw mode.
+ * This function will block on @link ::bmDrawMode BM_DRAW_MODE_CURSES @endlink draw mode.
  *
  * @param menu bmMenu instance from which to poll.
- * @param unicode Reference to unsigned int.
+ * @param outUnicode Reference to unsigned int.
  * @return bmKey for polled key.
  */
-bmKey bmMenuGetKey(bmMenu *menu, unsigned int *unicode)
+bmKey bmMenuGetKey(bmMenu *menu, unsigned int *outUnicode)
 {
     assert(menu);
-    assert(unicode);
+    assert(outUnicode);
 
-    *unicode = 0;
+    *outUnicode = 0;
     bmKey key = BM_KEY_NONE;
 
     if (menu->renderApi.getKey)
-        key = menu->renderApi.getKey(unicode);
+        key = menu->renderApi.getKey(outUnicode);
 
     return key;
 }

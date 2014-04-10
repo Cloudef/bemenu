@@ -37,21 +37,21 @@ char* _bmStrdup(const char *string)
  * @param nsize New size the list will be shrinked to.
  * @return Pointer to list of bmItem pointers.
  */
-bmItem** _bmShrinkItemList(bmItem ***list, size_t osize, size_t nsize)
+bmItem** _bmShrinkItemList(bmItem ***inOutList, size_t osize, size_t nsize)
 {
-    assert(list);
+    assert(inOutList);
 
     if (nsize >= osize)
-        return *list;
+        return *inOutList;
 
     void *tmp = malloc(sizeof(bmItem*) * nsize);
     if (!tmp)
-        return *list;
+        return *inOutList;
 
-    memcpy(tmp, *list, sizeof(bmItem*) * nsize);
-    free(*list);
-    *list = tmp;
-    return *list;
+    memcpy(tmp, *inOutList, sizeof(bmItem*) * nsize);
+    free(*inOutList);
+    *inOutList = tmp;
+    return *inOutList;
 }
 
 /**
@@ -135,15 +135,15 @@ size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len)
  *
  * @param string Null terminated C "string".
  * @param start Start offset where to delete from. (cursor)
- * @param runeWidth Reference to size_t, return number of columns for removed rune, or -1 on failure.
+ * @param outRuneWidth Reference to size_t, return number of columns for removed rune, or -1 on failure.
  * @return Number of bytes removed from buffer.
  */
-size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth)
+size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth)
 {
     assert(string);
 
-    if (runeWidth)
-        *runeWidth = 0;
+    if (outRuneWidth)
+        *outRuneWidth = 0;
 
     size_t len = strlen(string), oldStart = start;
     if (len == 0 || len < start || !*string)
@@ -151,8 +151,8 @@ size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth)
 
     start -= _bmUtf8RunePrev(string, start);
 
-    if (runeWidth)
-        *runeWidth = _bmUtf8RuneWidth(string + start, oldStart - start);
+    if (outRuneWidth)
+        *outRuneWidth = _bmUtf8RuneWidth(string + start, oldStart - start);
 
     memmove(string + start, string + oldStart, len - oldStart);
     string[len - (oldStart - start)] = 0;
@@ -167,15 +167,15 @@ size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth)
  * @param start Start offset where to insert to. (cursor)
  * @param rune Buffer to insert to string.
  * @param u8len Byte length of the rune.
- * @param runeWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
+ * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *runeWidth)
+size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth)
 {
     assert(string);
 
-    if (runeWidth)
-        *runeWidth = 0;
+    if (outRuneWidth)
+        *outRuneWidth = 0;
 
     size_t len = strlen(string);
     if (len + u8len >= bufSize)
@@ -188,8 +188,8 @@ size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char 
     memmove(str + u8len, str, len - start);
     memcpy(str, rune, u8len);
 
-    if (runeWidth)
-        *runeWidth = _bmUtf8RuneWidth(rune, u8len);
+    if (outRuneWidth)
+        *outRuneWidth = _bmUtf8RuneWidth(rune, u8len);
     return u8len;
 }
 
@@ -200,10 +200,10 @@ size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char 
  * @param bufSize Size of the buffer.
  * @param start Start offset where to insert to. (cursor)
  * @param unicode Unicode character to insert.
- * @param runeWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
+ * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *runeWidth)
+size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth)
 {
     assert(string);
 
@@ -219,7 +219,7 @@ size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int
         mb[0] |= (unicode >> (i * 6 - 6));
     }
 
-    return _bmUtf8RuneInsert(string, bufSize, start, mb, u8len, runeWidth);
+    return _bmUtf8RuneInsert(string, bufSize, start, mb, u8len, outRuneWidth);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

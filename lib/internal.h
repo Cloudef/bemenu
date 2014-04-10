@@ -64,7 +64,6 @@ struct _bmMenu {
 
     /**
      * Text used to filter matches.
-     *
      * XXX: Change this to a pointer?
      */
     char filter[1024];
@@ -115,18 +114,18 @@ struct _bmMenu {
 int _bmDrawCursesInit(struct _bmRenderApi *api);
 
 /* filter.c */
-bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selected);
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *count, unsigned int *selected);
+bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected);
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected);
 
 /* util.c */
 char* _bmStrdup(const char *s);
-bmItem** _bmShrinkItemList(bmItem ***list, size_t osize, size_t nsize);
+bmItem** _bmShrinkItemList(bmItem ***inOutList, size_t osize, size_t nsize);
 int _bmUtf8StringScreenWidth(const char *string);
 size_t _bmUtf8RuneNext(const char *string, size_t start);
 size_t _bmUtf8RunePrev(const char *string, size_t start);
 size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len);
-size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *runeWidth);
-size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *runeWidth);
-size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *runeWidth);
+size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth);
+size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth);
+size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth);
 
 /* vim: set ts=8 sw=4 tw=0 :*/

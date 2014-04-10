@@ -7,16 +7,16 @@
  * Filter that mimics the vanilla dmenu filtering.
  *
  * @param menu bmMenu instance to filter.
- * @param count unsigned int reference to filtered items count.
- * @param selected unsigned int reference to new selected item index.
+ * @param outNmemb unsigned int reference to filtered items outNmemb.
+ * @param outSelected unsigned int reference to new outSelected item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selected)
+bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected)
 {
     assert(menu);
-    assert(count);
-    assert(selected);
-    *count = *selected = 0;
+    assert(outNmemb);
+    assert(outSelected);
+    *outNmemb = *outSelected = 0;
 
     /* FIXME: not real dmenu like filtering at all */
 
@@ -29,28 +29,28 @@ bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selecte
         bmItem *item = menu->items[i];
         if (item->text && strstr(item->text, menu->filter)) {
             if (f == 0 || item == bmMenuGetSelectedItem(menu))
-                *selected = f;
+                *outSelected = f;
             filtered[f++] = item;
         }
     }
 
-    return _bmShrinkItemList(&filtered, menu->itemsCount, (*count = f));
+    return _bmShrinkItemList(&filtered, menu->itemsCount, (*outNmemb = f));
 }
 
 /**
  * Filter that mimics the vanilla case-insensitive dmenu filtering.
  *
  * @param menu bmMenu instance to filter.
- * @param count unsigned int reference to filtered items count.
- * @param selected unsigned int reference to new selected item index.
+ * @param outNmemb unsigned int reference to filtered items outNmemb.
+ * @param outSelected unsigned int reference to new outSelected item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *count, unsigned int *selected)
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outSelected)
 {
     assert(menu);
-    assert(count);
-    assert(selected);
-    *count = *selected = 0;
+    assert(outNmemb);
+    assert(outSelected);
+    *outNmemb = *outSelected = 0;
 
     /* FIXME: stub */
 

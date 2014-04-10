@@ -16,4 +16,6 @@ Features:
       - Curses
 
 bemenu also provides 'bemenu' executable that is compatible with dmenu interface.
+
+Get started on the <a href="modules.html">Modules</a> page.
 */
