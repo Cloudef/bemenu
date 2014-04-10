@@ -79,8 +79,10 @@ int _bmItemListGrow(struct _bmItemList *list, unsigned int step)
         if (!(tmp = malloc(nsize)))
             return 0;
 
-        if (list->list)
+        if (list->list) {
             memcpy(tmp, list->list, sizeof(bmItem*) * list->allocated);
+            free(list->list);
+        }
     }
 
     list->list = tmp;
