@@ -3,6 +3,7 @@ PROJECT(bemenu)
 INCLUDE(CTest)
 SET(BEMENU_NAME "bemenu")
 SET(BEMENU_DESCRIPTION "Dynamic menu library and client program inspired by dmenu")
+SET(BEMENU_VERSION "1.0.0")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${chck_SOURCE_DIR}/CMake/modules)
 
 # Compile library
