@@ -10,6 +10,12 @@
  */
 struct _bmItem {
     /**
+     * Userdata pointer.
+     * This pointer will be passed around with the item untouched.
+     */
+    void *userdata;
+
+    /**
      * Primary text shown on item as null terminated C "string".
      * Matching will be done against this text as well.
      */
@@ -59,6 +65,12 @@ struct _bmItemList {
  * Internal bmMenu struct that is not exposed to public.
  */
 struct _bmMenu {
+    /**
+     * Userdata pointer.
+     * This pointer will be passed around with the menu untouched.
+     */
+    void *userdata;
+
     /**
      * Underlying renderer access.
      */

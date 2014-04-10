@@ -123,6 +123,23 @@ void bmMenuFreeItems(bmMenu *menu);
  * @{ */
 
 /**
+ * Set userdata pointer to bmMenu instance.
+ * Userdata will be carried unmodified by the instance.
+ *
+ * @param menu bmMenu instance where to set userdata pointer.
+ * @param userdata Pointer to userdata.
+ */
+void bmMenuSetUserdata(bmMenu *menu, void *userdata);
+
+/**
+ * Get userdata pointer from bmMenu instance.
+ *
+ * @param menu bmMenu instance which userdata pointer to get.
+ * @return Pointer for unmodified userdata.
+ */
+void* bmMenuGetUserdata(bmMenu *menu);
+
+/**
  * Set active filter mode to bmMenu instance.
  *
  * @param menu bmMenu instance where to set filter mode.
@@ -350,6 +367,23 @@ void bmItemFree(bmItem *item);
 /**
  * @name Item Properties
  * @{ */
+
+/**
+ * Set userdata pointer to bmItem instance.
+ * Userdata will be carried unmodified by the instance.
+ *
+ * @param item bmItem instance where to set userdata pointer.
+ * @param userdata Pointer to userdata.
+ */
+void bmItemSetUserdata(bmItem *item, void *userdata);
+
+/**
+ * Get userdata pointer from bmItem instance.
+ *
+ * @param item bmItem instance which userdata pointer to get.
+ * @return Pointer for unmodified userdata.
+ */
+void* bmItemGetUserdata(bmItem *item);
 
 /**
  * Set text to bmItem instance.

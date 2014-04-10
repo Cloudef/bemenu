@@ -103,6 +103,31 @@ void bmMenuFreeItems(bmMenu *menu)
 }
 
 /**
+ * Set userdata pointer to bmMenu instance.
+ * Userdata will be carried unmodified by the instance.
+ *
+ * @param menu bmMenu instance where to set userdata pointer.
+ * @param userdata Pointer to userdata.
+ */
+void bmMenuSetUserdata(bmMenu *menu, void *userdata)
+{
+    assert(menu);
+    menu->userdata = userdata;
+}
+
+/**
+ * Get userdata pointer from bmMenu instance.
+ *
+ * @param menu bmMenu instance which userdata pointer to get.
+ * @return Pointer for unmodified userdata.
+ */
+void* bmMenuGetUserdata(bmMenu *menu)
+{
+    assert(menu);
+    return menu->userdata;
+}
+
+/**
  * Set active filter mode to bmMenu instance.
  *
  * @param menu bmMenu instance where to set filter mode.

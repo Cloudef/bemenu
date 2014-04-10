@@ -36,6 +36,31 @@ void bmItemFree(bmItem *item)
 }
 
 /**
+ * Set userdata pointer to bmItem instance.
+ * Userdata will be carried unmodified by the instance.
+ *
+ * @param item bmItem instance where to set userdata pointer.
+ * @param userdata Pointer to userdata.
+ */
+void bmItemSetUserdata(bmItem *item, void *userdata)
+{
+    assert(item);
+    item->userdata = userdata;
+}
+
+/**
+ * Get userdata pointer from bmItem instance.
+ *
+ * @param item bmItem instance which userdata pointer to get.
+ * @return Pointer for unmodified userdata.
+ */
+void* bmItemGetUserdata(bmItem *item)
+{
+    assert(item);
+    return item->userdata;
+}
+
+/**
  * Set text to bmItem instance.
  *
  * @param item bmItem instance where to set text.
