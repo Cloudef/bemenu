@@ -40,9 +40,6 @@ struct _bmMenu {
 /* draw/curses.c */
 int _bmDrawCursesInit(struct _bmRenderApi *api);
 
-/* menu.c */
-int _bmMenuShouldRenderItem(const bmMenu *menu, const bmItem *item);
-
 /* filter.c */
 bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *count, unsigned int *selected);
 bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *count, unsigned int *selected);
