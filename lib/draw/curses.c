@@ -107,7 +107,7 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
     }
 
     if (dw < ncols) {
-        if (!_bmDrawCursesResizeBuffer(&buffer, blen - 1, blen + (ncols - dw) + 1))
+        if (!_bmDrawCursesResizeBuffer(&buffer, blen - 1, blen + (ncols - dw)))
             return;
     } else if (i < blen) {
         int cc = dw - (dw - ncols);
