@@ -47,37 +47,73 @@ static struct curses {
     int *ESCDELAY;
 } curses;
 
+static int _bmDrawCursesResizeBuffer(char **buffer, size_t osize, size_t nsize)
+{
+    assert(buffer);
+    assert(nsize);
+
+    if (nsize == 0 || nsize < osize)
+        return 0;
+
+    void *tmp;
+    if (!*buffer || !(tmp = realloc(*buffer, nsize))) {
+        if (!(tmp = malloc(nsize)))
+            return 0;
+
+        if (*buffer) {
+            memcpy(tmp, *buffer, osize);
+            free(*buffer);
+        }
+    }
+
+    *buffer = tmp;
+    memset(*buffer + osize, ' ', (nsize - osize));
+    (*buffer)[nsize - 1] = 0;
+    return 1;
+}
+
 static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 {
-    static int ncols = 0;
+    static int blen = 0;
     static char *buffer = NULL;
-    int newNcols = curses.getmaxx(curses.stdscr);
 
-    if (newNcols <= 0)
+    int ncols = curses.getmaxx(curses.stdscr);
+    if (ncols <= 0)
         return;
-
-    if (!buffer || newNcols > ncols) {
-        if (buffer)
-            free(buffer);
-
-        ncols = newNcols;
-
-        if (!(buffer = calloc(1, ncols + 1)))
-            return;
-    }
 
     va_list args;
     va_start(args, format);
-    int tlen = vsnprintf(NULL, 0, format, args) + 1;
-    if (tlen > ncols)
-        tlen = ncols;
+    int nlen = vsnprintf(NULL, 0, format, args) + 1;
+    if (nlen < ncols)
+        nlen = ncols;
     va_end(args);
 
+    if ((!buffer || nlen > blen) && !_bmDrawCursesResizeBuffer(&buffer, blen, nlen))
+        return;
+
+    blen = nlen;
     va_start(args, format);
-    vsnprintf(buffer, tlen, format, args);
+    int slen = vsnprintf(buffer, blen - 1, format, args);
+    memset(buffer + slen, ' ', (blen - slen));
+    buffer[blen - 1] = 0;
     va_end(args);
 
-    memset(buffer + tlen - 1, ' ', ncols - tlen + 1);
+    int dw = 0, i = 0;
+    while (dw < ncols && i < blen) {
+        if (buffer[i] == '\t') buffer[i] = ' ';
+        int next = _bmUtf8RuneNext(buffer, i);
+        dw += _bmUtf8RuneWidth(buffer + i, next);
+        i += (next ? next : 1);
+    }
+
+    if (dw < ncols) {
+        if (!_bmDrawCursesResizeBuffer(&buffer, blen - 1, blen + (ncols - dw) + 1))
+            return;
+    } else if (i < blen) {
+        int cc = dw - (dw - ncols);
+        memset(buffer + i - (dw - ncols), ' ', (ncols - cc) + 1);
+        buffer[i - (dw - ncols) + (ncols - cc) + 1] = 0;
+    }
 
     if (pair > 0)
         curses.attron(COLOR_PAIR(pair));
@@ -126,7 +162,8 @@ static void _bmDrawCursesRender(const bmMenu *menu)
         _bmDrawCursesDrawLine(color, cl++, "%s%s", (highlighted ? ">> " : "   "), items[i]->text);
     }
 
-    curses.move(0, titleLen + menu->cursesCursor);
+    unsigned int ncols = curses.getmaxx(curses.stdscr) - titleLen - 1;
+    curses.move(0, titleLen + (ncols < menu->cursesCursor ? ncols : menu->cursesCursor));
     curses.refresh();
 }
 
