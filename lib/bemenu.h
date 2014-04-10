@@ -401,6 +401,22 @@ void bmItemSetUserdata(bmItem *item, void *userdata);
 void* bmItemGetUserdata(bmItem *item);
 
 /**
+ * Set filter text to bmMenu instance.
+ *
+ * @param menu bmMenu instance where to set filter.
+ * @param filter Null terminated C "string" to act as filter.
+ */
+void bmMenuSetFilter(bmMenu *menu, const char *filter);
+
+/**
+ * Get filter text from  bmMenu instance.
+ *
+ * @param menu bmMenu instance where to get filter.
+ * @return Const pointer to current filter text, may be **NULL** if empty.
+ */
+const char* bmMenuGetFilter(bmMenu *menu);
+
+/**
  * Set text to bmItem instance.
  *
  * @param item bmItem instance where to set text.

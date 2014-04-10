@@ -117,6 +117,36 @@ void* bmMenuGetUserdata(bmMenu *menu)
 }
 
 /**
+ * Set filter text to bmMenu instance.
+ *
+ * @param menu bmMenu instance where to set filter.
+ * @param filter Null terminated C "string" to act as filter.
+ */
+void bmMenuSetFilter(bmMenu *menu, const char *filter)
+{
+    assert(menu);
+
+    if (!filter) {
+        memset(menu->filter, 0, sizeof(menu->filter));
+        return;
+    }
+
+    strncpy(menu->filter, filter, sizeof(menu->filter));
+}
+
+/**
+ * Get filter text from  bmMenu instance.
+ *
+ * @param menu bmMenu instance where to get filter.
+ * @return Const pointer to current filter text, may be **NULL** if empty.
+ */
+const char* bmMenuGetFilter(bmMenu *menu)
+{
+    assert(menu);
+    return menu->filter;
+}
+
+/**
  * Set active filter mode to bmMenu instance.
  *
  * @param menu bmMenu instance where to set filter mode.
