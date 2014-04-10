@@ -307,6 +307,8 @@ int bmMenuSetHighlighted(bmMenu *menu, bmItem *item)
 /**
  * Get highlighted item from bmMenu instance.
  *
+ * @warning The pointer returned by this function may be invalid after items change.
+ *
  * @param menu bmMenu instance from where to get highlighted item.
  * @return Selected bmItem instance, **NULL** if none highlighted.
  */
@@ -326,7 +328,7 @@ bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
 /**
  * Set selected items to bmMenu instance.
  *
- * @warning The list won't be copied.
+ * @warning The list won't be copied, do not free it.
  *
  * @param menu bmMenu instance where items will be set.
  * @param items Array of bmItem pointers to set.
@@ -341,6 +343,8 @@ int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb)
 
 /**
  * Get selected items from bmMenu instance.
+ *
+ * @warning The pointer returned by this function may be invalid after selection or items change.
  *
  * @param menu bmMenu instance from where to get selected items.
  * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
