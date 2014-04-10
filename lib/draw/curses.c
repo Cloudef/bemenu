@@ -1,7 +1,3 @@
-/**
- * @file curses.c
- */
-
 #include "../internal.h"
 #include <wchar.h>
 #include <string.h>

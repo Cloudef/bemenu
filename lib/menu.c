@@ -1,7 +1,3 @@
-/**
- * @file bemenu.c
- */
-
 #include "internal.h"
 #include <stdlib.h>
 #include <string.h>

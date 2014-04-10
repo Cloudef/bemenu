@@ -1,7 +1,3 @@
-/**
- * @file item.c
- */
-
 #include "internal.h"
 #include <stdlib.h>
 #include <assert.h>

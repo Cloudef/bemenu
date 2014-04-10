@@ -1,7 +1,3 @@
-/**
- * @file internal.h
- */
-
 #include "bemenu.h"
 
 #ifndef size_t

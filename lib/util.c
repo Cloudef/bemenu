@@ -1,7 +1,3 @@
-/**
- * @file util.c
- */
-
 #include "internal.h"
 #define _XOPEN_SOURCE 700
 #include <wchar.h>

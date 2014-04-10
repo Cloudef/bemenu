@@ -1,7 +1,3 @@
-/**
- * @file filter.c
- */
-
 #include "internal.h"
 #include <stdlib.h>
 #include <assert.h>
