@@ -16,6 +16,11 @@ static void _bmMenuFilter(bmMenu *menu)
 {
     assert(menu);
 
+    if (!menu->items.list || menu->items.count <= 0) {
+        _bmItemListFreeList(&menu->filtered);
+        return;
+    }
+
     unsigned int count, selected;
     bmItem **filtered = filterFunc[menu->filterMode](menu, &count, &selected);
 
@@ -81,9 +86,6 @@ void bmMenuFree(bmMenu *menu)
 
     if (menu->title)
         free(menu->title);
-
-    if (menu->filtered.list)
-        free(menu->filtered.list);
 
     bmMenuFreeItems(menu);
     free(menu);
@@ -200,7 +202,13 @@ const char* bmMenuGetTitle(const bmMenu *menu)
 int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
 {
     assert(menu);
-    return _bmItemListAddItemAt(&menu->items, item, index);;
+
+    int ret = _bmItemListAddItemAt(&menu->items, item, index);
+
+    if (ret)
+        _bmMenuFilter(menu);
+
+    return ret;
 }
 
 /**
@@ -212,7 +220,12 @@ int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
  */
 int bmMenuAddItem(bmMenu *menu, bmItem *item)
 {
-    return _bmItemListAddItem(&menu->items, item);
+    int ret = _bmItemListAddItem(&menu->items, item);
+
+    if (ret)
+        _bmMenuFilter(menu);
+
+    return ret;
 }
 
 /**
@@ -237,6 +250,7 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
     if (ret) {
         _bmItemListRemoveItem(&menu->selection, item);
         _bmItemListRemoveItem(&menu->filtered, item);
+        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -260,6 +274,7 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
     if (ret) {
         _bmItemListRemoveItem(&menu->selection, item);
         _bmItemListRemoveItem(&menu->filtered, item);
+        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -275,7 +290,9 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
 int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index)
 {
     assert(menu);
-    unsigned int itemsCount = (menu->filtered.list ? menu->filtered.count : menu->items.count);
+
+    unsigned int itemsCount;
+    bmMenuGetFilteredItems(menu, &itemsCount);
 
     if (itemsCount <= index)
         return 0;
@@ -376,6 +393,7 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
     if (ret) {
         _bmItemListFreeList(&menu->selection);
         _bmItemListFreeList(&menu->filtered);
+        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -410,7 +428,7 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
 
-    if (menu->filtered.list)
+    if (strlen(menu->filter))
         return _bmItemListGetItems(&menu->filtered, outNmemb);
 
     return _bmItemListGetItems(&menu->items, outNmemb);
@@ -463,8 +481,11 @@ bmKey bmMenuGetKey(bmMenu *menu, unsigned int *outUnicode)
 bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 {
     assert(menu);
+
+    unsigned int itemsCount;
+    bmMenuGetFilteredItems(menu, &itemsCount);
+
     char *oldFilter = _bmStrdup(menu->filter);
-    unsigned int itemsCount = (menu->filtered.list ? menu->filtered.count : menu->items.count);
 
     switch (key) {
         case BM_KEY_LEFT:

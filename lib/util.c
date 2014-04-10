@@ -28,30 +28,56 @@ char* _bmStrdup(const char *string)
 }
 
 /**
- * Shrink bmItem** list pointer.
+ * Portable case-insensitive strcmp.
  *
- * Useful helper function for filter functions.
- *
- * @param list Pointer to pointer to list of bmItem pointers.
- * @param osize Current size of the list.
- * @param nsize New size the list will be shrinked to.
- * @return Pointer to list of bmItem pointers.
+ * @param hay C "string" to match against.
+ * @param needle C "string" to match.
  */
-bmItem** _bmShrinkItemList(bmItem ***inOutList, size_t osize, size_t nsize)
+int _bmStrupcmp(const char *hay, const char *needle)
 {
-    assert(inOutList);
+    size_t i, len;
 
-    if (nsize >= osize)
-        return *inOutList;
+    if ((len = strlen(hay)) != strlen(needle))
+        return 1;
 
-    void *tmp = malloc(sizeof(bmItem*) * nsize);
-    if (!tmp)
-        return *inOutList;
+    for (i = 0; i != len; ++i)
+        if (toupper(hay[i]) != toupper(needle[i]))
+            return 1;
 
-    memcpy(tmp, *inOutList, sizeof(bmItem*) * nsize);
-    free(*inOutList);
-    *inOutList = tmp;
-    return *inOutList;
+    return 0;
+}
+
+/**
+ * Portable case-insensitive strstr.
+ *
+ * @param hay C "string" to substring against.
+ * @param needle C "string" to substring.
+ */
+char* _bmStrupstr(const char *hay, const char *needle)
+{
+    size_t i, r = 0, p = 0, len, len2;
+
+    if (!_bmStrupcmp(hay, needle))
+        return (char*)hay;
+
+    if ((len = strlen(hay)) < (len2 = strlen(needle)))
+        return NULL;
+
+    for (i = 0; i != len; ++i) {
+        if (p == len2)
+            return (char*)hay + r;
+
+        if (toupper(hay[i]) == toupper(needle[p++])) {
+            if (!r)
+                r = i;
+        } else {
+            if (r)
+                i = r;
+            r = p = 0;
+        }
+    }
+
+    return (p == len2 ? (char*)hay + r : NULL);
 }
 
 /**

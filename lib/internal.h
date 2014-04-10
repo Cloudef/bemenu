@@ -153,6 +153,8 @@ int _bmItemListRemoveItem(struct _bmItemList *list, const bmItem *item);
 
 /* util.c */
 char* _bmStrdup(const char *s);
+int _bmStrupcmp(const char *hay, const char *needle);
+char* _bmStrupstr(const char *hay, const char *needle);
 bmItem** _bmShrinkItemList(bmItem ***inOutList, size_t osize, size_t nsize);
 int _bmUtf8StringScreenWidth(const char *string);
 size_t _bmUtf8RuneNext(const char *string, size_t start);
