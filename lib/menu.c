@@ -8,9 +8,12 @@
 #include <ctype.h>
 #include <assert.h>
 
+/**
+ * Filter function map.
+ */
 static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *count, unsigned int *selected) = {
-    _bmFilterDmenu,
-    _bmFilterDmenuCaseInsensitive
+    _bmFilterDmenu, /* BM_FILTER_DMENU */
+    _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
 
 static void _bmMenuFilter(bmMenu *menu)
