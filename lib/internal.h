@@ -103,6 +103,11 @@ struct _bmMenu {
     char filter[1024];
 
     /**
+     * Used as optimization.
+     */
+    char *oldFilter;
+
+    /**
      * Current byte offset on filter text.
      */
     unsigned int cursor;
@@ -136,8 +141,8 @@ int _bmDrawCursesInit(struct _bmRenderApi *api);
 int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item);
 
 /* filter.c */
-bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted);
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted);
+bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted);
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted);
 
 /* list.c */
 void _bmItemListFreeList(struct _bmItemList *list);

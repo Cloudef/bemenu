@@ -7,26 +7,10 @@
 /**
  * Filter function map.
  */
-static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted) = {
+static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted) = {
     _bmFilterDmenu, /* BM_FILTER_DMENU */
     _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
-
-static void _bmMenuFilter(bmMenu *menu)
-{
-    assert(menu);
-
-    if (!strlen(menu->filter) || !menu->items.list || menu->items.count <= 0) {
-        _bmItemListFreeList(&menu->filtered);
-        return;
-    }
-
-    unsigned int count, selected;
-    bmItem **filtered = filterFunc[menu->filterMode](menu, &count, &selected);
-
-    _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
-    menu->index = selected;
-}
 
 int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item)
 {
@@ -87,6 +71,9 @@ void bmMenuFree(bmMenu *menu)
     if (menu->title)
         free(menu->title);
 
+    if (menu->oldFilter)
+        free(menu->oldFilter);
+
     bmMenuFreeItems(menu);
     free(menu);
 }
@@ -138,12 +125,7 @@ void* bmMenuGetUserdata(bmMenu *menu)
 void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode)
 {
     assert(menu);
-
-    bmFilterMode oldMode = mode;
     menu->filterMode = (mode >= BM_FILTER_MODE_LAST ? BM_FILTER_MODE_DMENU : mode);
-
-    if (oldMode != mode)
-        _bmMenuFilter(menu);
 }
 
 /**
@@ -202,13 +184,7 @@ const char* bmMenuGetTitle(const bmMenu *menu)
 int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
 {
     assert(menu);
-
-    int ret = _bmItemListAddItemAt(&menu->items, item, index);
-
-    if (ret)
-        _bmMenuFilter(menu);
-
-    return ret;
+    return _bmItemListAddItemAt(&menu->items, item, index);
 }
 
 /**
@@ -220,12 +196,7 @@ int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
  */
 int bmMenuAddItem(bmMenu *menu, bmItem *item)
 {
-    int ret = _bmItemListAddItem(&menu->items, item);
-
-    if (ret)
-        _bmMenuFilter(menu);
-
-    return ret;
+    return _bmItemListAddItem(&menu->items, item);
 }
 
 /**
@@ -250,7 +221,6 @@ int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
     if (ret) {
         _bmItemListRemoveItem(&menu->selection, item);
         _bmItemListRemoveItem(&menu->filtered, item);
-        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -274,7 +244,6 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
     if (ret) {
         _bmItemListRemoveItem(&menu->selection, item);
         _bmItemListRemoveItem(&menu->filtered, item);
-        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -393,7 +362,6 @@ int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
     if (ret) {
         _bmItemListFreeList(&menu->selection);
         _bmItemListFreeList(&menu->filtered);
-        _bmMenuFilter(menu);
     }
 
     return ret;
@@ -448,6 +416,57 @@ void bmMenuRender(const bmMenu *menu)
 }
 
 /**
+ * Trigger filtering of menu manually.
+ * This is useful when adding new items and want to dynamically see them filtered.
+ *
+ * Do note that filtering might be heavy, so you should only call it after batch manipulation of items.
+ * Not after manipulation of each single item.
+ *
+ * @param menu bmMenu instance which to filter.
+ */
+void bmMenuFilter(bmMenu *menu)
+{
+    assert(menu);
+
+    char addition = 0;
+    size_t len = strlen(menu->filter);
+
+    if (!len || !menu->items.list || menu->items.count <= 0) {
+        _bmItemListFreeList(&menu->filtered);
+
+        if (menu->oldFilter)
+            free(menu->oldFilter);
+
+        menu->oldFilter = NULL;
+        return;
+    }
+
+    if (menu->oldFilter) {
+        size_t oldLen = strlen(menu->oldFilter);
+        addition = (oldLen < len && !memcmp(menu->oldFilter, menu->filter, oldLen));
+    }
+
+    if (menu->oldFilter && addition && menu->filtered.count <= 0)
+        return;
+
+    if (menu->oldFilter && !strcmp(menu->filter, menu->oldFilter))
+        return;
+
+    unsigned int count, selected;
+    bmItem **filtered = filterFunc[menu->filterMode](menu, addition, &count, &selected);
+
+    _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
+    menu->index = selected;
+
+    if (count) {
+        if (menu->oldFilter)
+            free(menu->oldFilter);
+
+        menu->oldFilter = _bmStrdup(menu->filter);
+    }
+}
+
+/**
  * Poll key and unicode from underlying UI toolkit.
  *
  * This function will block on @link ::bmDrawMode BM_DRAW_MODE_CURSES @endlink draw mode.
@@ -484,8 +503,6 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
     unsigned int itemsCount;
     bmMenuGetFilteredItems(menu, &itemsCount);
-
-    char *oldFilter = _bmStrdup(menu->filter);
 
     switch (key) {
         case BM_KEY_LEFT:
@@ -619,11 +636,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
         default: break;
     }
 
-    if (oldFilter && strcmp(oldFilter, menu->filter))
-        _bmMenuFilter(menu);
-
-    if (oldFilter)
-        free(oldFilter);
+    bmMenuFilter(menu);
 
     switch (key) {
         case BM_KEY_RETURN: return BM_RUN_RESULT_SELECTED;

@@ -319,6 +319,17 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb);
 void bmMenuRender(const bmMenu *menu);
 
 /**
+ * Trigger filtering of menu manually.
+ * This is useful when adding new items and want to dynamically see them filtered.
+ *
+ * Do note that filtering might be heavy, so you should only call it after batch manipulation of items.
+ * Not after manipulation of each single item.
+ *
+ * @param menu bmMenu instance which to filter.
+ */
+void bmMenuFilter(bmMenu *menu);
+
+/**
  * Poll key and unicode from underlying UI toolkit.
  *
  * This function will block on @link ::bmDrawMode BM_DRAW_MODE_CURSES @endlink draw mode.

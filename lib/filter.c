@@ -76,12 +76,13 @@ fail:
  * Dmenu filterer that accepts substring function.
  *
  * @param menu bmMenu instance to filter.
+ * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param fstrstr Substring function used to match items.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
  * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuFun(bmMenu *menu, char* (*fstrstr)(const char *a, const char *b), unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), unsigned int *outNmemb, unsigned int *outHighlighted)
 {
     assert(menu);
     assert(outNmemb);
@@ -89,7 +90,13 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char* (*fstrstr)(const char *a, const c
     *outNmemb = *outHighlighted = 0;
 
     unsigned int itemsCount;
-    bmItem **items = bmMenuGetItems(menu, &itemsCount);
+    bmItem **items;
+
+    if (addition) {
+        items = bmMenuGetFilteredItems(menu, &itemsCount);
+    } else {
+        items = bmMenuGetItems(menu, &itemsCount);
+    }
 
     bmItem **filtered = calloc(itemsCount, sizeof(bmItem*));
     if (!filtered)
@@ -99,6 +106,7 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char* (*fstrstr)(const char *a, const c
     unsigned int tokc;
     char *buffer = _bmFilterTokenize(menu, &tokv, &tokc);
 
+    char found = 0;
     unsigned int i, f;
     for (f = i = 0; i < itemsCount; ++i) {
         bmItem *item = items[i];
@@ -112,8 +120,11 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char* (*fstrstr)(const char *a, const c
                 continue;
         }
 
-        if (f == 0 || item == bmMenuGetHighlightedItem(menu))
+        if (!found && item == bmMenuGetHighlightedItem(menu)) {
             *outHighlighted = f;
+            found = 1;
+        }
+
         filtered[f++] = item;
     }
 
@@ -130,26 +141,28 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char* (*fstrstr)(const char *a, const c
  * Filter that mimics the vanilla dmenu filtering.
  *
  * @param menu bmMenu instance to filter.
+ * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
  * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenu(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
 {
-    return _bmFilterDmenuFun(menu, strstr, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, strstr, outNmemb, outHighlighted);
 }
 
 /**
  * Filter that mimics the vanilla case-insensitive dmenu filtering.
  *
  * @param menu bmMenu instance to filter.
+ * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
  * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
 {
-    return _bmFilterDmenuFun(menu, _bmStrupstr, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, outNmemb, outHighlighted);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
