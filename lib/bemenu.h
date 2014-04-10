@@ -222,6 +222,7 @@ int bmMenuRemoveItem(bmMenu *menu, bmItem *item);
  * Highlight item in menu by index.
  *
  * @param menu bmMenu instance from where to highlight item.
+ * @param index Index of item to highlight.
  * @return 1 on successful highlight, 0 on failure.
  */
 int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index);
