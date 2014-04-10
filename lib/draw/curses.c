@@ -12,6 +12,7 @@
 /* ncurses.h likes to define stuff for us.
  * This unforunately mangles with our struct. */
 #undef erase
+#undef get_wch
 #undef refresh
 #undef mvprintw
 #undef move
