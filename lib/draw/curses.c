@@ -244,10 +244,10 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
         case KEY_END:
             return BM_KEY_END;
 
-        case KEY_PPAGE: /* PAGE UP */
+        case KEY_PPAGE: /* Page up */
             return BM_KEY_PAGE_UP;
 
-        case KEY_NPAGE: /* PAGE DOWN */
+        case KEY_NPAGE: /* Page down */
             return BM_KEY_PAGE_DOWN;
 
         case 8: /* C-h */
