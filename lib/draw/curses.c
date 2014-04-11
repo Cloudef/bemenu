@@ -251,6 +251,7 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
             return BM_KEY_PAGE_DOWN;
 
         case 8: /* C-h */
+        case 127: /* Delete */
         case KEY_BACKSPACE:
             return BM_KEY_BACKSPACE;
 
