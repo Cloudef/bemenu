@@ -218,7 +218,7 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
     if (!curses.stdscr)
         return BM_KEY_NONE;
 
-    curses.get_wch(unicode);
+    curses.get_wch((wint_t*)unicode);
     switch (*unicode) {
         case 16: /* C-p */
         case KEY_UP:
