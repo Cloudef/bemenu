@@ -8,6 +8,21 @@
 #include <dlfcn.h>
 #include <signal.h>
 #include <assert.h>
+#include <unistd.h>
+
+#if _WIN32
+static const char *TTY = "CON";
+#else
+static const char *TTY = "/dev/tty";
+#endif
+
+#if __APPLE__
+    const char *DL_PATH = "libncurses.5.dylib";
+#elif _WIN32
+#   error FIXME: Compile with windows... or use relative path?
+#else
+    const char *DL_PATH = "libncursesw.so.5";
+#endif
 
 /* ncurses.h likes to define stuff for us.
  * This unforunately mangles with our struct. */
@@ -45,6 +60,8 @@ static struct curses {
     int (*getmaxy)(WINDOW *win);
     int (*keypad)(WINDOW *win, bool bf);
     int *ESCDELAY;
+    int oldStdin;
+    int oldStdout;
 } curses;
 
 static int _bmDrawCursesResizeBuffer(char **buffer, size_t osize, size_t nsize)
@@ -127,8 +144,14 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 static void _bmDrawCursesRender(const bmMenu *menu)
 {
     if (!curses.stdscr) {
-        freopen("/dev/tty", "r", stdin);
+        curses.oldStdin = dup(STDIN_FILENO);
+        curses.oldStdout = dup(STDOUT_FILENO);
+
+        freopen(TTY, "w", stdout);
+        freopen(TTY, "r", stdin);
+
         setlocale(LC_CTYPE, "");
+
         if ((curses.stdscr = curses.initscr()) == NULL)
             return;
 
@@ -169,14 +192,22 @@ static void _bmDrawCursesRender(const bmMenu *menu)
 
 static void _bmDrawCursesEndWin(void)
 {
+    freopen(TTY, "w", stdout);
+
     if (curses.refresh)
         curses.refresh();
 
     if (curses.endwin)
         curses.endwin();
 
+    if (curses.stdscr) {
+        dup2(curses.oldStdin, STDIN_FILENO);
+        dup2(curses.oldStdout, STDOUT_FILENO);
+        close(curses.oldStdin);
+        close(curses.oldStdout);
+    }
+
     curses.stdscr = NULL;
-    freopen("/dev/tty", "w", stdout);
 }
 
 static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
@@ -278,9 +309,7 @@ static void _bmDrawCursesCrashHandler(int sig)
 int _bmDrawCursesInit(struct _bmRenderApi *api)
 {
     memset(&curses, 0, sizeof(curses));
-
-    /* FIXME: hardcoded and not cross-platform */
-    curses.handle = dlopen("/usr/lib/libncursesw.so.5", RTLD_LAZY);
+    curses.handle = dlopen(DL_PATH, RTLD_LAZY);
 
     if (!curses.handle)
         return 0;
