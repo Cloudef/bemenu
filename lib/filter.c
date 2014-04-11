@@ -106,7 +106,8 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
     unsigned int tokc;
     char *buffer = _bmFilterTokenize(menu, &tokv, &tokc);
 
-    char found = 0;
+    bmItem *highlighted = bmMenuGetHighlightedItem(menu);
+
     unsigned int i, f;
     for (f = i = 0; i < itemsCount; ++i) {
         bmItem *item = items[i];
@@ -120,10 +121,8 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
                 continue;
         }
 
-        if (!found && item == bmMenuGetHighlightedItem(menu)) {
+        if (item == highlighted)
             *outHighlighted = f;
-            found = 1;
-        }
 
         filtered[f++] = item;
     }
