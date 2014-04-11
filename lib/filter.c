@@ -98,13 +98,15 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
         items = bmMenuGetItems(menu, &itemsCount);
     }
 
+    char *buffer = NULL;
     bmItem **filtered = calloc(itemsCount, sizeof(bmItem*));
     if (!filtered)
-        return NULL;
+        goto fail;
 
     char **tokv;
     unsigned int tokc;
-    char *buffer = _bmFilterTokenize(menu, &tokv, &tokc);
+    if (!(buffer = _bmFilterTokenize(menu, &tokv, &tokc)))
+        goto fail;
 
     bmItem *highlighted = bmMenuGetHighlightedItem(menu);
 
@@ -129,11 +131,17 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
 
     if (buffer)
         free(buffer);
-
     if (tokv)
         free(tokv);
 
     return _bmFilterShrinkList(&filtered, menu->items.count, (*outNmemb = f));
+
+fail:
+    if (filtered)
+        free(filtered);
+    if (buffer)
+        free(buffer);
+    return NULL;
 }
 
 /**
