@@ -150,7 +150,7 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
     if (pair > 0)
         curses.attron(COLOR_PAIR(pair));
 
-    curses.mvprintw(y, 0, buffer);
+    curses.mvprintw(y, 0, "%s", buffer);
 
     if (pair > 0)
         curses.attroff(COLOR_PAIR(pair));
