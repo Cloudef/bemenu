@@ -130,16 +130,26 @@ int _bmUtf8StringScreenWidth(const char *string)
 {
     assert(string);
 
-    int num_char = mbstowcs(NULL, string, 0) + 1;
+    char *mstr = _bmStrdup(string);
+    if (!mstr)
+        return strlen(string);
+
+    char *s;
+    for (s = mstr; *s; ++s) if (*s == '\t') *s = ' ';
+
+    int num_char = mbstowcs(NULL, mstr, 0) + 1;
     wchar_t *wstring = malloc((num_char + 1) * sizeof (wstring[0]));
 
-    if (mbstowcs(wstring, string, num_char) == (size_t)(-1)) {
+    if (mbstowcs(wstring, mstr, num_char) == (size_t)(-1)) {
         free(wstring);
-        return strlen(string);
+        int len = strlen(mstr);
+        free(mstr);
+        return len;
     }
 
     int length = wcswidth(wstring, num_char);
     free(wstring);
+    free(mstr);
     return length;
 }
 
