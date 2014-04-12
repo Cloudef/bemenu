@@ -291,7 +291,13 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
         case 9: /* Tab */
             return BM_KEY_TAB;
 
+        case 0: /* C-Space */
         case 18: /* C-r */
+            return BM_KEY_CONTROL_RETURN;
+
+        case 20: /* C-t */
+        case 331: /* Insert */
+            _bmDrawCursesEndWin();
             return BM_KEY_SHIFT_RETURN;
 
         case 10: /* Return */

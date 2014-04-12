@@ -663,7 +663,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             }
             break;
 
-        case BM_KEY_SHIFT_RETURN:
+        case BM_KEY_CONTROL_RETURN:
         case BM_KEY_RETURN:
             {
                 bmItem *highlighted = bmMenuGetHighlightedItem(menu);
@@ -672,6 +672,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             }
             break;
 
+        case BM_KEY_SHIFT_RETURN:
         case BM_KEY_ESCAPE:
             _bmItemListFreeList(&menu->selection);
             break;
@@ -682,6 +683,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
     bmMenuFilter(menu);
 
     switch (key) {
+        case BM_KEY_SHIFT_RETURN:
         case BM_KEY_RETURN: return BM_RUN_RESULT_SELECTED;
         case BM_KEY_ESCAPE: return BM_RUN_RESULT_CANCEL;
         default: break;

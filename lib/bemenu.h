@@ -88,6 +88,7 @@ typedef enum bmKey {
     BM_KEY_ESCAPE,
     BM_KEY_RETURN,
     BM_KEY_SHIFT_RETURN,
+    BM_KEY_CONTROL_RETURN,
     BM_KEY_UNICODE,
     BM_KEY_LAST
 } bmKey;
