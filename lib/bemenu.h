@@ -8,6 +8,13 @@ typedef struct _bmMenu bmMenu;
 typedef struct _bmItem bmItem;
 
 /**
+ * @defgroup Library
+ * @brief Library functions.
+ *
+ * Query library version, etc...
+ */
+
+/**
  * @defgroup Menu
  * @brief Menu container.
  *
@@ -22,7 +29,7 @@ typedef struct _bmItem bmItem;
  */
 
 /**
- * @addtogroub Library
+ * @addtogroup Library
  * @{ */
 
 /**
