@@ -28,13 +28,15 @@ static void readItemsToMenuFromStdin(bmMenu *menu)
     size_t pos;
     char *s = buffer;
     while ((pos = strcspn(s, "\n")) != 0) {
+        size_t next = pos + (s[pos] != 0);
         s[pos] = 0;
+
         bmItem *item = bmItemNew(s);
         if (!item)
             break;
 
         bmMenuAddItem(menu, item);
-        s += pos + 1;
+        s += next;
     }
 
     free(buffer);

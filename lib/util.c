@@ -34,11 +34,16 @@ char* _bmStrdup(const char *string)
  * Replaces next token in string with '\0' and returns position for the replaced token.
  *
  * @param string C "string" where token will be replaced.
+ * @param outNext Reference to position of next delimiter, or 0 if none.
  * @return Position of the replaced token.
  */
-size_t _bmStripToken(char *string, const char *token)
+size_t _bmStripToken(char *string, const char *token, size_t *outNext)
 {
     size_t len = strcspn(string, token);
+
+    if (outNext)
+        *outNext = len + (string[len] != 0);
+
     string[len] = 0;
     return len;
 }
