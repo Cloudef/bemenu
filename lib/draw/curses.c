@@ -272,9 +272,11 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
         case KEY_NPAGE: /* Page down */
             return BM_KEY_PAGE_DOWN;
 
+        case 550: /* C-Page up */
         case 398: /* S-Page up */
             return BM_KEY_SHIFT_PAGE_UP;
 
+        case 545: /* C-Page down */
         case 396: /* S-Page down */
             return BM_KEY_SHIFT_PAGE_DOWN;
 
