@@ -71,6 +71,9 @@ void bmMenuFree(bmMenu *menu)
     if (menu->title)
         free(menu->title);
 
+    if (menu->filter)
+        free(menu->filter);
+
     if (menu->oldFilter)
         free(menu->oldFilter);
 
@@ -126,12 +129,11 @@ void bmMenuSetFilter(bmMenu *menu, const char *filter)
 {
     assert(menu);
 
-    if (!filter) {
-        memset(menu->filter, 0, sizeof(menu->filter));
-        return;
-    }
+    if (menu->filter)
+        free(menu->filter);
 
-    strncpy(menu->filter, filter, sizeof(menu->filter));
+    menu->filter = (filter ? _bmStrdup(filter) : NULL);
+    menu->filterSize = (filter ? strlen(filter) : 0);
 }
 
 /**
@@ -426,7 +428,7 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
 {
     assert(menu);
 
-    if (strlen(menu->filter))
+    if (menu->filter && strlen(menu->filter))
         return _bmItemListGetItems(&menu->filtered, outNmemb);
 
     return _bmItemListGetItems(&menu->items, outNmemb);
@@ -459,7 +461,7 @@ void bmMenuFilter(bmMenu *menu)
     assert(menu);
 
     char addition = 0;
-    size_t len = strlen(menu->filter);
+    size_t len = (menu->filter ? strlen(menu->filter) : 0);
 
     if (!len || !menu->items.list || menu->items.count <= 0) {
         _bmItemListFreeList(&menu->filtered);
@@ -561,7 +563,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_END:
-            menu->cursor = strlen(menu->filter);
+            menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
             menu->cursesCursor = _bmUtf8StringScreenWidth(menu->filter);
             break;
 
@@ -619,17 +621,17 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
         case BM_KEY_WORD_DELETE:
             {
-                while (menu->cursor < strlen(menu->filter) && !isspace(menu->filter[menu->cursor])) {
+                while (menu->cursor < (menu->filter ? strlen(menu->filter) : 0) && !isspace(menu->filter[menu->cursor])) {
                     unsigned int oldCursor = menu->cursor;
                     menu->cursor += _bmUtf8RuneNext(menu->filter, menu->cursor);
                     menu->cursesCursor += _bmUtf8RuneWidth(menu->filter + oldCursor, menu->cursor - oldCursor);
                 }
-                while (menu->cursor > 0 && isspace(menu->filter[menu->cursor - 1])) {
+                while (menu->cursor > 0 && menu->filter && isspace(menu->filter[menu->cursor - 1])) {
                     unsigned int oldCursor = menu->cursor;
                     menu->cursor -= _bmUtf8RunePrev(menu->filter, menu->cursor);
                     menu->cursesCursor -= _bmUtf8RuneWidth(menu->filter + menu->cursor, oldCursor - menu->cursor);
                 }
-                while (menu->cursor > 0 && !isspace(menu->filter[menu->cursor - 1])) {
+                while (menu->cursor > 0 && menu->filter && !isspace(menu->filter[menu->cursor - 1])) {
                     size_t width;
                     menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
                     menu->cursesCursor -= width;
@@ -640,24 +642,18 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
         case BM_KEY_UNICODE:
             {
                 size_t width;
-                menu->cursor += _bmUnicodeInsert(menu->filter, sizeof(menu->filter) - 1, menu->cursor, unicode, &width);
+                menu->cursor += _bmUnicodeInsert(&menu->filter, &menu->filterSize, menu->cursor, unicode, &width);
                 menu->cursesCursor += width;
             }
             break;
 
         case BM_KEY_TAB:
             {
+                const char *text;
                 bmItem *highlighted = bmMenuGetHighlightedItem(menu);
-                if (highlighted && bmItemGetText(highlighted)) {
-                    const char *text = bmItemGetText(highlighted);
-                    size_t len = strlen(text);
-
-                    if (len > sizeof(menu->filter) - 1)
-                        len = sizeof(menu->filter) - 1;
-
-                    memset(menu->filter, 0, strlen(menu->filter));
-                    memcpy(menu->filter, text, len);
-                    menu->cursor = strlen(menu->filter);
+                if (highlighted && (text = bmItemGetText(highlighted))) {
+                    bmMenuSetFilter(menu, text);
+                    menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
                     menu->cursesCursor = _bmUtf8StringScreenWidth(menu->filter);
                 }
             }

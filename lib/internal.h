@@ -103,14 +103,18 @@ struct _bmMenu {
 
     /**
      * Text used to filter matches.
-     * XXX: Change this to a pointer?
      */
-    char filter[1024];
+    char *filter;
 
     /**
      * Used as optimization.
      */
     char *oldFilter;
+
+    /**
+     * Size of filter buffer
+     */
+    size_t filterSize;
 
     /**
      * Current byte offset on filter text.
@@ -173,7 +177,7 @@ size_t _bmUtf8RuneNext(const char *string, size_t start);
 size_t _bmUtf8RunePrev(const char *string, size_t start);
 size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len);
 size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth);
-size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth);
-size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth);
+size_t _bmUtf8RuneInsert(char **string, size_t *bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth);
+size_t _bmUnicodeInsert(char **string, size_t *bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth);
 
 /* vim: set ts=8 sw=4 tw=0 :*/

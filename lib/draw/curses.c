@@ -182,7 +182,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     curses.erase();
 
     int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
-    _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", menu->filter);
+    _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", (menu->filter ? menu->filter : ""));
 
     if (menu->title) {
         curses.attron(COLOR_PAIR(1));

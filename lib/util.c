@@ -228,29 +228,45 @@ size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth)
 /**
  * Insert UTF8 rune to buffer.
  *
- * @param string Null terminated C "string".
- * @param bufSize Size of the buffer.
+ * @param inOutString Reference to buffer.
+ * @param inOutBufSize Reference to size of the buffer.
  * @param start Start offset where to insert to. (cursor)
  * @param rune Buffer to insert to string.
  * @param u8len Byte length of the rune.
  * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth)
+size_t _bmUtf8RuneInsert(char **inOutString, size_t *inOutBufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth)
 {
-    assert(string);
+    assert(inOutString);
+    assert(inOutBufSize);
 
     if (outRuneWidth)
         *outRuneWidth = 0;
 
-    size_t len = strlen(string);
-    if (len + u8len >= bufSize)
+    size_t len = (*inOutString ? strlen(*inOutString) : 0);
+    if (!*inOutString && !(*inOutString = calloc(1, (*inOutBufSize = u8len + 1))))
         return 0;
+
+    if (len + u8len >= *inOutBufSize) {
+        void *tmp;
+        if (!(tmp = realloc(*inOutString, (*inOutBufSize * 2)))) {
+            if (!(tmp = malloc((*inOutBufSize * 2))))
+                return 0;
+
+            memcpy(tmp, *inOutString, *inOutBufSize);
+            free(*inOutString);
+        }
+
+        memset(tmp + *inOutBufSize, 0, *inOutBufSize);
+        *inOutString = tmp;
+        *inOutBufSize *= 2;
+    }
 
     if (u8len == 1 && !isprint(*rune))
         return 0;
 
-    char *str = string + start;
+    char *str = *inOutString + start;
     memmove(str + u8len, str, len - start);
     memcpy(str, rune, u8len);
 
@@ -262,16 +278,17 @@ size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char 
 /**
  * Insert unicode character to UTF8 buffer.
  *
- * @param string Null terminated C "string".
- * @param bufSize Size of the buffer.
+ * @param inOutString Reference to buffer.
+ * @param inOutBufSize Reference to size of the buffer.
  * @param start Start offset where to insert to. (cursor)
  * @param unicode Unicode character to insert.
  * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth)
+size_t _bmUnicodeInsert(char **inOutString, size_t *inOutBufSize, size_t start, unsigned int unicode, size_t *outRuneWidth)
 {
-    assert(string);
+    assert(inOutString);
+    assert(inOutBufSize);
 
     char u8len = ((unicode < 0x80) ? 1 : ((unicode < 0x800) ? 2 : ((unicode < 0x10000) ? 3 : 4)));
     char mb[5] = { 0, 0, 0, 0 };
@@ -285,7 +302,7 @@ size_t _bmUnicodeInsert(char *string, size_t bufSize, size_t start, unsigned int
         mb[0] |= (unicode >> (i * 6 - 6));
     }
 
-    return _bmUtf8RuneInsert(string, bufSize, start, mb, u8len, outRuneWidth);
+    return _bmUtf8RuneInsert(inOutString, inOutBufSize, start, mb, u8len, outRuneWidth);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
