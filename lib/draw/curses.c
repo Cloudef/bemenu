@@ -181,8 +181,18 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     const unsigned int lines = curses.getmaxy(curses.stdscr);
     curses.erase();
 
-    int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
-    _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", (menu->filter ? menu->filter : ""));
+    unsigned int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
+    unsigned int ncols = curses.getmaxx(curses.stdscr);
+    unsigned int ccols = ncols - titleLen - 1;
+    unsigned int doffset = (menu->cursesCursor < ccols ? 0 : menu->cursesCursor - ccols);
+
+    if (doffset > 0) {
+        /* find offset where we won't break the UTF8 string */
+        doffset += _bmUtf8RuneNext(menu->filter, doffset);
+        doffset -= _bmUtf8RunePrev(menu->filter, doffset);
+    }
+
+    _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", (menu->filter ? menu->filter + doffset : ""));
 
     if (menu->title) {
         curses.attron(COLOR_PAIR(1));
@@ -199,8 +209,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
         _bmDrawCursesDrawLine(color, cl++, "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : ""));
     }
 
-    unsigned int ncols = curses.getmaxx(curses.stdscr) - titleLen - 1;
-    curses.move(0, titleLen + (ncols < menu->cursesCursor ? ncols : menu->cursesCursor));
+    curses.move(0, titleLen + (menu->cursesCursor < ccols ? menu->cursesCursor : ccols));
     curses.refresh();
 }
 
