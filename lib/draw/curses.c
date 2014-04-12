@@ -198,6 +198,12 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     curses.refresh();
 }
 
+static unsigned int _bmDrawCursesDisplayedCount(const bmMenu *menu)
+{
+    (void)menu;
+    return (curses.stdscr ? curses.getmaxy(curses.stdscr) : 0);
+}
+
 static void _bmDrawCursesEndWin(void)
 {
     freopen(TTY, "w", stdout);
@@ -257,6 +263,12 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
 
         case KEY_NPAGE: /* Page down */
             return BM_KEY_PAGE_DOWN;
+
+        case 398: /* S-Page up */
+            return BM_KEY_SHIFT_PAGE_UP;
+
+        case 396: /* S-Page down */
+            return BM_KEY_SHIFT_PAGE_DOWN;
 
         case 8: /* C-h */
         case 127: /* Delete */
@@ -361,6 +373,7 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
 
 #undef bmLoadFunction
 
+    api->displayedCount = _bmDrawCursesDisplayedCount;
     api->getKey = _bmDrawCursesGetKey;
     api->render = _bmDrawCursesRender;
     api->free = _bmDrawCursesFree;

@@ -28,6 +28,11 @@ struct _bmItem {
  */
 struct _bmRenderApi {
     /**
+     * Get count of displayed items by the underlying renderer.
+     */
+    unsigned int (*displayedCount)(const bmMenu *menu);
+
+    /**
      * If the underlying renderer is a UI toolkit. (curses, etc...)
      * There might be possibility to get user input, and this should be thus implemented.
      */

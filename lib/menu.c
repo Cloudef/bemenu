@@ -532,6 +532,13 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
     unsigned int itemsCount;
     bmMenuGetFilteredItems(menu, &itemsCount);
 
+    unsigned int displayed = 0;
+    if (menu->renderApi.displayedCount)
+        displayed = menu->renderApi.displayedCount(menu);
+
+    if (!displayed)
+        displayed = itemsCount;
+
     switch (key) {
         case BM_KEY_LEFT:
             {
@@ -569,10 +576,18 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_PAGE_UP:
-            menu->index = 0;
+            menu->index = (menu->index < displayed ? 0 : menu->index - (displayed - 1));
             break;
 
         case BM_KEY_PAGE_DOWN:
+            menu->index = (menu->index + displayed >= itemsCount ? itemsCount - 1 : menu->index + (displayed - 1));
+            break;
+
+        case BM_KEY_SHIFT_PAGE_UP:
+            menu->index = 0;
+            break;
+
+        case BM_KEY_SHIFT_PAGE_DOWN:
             menu->index = itemsCount - 1;
             break;
 
