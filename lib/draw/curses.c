@@ -101,6 +101,9 @@ static int _bmDrawCursesResizeBuffer(char **buffer, size_t osize, size_t nsize)
     return 1;
 }
 
+#if __GNUC__
+__attribute__((format(printf, 3, 4)))
+#endif
 static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 {
     static int blen = 0;
@@ -178,8 +181,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     const unsigned int lines = curses.getmaxy(curses.stdscr);
     curses.erase();
 
-    size_t titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
-
+    int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
     _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", menu->filter);
 
     if (menu->title) {
