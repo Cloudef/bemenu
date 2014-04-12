@@ -130,7 +130,6 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
             *outHighlighted = f;
 
         if (tokc && item->text && !fstrncmp(tokv[0], item->text, len + 1)) { /* exact matches */
-            //memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(bmItem*));
             memmove(&filtered[1], filtered, f * sizeof(bmItem*));
             filtered[0] = item;
             e++; /* where do exact matches end */
