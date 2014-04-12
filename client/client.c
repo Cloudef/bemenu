@@ -103,8 +103,10 @@ int main(int argc, char **argv)
     if (status == BM_RUN_RESULT_SELECTED) {
         unsigned int i, count;
         bmItem **items = bmMenuGetSelectedItems(menu, &count);
-        for (i = 0; i < count; ++i)
-            printf("%s\n", bmItemGetText(items[i]));
+        for (i = 0; i < count; ++i) {
+            const char *text = bmItemGetText(items[i]);
+            printf("%s\n", (text ? text : ""));
+        }
     }
 
     bmMenuFree(menu);

@@ -190,7 +190,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     for (i = (menu->index / (lines - 1)) * (lines - 1); i < itemsCount && cl < lines; ++i) {
         int highlighted = (items[i] == bmMenuGetHighlightedItem(menu));
         int color = (highlighted ? 2 : (_bmMenuItemIsSelected(menu, items[i]) ? 1 : 0));
-        _bmDrawCursesDrawLine(color, cl++, "%s%s", (highlighted ? ">> " : "   "), items[i]->text);
+        _bmDrawCursesDrawLine(color, cl++, "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : "(null)"));
     }
 
     unsigned int ncols = curses.getmaxx(curses.stdscr) - titleLen - 1;
