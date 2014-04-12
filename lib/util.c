@@ -242,7 +242,7 @@ size_t _bmUtf8RuneInsert(char *string, size_t bufSize, size_t start, const char 
     if (len + u8len >= bufSize)
         return 0;
 
-    if (u8len == 1 && iscntrl(*rune))
+    if (u8len == 1 && !isprint(*rune))
         return 0;
 
     char *str = string + start;
