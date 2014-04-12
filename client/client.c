@@ -26,13 +26,16 @@ static void readItemsToMenuFromStdin(bmMenu *menu)
     }
     buffer[allocated - step + read - 1] = 0;
 
-    char *s;
-    for (s = strtok(buffer, "\n"); s; s = strtok(NULL, "\n")) {
+    size_t pos;
+    char *s = buffer;
+    while ((pos = strcspn(s, "\n")) != 0) {
+        s[pos] = 0;
         bmItem *item = bmItemNew(s);
         if (!item)
             break;
 
         bmMenuAddItem(menu, item);
+        s += pos + 1;
     }
 
     free(buffer);

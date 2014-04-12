@@ -1,14 +1,18 @@
 #include "../internal.h"
-#define _XOPEN_SOURCE 700
+
+#define _XOPEN_SOURCE 500
+#include <signal.h> /* sigaction */
+#include <stdarg.h> /* vsnprintf */
+#undef _XOPEN_SOURCE
+
 #include <wchar.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <locale.h>
 #include <ncurses.h>
 #include <dlfcn.h>
-#include <signal.h>
 #include <assert.h>
-#include <unistd.h>
 
 #if _WIN32
 static const char *TTY = "CON";

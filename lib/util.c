@@ -28,6 +28,19 @@ char* _bmStrdup(const char *string)
 }
 
 /**
+ * Replaces next token in string with '\0' and returns position for the replaced token.
+ *
+ * @param string C "string" where token will be replaced.
+ * @return Position of the replaced token.
+ */
+size_t _bmStripToken(char *string, const char *token)
+{
+    size_t len = strcspn(string, token);
+    string[len] = 0;
+    return len;
+}
+
+/**
  * Portable case-insensitive strcmp.
  *
  * @param hay C "string" to match against.

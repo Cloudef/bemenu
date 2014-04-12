@@ -163,6 +163,7 @@ int _bmItemListRemoveItem(struct _bmItemList *list, const bmItem *item);
 
 /* util.c */
 char* _bmStrdup(const char *s);
+size_t _bmStripToken(char *string, const char *token);
 int _bmStrupcmp(const char *hay, const char *needle);
 int _bmStrnupcmp(const char *hay, const char *needle, size_t len);
 char* _bmStrupstr(const char *hay, const char *needle);

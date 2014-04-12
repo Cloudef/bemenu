@@ -54,11 +54,16 @@ static char* _bmFilterTokenize(bmMenu *menu, char ***outTokv, unsigned int *outT
     if (!(buffer = _bmStrdup(menu->filter)))
         goto fail;
 
-    char *s, **tmp = NULL;
+    size_t pos = 0;
     unsigned int tokc = 0, tokn = 0;
-    for (s = strtok(buffer, " "); s; tmp[tokc - 1] = s, s = strtok(NULL, " "), tokv = tmp)
+    char *s = buffer, **tmp = NULL;
+    while ((pos = _bmStripToken(s, " ")) != 0) {
         if (++tokc > tokn && !(tmp = realloc(tmp, ++tokn * sizeof(char*))))
             goto fail;
+
+        tmp[tokc - 1] = s;
+        s += pos + 1;
+    }
 
     *outTokv = tmp;
     *outTokc = tokc;
