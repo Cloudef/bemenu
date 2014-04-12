@@ -5,80 +5,37 @@
 #include <assert.h>
 #include <bemenu.h>
 
-static ptrdiff_t getLine(char **outLine, size_t *outAllocated, FILE *stream)
-{
-    size_t len = 0, allocated;
-    char *s, *buffer;
-
-    assert(outLine);
-    assert(outAllocated);
-
-    if (!stream || feof(stream) || ferror(stream))
-        return -1;
-
-    allocated = *outAllocated;
-    buffer = *outLine;
-
-    if (!buffer || allocated == 0) {
-        if (!(buffer = calloc(1, (allocated = 1024) + 1)))
-            return -1;
-    }
-
-    for (s = buffer;;) {
-        if (!fgets(s, allocated - (s - buffer), stream)) {
-            *outAllocated = allocated;
-            *outLine = buffer;
-            return -1;
-        }
-
-        len = strlen(s);
-        if (feof(stream))
-            break;
-
-        if (len > 0 && s[len - 1] == '\n')
-            break;
-
-        if (len + 1 >= allocated - (s - buffer)) {
-            void *tmp = realloc(buffer, 2 * allocated);
-            if (!tmp)
-                break;
-
-            buffer = tmp;
-            s = buffer + allocated - 1;
-            memset(s, 0, allocated - (s - buffer));
-            allocated *= 2;
-        } else {
-            s += len;
-        }
-    }
-
-    *outAllocated = allocated;
-    *outLine = buffer;
-
-    if (s[len - 1] == '\n')
-        s[len - 1] = 0;
-
-    return s - buffer + len;
-}
-
 static void readItemsToMenuFromStdin(bmMenu *menu)
 {
     assert(menu);
 
-    ptrdiff_t len;
-    size_t size = 0;
-    char *line = NULL;
+    size_t step = 1024, allocated;
+    char *buffer;
 
-    while ((len = getLine(&line, &size, stdin)) != -1) {
-        bmItem *item = bmItemNew((len > 0 ? line : NULL));
+    if (!(buffer = malloc((allocated = step))))
+        return;
+
+    size_t read;
+    while ((read = fread(buffer + (allocated - step), 1, step, stdin)) == step) {
+        void *tmp;
+        if (!(tmp = realloc(buffer, (allocated += step)))) {
+            free(buffer);
+            return;
+        }
+        buffer = tmp;
+    }
+    buffer[allocated - step + read - 1] = 0;
+
+    char *s;
+    for (s = strtok(buffer, "\n"); s; s = strtok(NULL, "\n")) {
+        bmItem *item = bmItemNew(s);
         if (!item)
             break;
 
         bmMenuAddItem(menu, item);
     }
 
-    if (line)
-        free(line);
+    free(buffer);
 }
 
 int main(int argc, char **argv)
