@@ -252,8 +252,6 @@ bmItem* bmMenuGetHighlightedItem(const bmMenu *menu);
 /**
  * Set selected items to bmMenu instance.
  *
- * @warning The list won't be copied, do not free it.
- *
  * @param menu bmMenu instance where items will be set.
  * @param items Array of bmItem pointers to set.
  * @param nmemb Total count of items in array.

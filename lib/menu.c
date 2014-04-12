@@ -346,8 +346,6 @@ bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
 /**
  * Set selected items to bmMenu instance.
  *
- * @warning The list won't be copied, do not free it.
- *
  * @param menu bmMenu instance where items will be set.
  * @param items Array of bmItem pointers to set.
  * @param nmemb Total count of items in array.
@@ -356,7 +354,13 @@ bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
 int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb)
 {
     assert(menu);
-    return _bmItemListSetItemsNoCopy(&menu->selection, items, nmemb);
+
+    bmItem **newItems;
+    if (!(newItems = calloc(sizeof(bmItem*), nmemb)))
+        return 0;
+
+    memcpy(newItems, items, sizeof(bmItem*) * nmemb);
+    return _bmItemListSetItemsNoCopy(&menu->selection, newItems, nmemb);
 }
 
 /**
