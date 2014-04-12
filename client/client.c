@@ -107,6 +107,9 @@ int main(int argc, char **argv)
             const char *text = bmItemGetText(items[i]);
             printf("%s\n", (text ? text : ""));
         }
+
+        if (!count && bmMenuGetFilter(menu))
+            printf("%s\n", bmMenuGetFilter(menu));
     }
 
     bmMenuFree(menu);
