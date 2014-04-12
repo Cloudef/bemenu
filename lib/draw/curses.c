@@ -251,10 +251,12 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
             return BM_KEY_RIGHT;
 
         case 1: /* C-a */
+        case 391: /* S-Home */
         case KEY_HOME:
             return BM_KEY_HOME;
 
         case 5: /* C-e */
+        case 386: /* S-End */
         case KEY_END:
             return BM_KEY_END;
 
@@ -279,6 +281,7 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
         case KEY_DC:
             return BM_KEY_DELETE;
 
+        case 383: /* S-Del */
         case 21: /* C-u */
             return BM_KEY_LINE_DELETE_LEFT;
 
