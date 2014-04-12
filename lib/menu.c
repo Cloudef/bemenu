@@ -7,7 +7,7 @@
 /**
  * Filter function map.
  */
-static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted) = {
+static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, char addition, unsigned int *outNmemb) = {
     _bmFilterDmenu, /* BM_FILTER_DMENU */
     _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
@@ -482,11 +482,11 @@ void bmMenuFilter(bmMenu *menu)
     if (menu->oldFilter && !strcmp(menu->filter, menu->oldFilter))
         return;
 
-    unsigned int count, selected;
-    bmItem **filtered = filterFunc[menu->filterMode](menu, addition, &count, &selected);
+    unsigned int count;
+    bmItem **filtered = filterFunc[menu->filterMode](menu, addition, &count);
 
     _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
-    menu->index = selected;
+    menu->index = 0;
 
     if (menu->oldFilter)
         free(menu->oldFilter);

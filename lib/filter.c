@@ -79,17 +79,15 @@ fail:
  * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param fstrstr Substring function used to match items.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), unsigned int *outNmemb)
 {
     assert(menu);
     assert(fstrstr);
     assert(fstrncmp);
     assert(outNmemb);
-    assert(outHighlighted);
-    *outNmemb = *outHighlighted = 0;
+    *outNmemb = 0;
 
     unsigned int itemsCount;
     bmItem **items;
@@ -110,8 +108,6 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
     if (!(buffer = _bmFilterTokenize(menu, &tokv, &tokc)))
         goto fail;
 
-    bmItem *highlighted = bmMenuGetHighlightedItem(menu);
-
     size_t len = (tokc ? strlen(tokv[0]) : 0);
     unsigned int i, f, e;
     for (e = f = i = 0; i < itemsCount; ++i) {
@@ -125,9 +121,6 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
             if (t < tokc)
                 continue;
         }
-
-        if (item == highlighted)
-            *outHighlighted = f;
 
         if (tokc && item->text && !fstrncmp(tokv[0], item->text, len + 1)) { /* exact matches */
             memmove(&filtered[1], filtered, f * sizeof(bmItem*));
@@ -164,12 +157,11 @@ fail:
  * @param menu bmMenu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb)
 {
-    return _bmFilterDmenuFun(menu, addition, strstr, strncmp, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, strstr, strncmp, outNmemb);
 }
 
 /**
@@ -178,12 +170,11 @@ bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, uns
  * @param menu bmMenu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb)
 {
-    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, _bmStrnupcmp, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, _bmStrnupcmp, outNmemb);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
