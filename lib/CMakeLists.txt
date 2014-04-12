@@ -2,13 +2,16 @@
 SET(BEMENU_SOURCE
     menu.c
     item.c
-    filter.c
     list.c
     util.c
+    filter.c
+    library.c
     draw/curses.c
     )
 SET(BEMENU_INCLUDE)
 SET(BEMENU_LIBRARIES)
+
+CONFIGURE_FILE(version.h.in version.h @ONLY)
 
 # Warnings
 IF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
@@ -24,7 +27,7 @@ IF (UNIX AND CMAKE_COMPILER_IS_GNUCC)
 ENDIF ()
 
 # Compile
-INCLUDE_DIRECTORIES(${BEMENU_INCLUDE})
+INCLUDE_DIRECTORIES(${BEMENU_INCLUDE} ${CMAKE_CURRENT_BINARY_DIR})
 ADD_LIBRARY(bemenu ${BEMENU_SOURCE})
 TARGET_LINK_LIBRARIES(bemenu ${BEMENU_LIBRARIES} dl)
 

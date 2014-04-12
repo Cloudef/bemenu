@@ -3,6 +3,140 @@
 #include <string.h>
 #include <assert.h>
 #include <bemenu.h>
+#include <getopt.h>
+
+static struct {
+    bmFilterMode filterMode;
+    int wrap;
+    unsigned int lines;
+    const char *title;
+    int selected;
+    int bottom;
+    int grab;
+    int monitor;
+} client = {
+    BM_FILTER_MODE_DMENU, /* filterMode */
+    0, /* wrap */
+    0, /* lines */
+    "bemenu", /* title */
+    0, /* selected */
+    0, /* bottom */
+    0, /* grab */
+    0 /* monitor */
+};
+
+static void printVersion(const char *name)
+{
+    char *base = strrchr(name, '/');
+    printf("%s v%s\n", (base ? base  + 1 : name), bmVersion());
+    puts("<o/ \e[5mDISCO\e[m");
+}
+
+static void usage(FILE *out, const char *name)
+{
+    char *base = strrchr(name, '/');
+    fprintf(out, "usage: %s [options]\n", (base ? base + 1 : name));
+    fputs("Options\n"
+          " -h, --help            display this help and exit.\n"
+          " -v, --version         display version.\n"
+          " -i, --ignorecase      match items case insensitively.\n"
+          " -w, --wrap            wraps cursor selection.\n"
+          " -l, --list            list items vertically with the given number of lines.\n"
+          " -p, --prompt          defines the prompt text to be displayed.\n"
+          " -I, --index           select item at index automatically.\n\n"
+
+          "Backend specific options\n"
+          "   c = ncurses\n" // x == x11
+          "   (...) At end of help indicates the backend support for option.\n\n"
+
+          " -b, --bottom          appears at the bottom of the screen. ()\n"
+          " -f, --grab            grabs the keyboard before reading stdin. ()\n"
+          " -m, --monitor         index of monitor where menu will appear. ()\n"
+          " -fn, --fn             defines the font to be used. ()\n"
+          " -nb, --nb             defines the normal background color. ()\n"
+          " -nf, --nf             defines the normal foreground color. ()\n"
+          " -sb, --sb             defines the selected background color. ()\n"
+          " -sf, --sf             defines the selected foreground color. ()\n"
+
+
+          , out);
+    exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
+}
+
+static void parseArgs(int *argc, char **argv[])
+{
+    static const struct option opts[] = {
+        { "help",        no_argument,       0, 'h' },
+        { "version",     no_argument,       0, 'v' },
+
+        { "ignorecase",  no_argument,       0, 'i' },
+        { "wrap",        no_argument,       0, 'w' },
+        { "list",        required_argument, 0, 'l' },
+        { "prompt",      required_argument, 0, 'p' },
+        { "index",       required_argument, 0, 'I' },
+
+        { "bottom",      no_argument,       0, 'b' },
+        { "grab",        no_argument,       0, 'f' },
+        { "monitor",     required_argument, 0, 'm' },
+        { "fn",          required_argument, 0, 0x100 },
+        { "nb",          required_argument, 0, 0x101 },
+        { "nf",          required_argument, 0, 0x102 },
+        { "sb",          required_argument, 0, 0x103 },
+        { "sf",          required_argument, 0, 0x104 },
+        { 0, 0, 0, 0 }
+    };
+
+    for (;;) {
+        int opt = getopt_long(*argc, *argv, "hviw:I:p:Ibf:m", opts, NULL);
+        if (opt < 0)
+            break;
+
+        switch (opt) {
+            case 'h':
+                usage(stdout, *argv[0]);
+                break;
+            case 'v':
+                printVersion(*argv[0]);
+                exit(EXIT_SUCCESS);
+
+            case 'i':
+                client.filterMode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
+                break;
+            case 'w':
+                client.wrap = 1;
+                break;
+            case 'l':
+                client.lines = strtol(optarg, NULL, 10);
+                break;
+            case 'p':
+                client.title = optarg;
+                break;
+            case 'I':
+                client.selected = strtol(optarg, NULL, 10);
+                break;
+
+            case 'b':
+                client.bottom = 1;
+                break;
+            case 'f':
+                client.grab = 1;
+                break;
+            case 'm':
+                client.monitor = strtol(optarg, NULL, 10);
+                break;
+
+            case 0x100:
+            case 0x101:
+            case 0x102:
+            case 0x103:
+            case 0x104:
+                break;
+        }
+    }
+
+    *argc -= optind;
+    *argv += optind;
+}
 
 static void readItemsToMenuFromStdin(bmMenu *menu)
 {
@@ -44,14 +178,18 @@ static void readItemsToMenuFromStdin(bmMenu *menu)
 
 int main(int argc, char **argv)
 {
-    (void)argc, (void)argv;
+    parseArgs(&argc, &argv);
 
     bmMenu *menu = bmMenuNew(BM_DRAW_MODE_CURSES);
     if (!menu)
         return EXIT_FAILURE;
 
-    bmMenuSetTitle(menu, "bemenu");
+    bmMenuSetTitle(menu, client.title);
+    bmMenuSetFilterMode(menu, client.filterMode);
+
     readItemsToMenuFromStdin(menu);
+
+    bmMenuSetHighlightedIndex(menu, client.selected);
 
     bmKey key;
     unsigned int unicode;
