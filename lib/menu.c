@@ -547,7 +547,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
     switch (key) {
         case BM_KEY_LEFT:
-            {
+            if (menu->filter) {
                 unsigned int oldCursor = menu->cursor;
                 menu->cursor -= _bmUtf8RunePrev(menu->filter, menu->cursor);
                 menu->cursesCursor -= _bmUtf8RuneWidth(menu->filter + menu->cursor, oldCursor - menu->cursor);
@@ -555,7 +555,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_RIGHT:
-            {
+            if (menu->filter) {
                 unsigned int oldCursor = menu->cursor;
                 menu->cursor += _bmUtf8RuneNext(menu->filter, menu->cursor);
                 menu->cursesCursor += _bmUtf8RuneWidth(menu->filter + oldCursor, menu->cursor - oldCursor);
@@ -568,7 +568,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
 
         case BM_KEY_END:
             menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
-            menu->cursesCursor = _bmUtf8StringScreenWidth(menu->filter);
+            menu->cursesCursor = (menu->filter ? _bmUtf8StringScreenWidth(menu->filter) : 0);
             break;
 
         case BM_KEY_UP:
@@ -598,7 +598,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_BACKSPACE:
-            {
+            if (menu->filter) {
                 size_t width;
                 menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
                 menu->cursesCursor -= width;
@@ -606,11 +606,12 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_DELETE:
-            _bmUtf8RuneRemove(menu->filter, menu->cursor + 1, NULL);
+            if (menu->filter)
+                _bmUtf8RuneRemove(menu->filter, menu->cursor + 1, NULL);
             break;
 
         case BM_KEY_LINE_DELETE_LEFT:
-            {
+            if (menu->filter) {
                 while (menu->cursor > 0) {
                     size_t width;
                     menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
@@ -620,22 +621,23 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_LINE_DELETE_RIGHT:
-            menu->filter[menu->cursor] = 0;
+            if (menu->filter)
+                menu->filter[menu->cursor] = 0;
             break;
 
         case BM_KEY_WORD_DELETE:
-            {
-                while (menu->cursor < (menu->filter ? strlen(menu->filter) : 0) && !isspace(menu->filter[menu->cursor])) {
+           if (menu->filter) {
+                while (menu->cursor < strlen(menu->filter) && !isspace(menu->filter[menu->cursor])) {
                     unsigned int oldCursor = menu->cursor;
                     menu->cursor += _bmUtf8RuneNext(menu->filter, menu->cursor);
                     menu->cursesCursor += _bmUtf8RuneWidth(menu->filter + oldCursor, menu->cursor - oldCursor);
                 }
-                while (menu->cursor > 0 && menu->filter && isspace(menu->filter[menu->cursor - 1])) {
+                while (menu->cursor > 0 && isspace(menu->filter[menu->cursor - 1])) {
                     unsigned int oldCursor = menu->cursor;
                     menu->cursor -= _bmUtf8RunePrev(menu->filter, menu->cursor);
                     menu->cursesCursor -= _bmUtf8RuneWidth(menu->filter + menu->cursor, oldCursor - menu->cursor);
                 }
-                while (menu->cursor > 0 && menu->filter && !isspace(menu->filter[menu->cursor - 1])) {
+                while (menu->cursor > 0 && !isspace(menu->filter[menu->cursor - 1])) {
                     size_t width;
                     menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
                     menu->cursesCursor -= width;
@@ -658,7 +660,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
                 if (highlighted && (text = bmItemGetText(highlighted))) {
                     bmMenuSetFilter(menu, text);
                     menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
-                    menu->cursesCursor = _bmUtf8StringScreenWidth(menu->filter);
+                    menu->cursesCursor = (menu->filter ? _bmUtf8StringScreenWidth(menu->filter) : 0);
                 }
             }
             break;
