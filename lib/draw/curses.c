@@ -54,7 +54,8 @@ static const char *TTY = "/dev/tty";
  * Dynamically loaded curses API.
  */
 static struct curses {
-    struct sigaction action;
+    struct sigaction abrtAction;
+    struct sigaction segvAction;
     void *handle;
     WINDOW *stdscr;
     WINDOW* (*initscr)(void);
@@ -342,8 +343,8 @@ static void _bmDrawCursesFree(void)
     if (curses.handle)
         dlclose(curses.handle);
 
-    sigaction(SIGABRT, &curses.action, NULL);
-    sigaction(SIGSEGV, &curses.action, NULL);
+    sigaction(SIGABRT, &curses.abrtAction, NULL);
+    sigaction(SIGSEGV, &curses.segvAction, NULL);
     memset(&curses, 0, sizeof(curses));
 }
 
@@ -407,8 +408,8 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = _bmDrawCursesCrashHandler;
-    sigaction(SIGABRT, &action, &curses.action);
-    sigaction(SIGSEGV, &action, &curses.action);
+    sigaction(SIGABRT, &action, &curses.abrtAction);
+    sigaction(SIGSEGV, &action, &curses.segvAction);
     return 1;
 
 function_pointer_exception:
