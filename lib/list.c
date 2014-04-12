@@ -35,6 +35,7 @@ bmItem** _bmItemListGetItems(const struct _bmItemList *list, unsigned int *outNm
     return list->list;
 }
 
+/** !!! Frees the old list, not items !!! */
 int _bmItemListSetItemsNoCopy(struct _bmItemList *list, bmItem **items, unsigned int nmemb)
 {
     assert(list);
@@ -51,6 +52,7 @@ int _bmItemListSetItemsNoCopy(struct _bmItemList *list, bmItem **items, unsigned
     return 1;
 }
 
+/** !!! Frees the old items and list !!! */
 int _bmItemListSetItems(struct _bmItemList *list, const bmItem **items, unsigned int nmemb)
 {
     assert(list);
