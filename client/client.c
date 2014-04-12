@@ -91,7 +91,7 @@ static void parseArgs(int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int opt = getopt_long(*argc, *argv, "hviw:I:p:Ibf:m", opts, NULL);
+        int opt = getopt_long(*argc, *argv, "hviw:l:I:p:Ibf:m", opts, NULL);
         if (opt < 0)
             break;
 
