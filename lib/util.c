@@ -1,6 +1,9 @@
 #include "internal.h"
-#define _XOPEN_SOURCE 700
-#include <wchar.h>
+
+#define _XOPEN_SOURCE
+#include <wchar.h> /* wcswidth */
+#undef _XOPEN_SOURCE
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
