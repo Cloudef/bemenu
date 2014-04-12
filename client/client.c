@@ -86,6 +86,10 @@ static void parseArgs(int *argc, char **argv[])
         { 0, 0, 0, 0 }
     };
 
+    /* TODO: getopt does not support -sf, -sb etc..
+     * Either break the interface and make them --sf, --sb (like they are now),
+     * or parse them before running getopt.. */
+
     for (;;) {
         int opt = getopt_long(*argc, *argv, "hviw:I:p:Ibf:m", opts, NULL);
         if (opt < 0)
