@@ -2,7 +2,7 @@
 @mainpage Main Page
 
 bemenu is a dynamic menu library and client program inspired by dmenu.
-You can create flexible menu oriented programs using the library interface in your favorite language that has bemenu bindings avaialable.
+You can create flexible menu oriented programs using the library interface in your favorite language that has bemenu bindings available.
 
 Unlike old dmenu approach, with library you don't have to feed unneccessary metadata into client program and parse the result.
 Instead your program will be aware of the items and possible metadata inside the menu.
