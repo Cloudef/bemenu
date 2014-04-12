@@ -82,9 +82,11 @@ fail:
  * @param outHighlighted unsigned int reference to new outHighlighted item index.
  * @return Pointer to array of bmItem pointers.
  */
-bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), unsigned int *outNmemb, unsigned int *outHighlighted)
+bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), unsigned int *outNmemb, unsigned int *outHighlighted)
 {
     assert(menu);
+    assert(fstrstr);
+    assert(fstrncmp);
     assert(outNmemb);
     assert(outHighlighted);
     *outNmemb = *outHighlighted = 0;
@@ -110,8 +112,9 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
 
     bmItem *highlighted = bmMenuGetHighlightedItem(menu);
 
-    unsigned int i, f;
-    for (f = i = 0; i < itemsCount; ++i) {
+    size_t len = (tokc ? strlen(tokv[0]) : 0);
+    unsigned int i, f, e;
+    for (e = f = i = 0; i < itemsCount; ++i) {
         bmItem *item = items[i];
         if (!item->text && tokc != 0)
             continue;
@@ -126,7 +129,19 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
         if (item == highlighted)
             *outHighlighted = f;
 
-        filtered[f++] = item;
+        if (tokc && item->text && !fstrncmp(tokv[0], item->text, len + 1)) { /* exact matches */
+            //memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(bmItem*));
+            memmove(&filtered[1], filtered, f * sizeof(bmItem*));
+            filtered[0] = item;
+            e++; /* where do exact matches end */
+        } else if (tokc && item->text && !fstrncmp(tokv[0], item->text, len)) { /* prefixes */
+            memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(bmItem*));
+            filtered[e] = item;
+            e++; /* where do exact matches end */
+        } else {
+            filtered[f] = item;
+        }
+        f++; /* where do all matches end */
     }
 
     if (buffer)
@@ -155,7 +170,7 @@ fail:
  */
 bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
 {
-    return _bmFilterDmenuFun(menu, addition, strstr, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, strstr, strncmp, outNmemb, outHighlighted);
 }
 
 /**
@@ -169,7 +184,7 @@ bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb, uns
  */
 bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb, unsigned int *outHighlighted)
 {
-    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, outNmemb, outHighlighted);
+    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, _bmStrnupcmp, outNmemb, outHighlighted);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
