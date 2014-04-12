@@ -32,19 +32,38 @@ char* _bmStrdup(const char *string)
  *
  * @param hay C "string" to match against.
  * @param needle C "string" to match.
+ * @return Less than, equal to or greater than zero if hay is lexicographically less than, equal to or greater than needle.
  */
 int _bmStrupcmp(const char *hay, const char *needle)
 {
-    size_t i, len;
+    size_t len, len2;
 
-    if ((len = strlen(hay)) != strlen(needle))
-        return 1;
+    if ((len = strlen(hay)) != (len2 = strlen(needle)))
+        return hay[len] - needle[len2];
 
-    for (i = 0; i != len; ++i)
-        if (toupper(hay[i]) != toupper(needle[i]))
-            return 1;
+    return _bmStrnupcmp(hay, needle, len);
+}
 
-    return 0;
+/**
+ * Portable case-insensitive strncmp.
+ *
+ * @param hay C "string" to match against.
+ * @param needle C "string" to match.
+ * @return Less than, equal to or greater than zero if hay is lexicographically less than, equal to or greater than needle.
+ */
+int _bmStrnupcmp(const char *hay, const char *needle, size_t len)
+{
+    size_t i = 0;
+    unsigned char a = 0, b = 0;
+
+    const unsigned char *p1 = (const unsigned char*)hay;
+    const unsigned char *p2 = (const unsigned char*)needle;
+
+    for (i = 0; len > 0; --len, ++i)
+        if ((a = toupper(*p1++)) != (b = toupper(*p2++)))
+            return a - b;
+
+    return a - b;
 }
 
 /**
@@ -57,13 +76,13 @@ char* _bmStrupstr(const char *hay, const char *needle)
 {
     size_t i, r = 0, p = 0, len, len2;
 
-    if (!_bmStrupcmp(hay, needle))
-        return (char*)hay;
-
     if ((len = strlen(hay)) < (len2 = strlen(needle)))
         return NULL;
 
-    for (i = 0; i != len; ++i) {
+    if (!_bmStrnupcmp(hay, needle, len2))
+        return (char*)hay;
+
+    for (i = 0; i < len; ++i) {
         if (p == len2)
             return (char*)hay + r;
 
