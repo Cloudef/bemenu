@@ -1,5 +1,11 @@
 #include "../internal.h"
 
+#if __APPLE__
+#   define _C99_SOURCE
+#   include <stdio.h> /* vsnprintf */
+#   undef _C99_SOURCE
+#endif
+
 #define _XOPEN_SOURCE 500
 #include <signal.h> /* sigaction */
 #include <stdarg.h> /* vsnprintf */
