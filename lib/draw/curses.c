@@ -72,6 +72,7 @@ static struct curses {
     int (*getmaxx)(WINDOW *win);
     int (*getmaxy)(WINDOW *win);
     int (*keypad)(WINDOW *win, bool bf);
+    int (*curs_set)(int visibility);
     int (*noecho)(void);
     int (*raw)(void);
     int *ESCDELAY;
@@ -175,6 +176,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
 
         *curses.ESCDELAY = 25;
         curses.keypad(curses.stdscr, true);
+        curses.curs_set(1);
         curses.noecho();
         curses.raw();
 
@@ -398,6 +400,8 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     if (!bmLoadFunction(getmaxy))
         goto function_pointer_exception;
     if (!bmLoadFunction(keypad))
+        goto function_pointer_exception;
+    if (!bmLoadFunction(curs_set))
         goto function_pointer_exception;
     if (!bmLoadFunction(noecho))
         goto function_pointer_exception;
