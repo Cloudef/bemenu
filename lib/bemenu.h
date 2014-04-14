@@ -171,6 +171,22 @@ void bmMenuSetUserdata(bmMenu *menu, void *userdata);
 void* bmMenuGetUserdata(bmMenu *menu);
 
 /**
+ * Set filter text to bmMenu instance.
+ *
+ * @param menu bmMenu instance where to set filter.
+ * @param filter Null terminated C "string" to act as filter.
+ */
+void bmMenuSetFilter(bmMenu *menu, const char *filter);
+
+/**
+ * Get filter text from  bmMenu instance.
+ *
+ * @param menu bmMenu instance where to get filter.
+ * @return Const pointer to current filter text, may be **NULL** if empty.
+ */
+const char* bmMenuGetFilter(bmMenu *menu);
+
+/**
  * Set active filter mode to bmMenu instance.
  *
  * @param menu bmMenu instance where to set filter mode.
@@ -428,22 +444,6 @@ void bmItemSetUserdata(bmItem *item, void *userdata);
  * @return Pointer for unmodified userdata.
  */
 void* bmItemGetUserdata(bmItem *item);
-
-/**
- * Set filter text to bmMenu instance.
- *
- * @param menu bmMenu instance where to set filter.
- * @param filter Null terminated C "string" to act as filter.
- */
-void bmMenuSetFilter(bmMenu *menu, const char *filter);
-
-/**
- * Get filter text from  bmMenu instance.
- *
- * @param menu bmMenu instance where to get filter.
- * @return Const pointer to current filter text, may be **NULL** if empty.
- */
-const char* bmMenuGetFilter(bmMenu *menu);
 
 /**
  * Set text to bmItem instance.
