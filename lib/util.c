@@ -279,6 +279,7 @@ size_t _bmUtf8RuneInsert(char **inOutString, size_t *inOutBufSize, size_t start,
     char *str = *inOutString + start;
     memmove(str + u8len, str, len - start);
     memcpy(str, rune, u8len);
+    (*inOutString)[len + u8len] = 0;
 
     if (outRuneWidth)
         *outRuneWidth = _bmUtf8RuneWidth(rune, u8len);
