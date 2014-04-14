@@ -118,7 +118,7 @@ static void parseArgs(int *argc, char **argv[])
         { "sb",          required_argument, 0, 0x103 },
         { "sf",          required_argument, 0, 0x104 },
 
-        { "disco",       no_argument, 0, 0x105 },
+        { "disco",       no_argument,       0, 0x105 },
         { 0, 0, 0, 0 }
     };
 
