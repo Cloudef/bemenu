@@ -208,12 +208,12 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     unsigned int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
     unsigned int ncols = curses.getmaxx(curses.stdscr);
     unsigned int ccols = ncols - titleLen - 1;
-    unsigned int doffset = (menu->cursesCursor < ccols ? 0 : menu->cursesCursor - ccols);
+    unsigned int dcols = 0, doffset = menu->cursor;
 
-    if (doffset > 0) {
-        /* find offset where we won't break the UTF8 string */
-        doffset += _bmUtf8RuneNext(menu->filter, doffset);
-        doffset -= _bmUtf8RunePrev(menu->filter, doffset);
+    while (doffset > 0 && dcols < ccols) {
+        int prev = _bmUtf8RunePrev(menu->filter, doffset);
+        dcols += _bmUtf8RuneWidth(menu->filter + doffset - prev, prev);
+        doffset -= (prev ? prev : 1);
     }
 
     _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", (menu->filter ? menu->filter + doffset : ""));
