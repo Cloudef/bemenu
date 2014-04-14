@@ -45,7 +45,7 @@ bmMenu* bmMenuNew(bmDrawMode drawMode)
             status = _bmDrawCursesInit(&menu->renderApi);
             break;
 
-        default:break;
+        default: break;
     }
 
     if (status == 0) {
