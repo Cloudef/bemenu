@@ -1,9 +1,12 @@
+#define _XOPEN_SOURCE 500
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <bemenu.h>
+#include <unistd.h>
+#include <signal.h>
 #include <getopt.h>
+#include <bemenu.h>
 
 static struct {
     bmFilterMode filterMode;
@@ -24,6 +27,40 @@ static struct {
     0, /* grab */
     0 /* monitor */
 };
+
+static void discoTrap(int sig)
+{
+    (void)sig;
+    printf("\e[?25h\n");
+    fflush(stdout);
+    exit(EXIT_FAILURE);
+}
+
+static void disco(void)
+{
+    struct sigaction action;
+    memset(&action, 0, sizeof(struct sigaction));
+    action.sa_handler = discoTrap;
+    sigaction(SIGABRT, &action, NULL);
+    sigaction(SIGSEGV, &action, NULL);
+    sigaction(SIGTRAP, &action, NULL);
+    sigaction(SIGINT, &action, NULL);
+
+    unsigned int i, cc, c = 80;
+    printf("\e[?25l");
+    while (1) {
+        for (i = 1; i < c - 1; ++i) {
+            printf("\r    %*s%s %s %s ", (i > c / 2 ? c - i : i), " ", ((i % 2) ? "<o/" : "\\o>"), ((i % 4) ? "DISCO" : "     "), ((i %2) ? "\\o>" : "<o/"));
+            for (cc = 0; cc < (i < c / 2 ? c / 2 - i : i - c / 2); ++cc) printf(((i % 2) ? "^" : "'"));
+            printf("%s %s \r %s %s", ((i % 2) ? "*" : "•"), ((i % 3) ? "\\o" : "<o"), ((i % 3) ? "o/" : "o>"), ((i % 2) ? "*" : "•"));
+            for (cc = 2; cc < (i > c / 2 ? c - i : i); ++cc) printf(((i % 2) ? "^" : "'"));
+            fflush(stdout);
+            usleep(140 * 1000);
+        }
+    }
+    printf("\e[?25h");
+    exit(EXIT_SUCCESS);
+}
 
 static void version(const char *name)
 {
@@ -80,6 +117,8 @@ static void parseArgs(int *argc, char **argv[])
         { "nf",          required_argument, 0, 0x102 },
         { "sb",          required_argument, 0, 0x103 },
         { "sf",          required_argument, 0, 0x104 },
+
+        { "disco",       no_argument, 0, 0x105 },
         { 0, 0, 0, 0 }
     };
 
@@ -131,6 +170,10 @@ static void parseArgs(int *argc, char **argv[])
             case 0x102:
             case 0x103:
             case 0x104:
+                break;
+
+            case 0x105:
+                disco();
                 break;
 
             case ':':
