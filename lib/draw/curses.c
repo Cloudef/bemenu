@@ -62,6 +62,7 @@ static const char *TTY = "/dev/tty";
 static struct curses {
     struct sigaction abrtAction;
     struct sigaction segvAction;
+    struct sigaction winchAction;
     void *handle;
     WINDOW *stdscr;
     WINDOW* (*initscr)(void);
@@ -273,6 +274,11 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
 
     curses.get_wch((wint_t*)unicode);
     switch (*unicode) {
+#if KEY_RESIZE
+        case KEY_RESIZE:
+            return BM_KEY_NONE;
+#endif
+
         case 16: /* C-p */
         case KEY_UP:
             return BM_KEY_UP;
@@ -335,7 +341,6 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
         case 9: /* Tab */
             return BM_KEY_TAB;
 
-        case 0: /* C-Space */
         case 18: /* C-r */
             return BM_KEY_CONTROL_RETURN;
 
@@ -368,6 +373,7 @@ static void _bmDrawCursesFree(void)
 
     sigaction(SIGABRT, &curses.abrtAction, NULL);
     sigaction(SIGSEGV, &curses.segvAction, NULL);
+    sigaction(SIGWINCH, &curses.winchAction, NULL);
     memset(&curses, 0, sizeof(curses));
 }
 
@@ -375,6 +381,16 @@ static void _bmDrawCursesCrashHandler(int sig)
 {
     (void)sig;
     _bmDrawCursesFree();
+}
+
+static void _bmDrawCursesResizeHandler(int sig)
+{
+    (void)sig;
+    if (!curses.stdscr)
+        return;
+
+    curses.endwin();
+    curses.refresh();
 }
 
 int _bmDrawCursesInit(struct _bmRenderApi *api)
@@ -441,6 +457,9 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     action.sa_handler = _bmDrawCursesCrashHandler;
     sigaction(SIGABRT, &action, &curses.abrtAction);
     sigaction(SIGSEGV, &action, &curses.segvAction);
+
+    action.sa_handler = _bmDrawCursesResizeHandler;
+    sigaction(SIGWINCH, &action, &curses.winchAction);
     return 1;
 
 function_pointer_exception:
