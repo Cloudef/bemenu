@@ -76,6 +76,7 @@ static struct curses {
     int (*attroff)(int attrs);
     int (*attron)(int attrs);
     int (*start_color)(void);
+    int (*use_default_colors)(void);
     int (*getmaxx)(WINDOW *win);
     int (*getmaxy)(WINDOW *win);
     int (*keypad)(WINDOW *win, bool bf);
@@ -199,8 +200,9 @@ static void _bmDrawCursesRender(const bmMenu *menu)
         curses.raw();
 
         curses.start_color();
+        curses.use_default_colors();
         curses.init_pair(1, COLOR_BLACK, COLOR_RED);
-        curses.init_pair(2, COLOR_RED, COLOR_BLACK);
+        curses.init_pair(2, COLOR_RED, -1);
     }
 
     const unsigned int lines = curses.getmaxy(curses.stdscr);
@@ -431,6 +433,8 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     if (!bmLoadFunction(attron))
         goto function_pointer_exception;
     if (!bmLoadFunction(start_color))
+        goto function_pointer_exception;
+    if (!bmLoadFunction(use_default_colors))
         goto function_pointer_exception;
     if (!bmLoadFunction(getmaxx))
         goto function_pointer_exception;
