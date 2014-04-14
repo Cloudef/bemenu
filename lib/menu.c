@@ -173,6 +173,30 @@ bmFilterMode bmMenuGetFilterMode(const bmMenu *menu)
 }
 
 /**
+ * Set selection wrapping on/off.
+ *
+ * @param menu bmMenu instance where to toggle selection wrapping.
+ * @param int 1 == on, 0 == off.
+ */
+void bmMenuSetWrap(bmMenu *menu, int wrap)
+{
+    assert(menu);
+    menu->wrap = (wrap ? 1 : 0);
+}
+
+/**
+ * Get selection wrapping state.
+ *
+ * @param menu bmMenu instance where to get selection wrapping state.
+ * @return int for wrap state.
+ */
+int bmMenuGetWrap(const bmMenu *menu)
+{
+    assert(menu);
+    return menu->wrap;
+}
+
+/**
  * Set title to bmMenu instance.
  *
  * @param menu bmMenu instance where to set title.
@@ -572,13 +596,19 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_UP:
-            if (menu->index > 0)
+            if (menu->index > 0) {
                 menu->index--;
+            } else if (menu->wrap) {
+                menu->index = itemsCount - 1;
+            }
             break;
 
         case BM_KEY_DOWN:
-            if (menu->index < itemsCount - 1)
+            if (menu->index < itemsCount - 1) {
                 menu->index++;
+            } else if (menu->wrap) {
+                menu->index = 0;
+            }
             break;
 
         case BM_KEY_PAGE_UP:

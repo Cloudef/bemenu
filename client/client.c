@@ -91,7 +91,7 @@ static void parseArgs(int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int opt = getopt_long(*argc, *argv, "hviw:l:I:p:Ibf:m", opts, NULL);
+        int opt = getopt_long(*argc, *argv, "hviwl:I:p:I:bfm:", opts, NULL);
         if (opt < 0)
             break;
 
@@ -190,6 +190,7 @@ int main(int argc, char **argv)
 
     bmMenuSetTitle(menu, client.title);
     bmMenuSetFilterMode(menu, client.filterMode);
+    bmMenuSetWrap(menu, client.wrap);
 
     readItemsToMenuFromStdin(menu);
 

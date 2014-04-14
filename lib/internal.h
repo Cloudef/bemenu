@@ -141,6 +141,11 @@ struct _bmMenu {
      * Drawing mode used in menu instance.
      */
     bmDrawMode drawMode;
+
+    /**
+     * Should selection be wrapped?
+     */
+    char wrap;
 };
 
 /* draw/curses.c */

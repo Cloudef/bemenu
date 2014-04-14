@@ -203,6 +203,22 @@ void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode);
 bmFilterMode bmMenuGetFilterMode(const bmMenu *menu);
 
 /**
+ * Set selection wrapping on/off.
+ *
+ * @param menu bmMenu instance where to toggle selection wrapping.
+ * @param int 1 == on, 0 == off.
+ */
+void bmMenuSetWrap(bmMenu *menu, int wrap);
+
+/**
+ * Get selection wrapping state.
+ *
+ * @param menu bmMenu instance where to get selection wrapping state.
+ * @return int for wrap state.
+ */
+int bmMenuGetWrap(const bmMenu *menu);
+
+/**
  * Set title to bmMenu instance.
  *
  * @param menu bmMenu instance where to set title.
