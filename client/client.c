@@ -25,11 +25,11 @@ static struct {
     0 /* monitor */
 };
 
-static void printVersion(const char *name)
+static void version(const char *name)
 {
     char *base = strrchr(name, '/');
     printf("%s v%s\n", (base ? base  + 1 : name), bmVersion());
-    puts("<o/ \e[5mDISCO\e[m");
+    exit(EXIT_SUCCESS);
 }
 
 static void usage(FILE *out, const char *name)
@@ -97,8 +97,7 @@ static void parseArgs(int *argc, char **argv[])
                 usage(stdout, *argv[0]);
                 break;
             case 'v':
-                printVersion(*argv[0]);
-                exit(EXIT_SUCCESS);
+                version(*argv[0]);
                 break;
 
             case 'i':
