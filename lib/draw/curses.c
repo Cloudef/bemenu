@@ -206,8 +206,12 @@ static void _bmDrawCursesRender(const bmMenu *menu)
     const unsigned int lines = curses.getmaxy(curses.stdscr);
     curses.erase();
 
-    unsigned int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
     unsigned int ncols = curses.getmaxx(curses.stdscr);
+    unsigned int titleLen = (menu->title ? strlen(menu->title) + 1 : 0);
+
+    if (titleLen >= ncols)
+        titleLen = 0;
+
     unsigned int ccols = ncols - titleLen - 1;
     unsigned int dcols = 0, doffset = menu->cursor;
 
@@ -219,7 +223,7 @@ static void _bmDrawCursesRender(const bmMenu *menu)
 
     _bmDrawCursesDrawLine(0, 0, "%*s%s", titleLen, "", (menu->filter ? menu->filter + doffset : ""));
 
-    if (menu->title) {
+    if (menu->title && titleLen > 0) {
         curses.attron(COLOR_PAIR(1));
         curses.mvprintw(0, 0, menu->title);
         curses.attroff(COLOR_PAIR(1));
