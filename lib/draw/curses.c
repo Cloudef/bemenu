@@ -87,12 +87,12 @@ static struct curses {
     int oldStdout;
 } curses;
 
-static int _bmDrawCursesResizeBuffer(char **buffer, size_t osize, size_t nsize)
+static int _bmDrawCursesResizeBuffer(char **buffer, size_t *osize, size_t nsize)
 {
     assert(buffer);
-    assert(nsize);
+    assert(osize);
 
-    if (nsize == 0 || nsize < osize)
+    if (nsize == 0 || nsize <= *osize)
         return 0;
 
     void *tmp;
@@ -101,14 +101,13 @@ static int _bmDrawCursesResizeBuffer(char **buffer, size_t osize, size_t nsize)
             return 0;
 
         if (*buffer) {
-            memcpy(tmp, *buffer, osize);
+            memcpy(tmp, *buffer, *osize);
             free(*buffer);
         }
     }
 
     *buffer = tmp;
-    memset(*buffer + osize, ' ', (nsize - osize));
-    (*buffer)[nsize - 1] = 0;
+    *osize = nsize;
     return 1;
 }
 
@@ -117,32 +116,27 @@ __attribute__((format(printf, 3, 4)))
 #endif
 static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
 {
-    static int blen = 0;
+    static size_t blen = 0;
     static char *buffer = NULL;
 
-    int ncols = curses.getmaxx(curses.stdscr);
+    size_t ncols = curses.getmaxx(curses.stdscr);
     if (ncols <= 0)
         return;
 
     va_list args;
     va_start(args, format);
-    int nlen = vsnprintf(NULL, 0, format, args) + 1;
-    if (nlen < ncols)
-        nlen = ncols;
+    size_t nlen = vsnprintf(NULL, 0, format, args);
     va_end(args);
 
-    if ((!buffer || nlen > blen) && !_bmDrawCursesResizeBuffer(&buffer, blen, nlen))
+    if ((!buffer || nlen > blen) && !_bmDrawCursesResizeBuffer(&buffer, &blen, nlen + 1))
         return;
 
-    blen = nlen;
     va_start(args, format);
-    int slen = vsnprintf(buffer, blen - 1, format, args);
-    memset(buffer + slen, ' ', (blen - slen));
-    buffer[blen - 1] = 0;
+    vsnprintf(buffer, blen - 1, format, args);
     va_end(args);
 
-    int dw = 0, i = 0;
-    while (dw < ncols && i < blen) {
+    size_t dw = 0, i = 0;
+    while (dw < ncols && i < nlen) {
         if (buffer[i] == '\t') buffer[i] = ' ';
         int next = _bmUtf8RuneNext(buffer, i);
         dw += _bmUtf8RuneWidth(buffer + i, next);
@@ -150,12 +144,27 @@ static void _bmDrawCursesDrawLine(int pair, int y, const char *format, ...)
     }
 
     if (dw < ncols) {
-        if (!_bmDrawCursesResizeBuffer(&buffer, blen - 1, blen + (ncols - dw)))
-            return;
+        /* line is too short, widen it */
+        size_t offset = i + (ncols - dw);
+        if (blen <= offset && !_bmDrawCursesResizeBuffer(&buffer, &blen, offset + 1))
+             return;
+
+        memset(buffer + nlen, ' ', offset - nlen);
+        buffer[offset] = 0;
     } else if (i < blen) {
-        int cc = dw - (dw - ncols);
+        /* line is too long, shorten it */
+        i -= _bmUtf8RunePrev(buffer, i - (dw - ncols)) - 1;
+        size_t cc = dw - (dw - ncols);
+
+        size_t offset = i - (dw - ncols) + (ncols - cc) + 1;
+        if (blen <= offset) {
+            int diff = offset - blen + 1;
+            if (!_bmDrawCursesResizeBuffer(&buffer, &blen, blen + diff))
+                return;
+        }
+
         memset(buffer + i - (dw - ncols), ' ', (ncols - cc) + 1);
-        buffer[i - (dw - ncols) + (ncols - cc) + 1] = 0;
+        buffer[offset] = 0;
     }
 
     if (pair > 0)
