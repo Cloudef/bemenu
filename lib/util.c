@@ -254,6 +254,9 @@ size_t _bmUtf8RuneInsert(char **inOutString, size_t *inOutBufSize, size_t start,
     if (outRuneWidth)
         *outRuneWidth = 0;
 
+    if (u8len == 1 && !isprint(*rune))
+        return 0;
+
     size_t len = (*inOutString ? strlen(*inOutString) : 0);
     if (!*inOutString && !(*inOutString = calloc(1, (*inOutBufSize = u8len + 1))))
         return 0;
@@ -272,9 +275,6 @@ size_t _bmUtf8RuneInsert(char **inOutString, size_t *inOutBufSize, size_t start,
         *inOutString = tmp;
         *inOutBufSize *= 2;
     }
-
-    if (u8len == 1 && !isprint(*rune))
-        return 0;
 
     char *str = *inOutString + start;
     memmove(str + u8len, str, len - start);
