@@ -133,6 +133,12 @@ static void parseArgs(int *argc, char **argv[])
             case 0x103:
             case 0x104:
                 break;
+
+            case ':':
+            case '?':
+                fputs("\n", stderr);
+                usage(stderr, *argv[0]);
+                break;
         }
     }
 
