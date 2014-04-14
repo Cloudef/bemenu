@@ -56,10 +56,7 @@ static void usage(FILE *out, const char *name)
           " -nb, --nb             defines the normal background color. ()\n"
           " -nf, --nf             defines the normal foreground color. ()\n"
           " -sb, --sb             defines the selected background color. ()\n"
-          " -sf, --sf             defines the selected foreground color. ()\n"
-
-
-          , out);
+          " -sf, --sf             defines the selected foreground color. ()\n", out);
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
 
