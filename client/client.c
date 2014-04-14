@@ -99,6 +99,7 @@ static void parseArgs(int *argc, char **argv[])
             case 'v':
                 printVersion(*argv[0]);
                 exit(EXIT_SUCCESS);
+                break;
 
             case 'i':
                 client.filterMode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
