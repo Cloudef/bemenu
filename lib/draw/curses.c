@@ -42,9 +42,16 @@ static const char *TTY = "/dev/tty";
     };
 #endif
 
+/* these are implemented as macros in older curses */
+#ifndef NCURSES_OPAQUE
+static int wrap_getmaxx(WINDOW *win) { return getmaxx(win); }
+static int wrap_getmaxy(WINDOW *win) { return getmaxy(win); }
+#endif
+
 /* ncurses.h likes to define stuff for us.
  * This unforunately mangles with our struct. */
 #undef erase
+#undef getch
 #undef get_wch
 #undef refresh
 #undef mvprintw
@@ -68,6 +75,7 @@ static struct curses {
     int (*endwin)(void);
     int (*refresh)(void);
     int (*erase)(void);
+    int (*getch)(void);
     int (*get_wch)(wint_t *wch);
     int (*mvprintw)(int x, int y, const char *fmt, ...);
     int (*move)(int x, int y);
@@ -278,7 +286,11 @@ static bmKey _bmDrawCursesGetKey(unsigned int *unicode)
     if (!curses.stdscr)
         return BM_KEY_NONE;
 
-    curses.get_wch((wint_t*)unicode);
+    if (curses.get_wch)
+        curses.get_wch((wint_t*)unicode);
+    else if (curses.getch)
+        *unicode = curses.getch();
+
     switch (*unicode) {
 #if KEY_RESIZE
         case KEY_RESIZE:
@@ -419,7 +431,7 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
         goto function_pointer_exception;
     if (!bmLoadFunction(refresh))
         goto function_pointer_exception;
-    if (!bmLoadFunction(get_wch))
+    if (!bmLoadFunction(get_wch) && !bmLoadFunction(getch))
         goto function_pointer_exception;
     if (!bmLoadFunction(erase))
         goto function_pointer_exception;
@@ -437,10 +449,6 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
         goto function_pointer_exception;
     if (!bmLoadFunction(use_default_colors))
         goto function_pointer_exception;
-    if (!bmLoadFunction(getmaxx))
-        goto function_pointer_exception;
-    if (!bmLoadFunction(getmaxy))
-        goto function_pointer_exception;
     if (!bmLoadFunction(keypad))
         goto function_pointer_exception;
     if (!bmLoadFunction(curs_set))
@@ -453,6 +461,16 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
         goto function_pointer_exception;
     if (!bmLoadFunction(ESCDELAY))
         goto function_pointer_exception;
+
+#ifndef NCURSES_OPAQUE
+    curses.getmaxx = wrap_getmaxx;
+    curses.getmaxy = wrap_getmaxy;
+#else
+    if (!bmLoadFunction(getmaxx))
+        goto function_pointer_exception;
+    if (!bmLoadFunction(getmaxy))
+        goto function_pointer_exception;
+#endif
 
 #undef bmLoadFunction
 
