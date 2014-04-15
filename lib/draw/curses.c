@@ -54,7 +54,6 @@ static const char *TTY = "/dev/tty";
 #undef attron
 #undef getmaxx
 #undef getmaxy
-#undef timeout
 
 /**
  * Dynamically loaded curses API.
