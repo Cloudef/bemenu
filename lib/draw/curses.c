@@ -403,15 +403,15 @@ static void _bmDrawCursesResizeHandler(int sig)
 int _bmDrawCursesInit(struct _bmRenderApi *api)
 {
     memset(&curses, 0, sizeof(curses));
+    const char *lib = NULL, *func = NULL;
 
     unsigned int i;
     for (i = 0; DL_PATH[i] && !curses.handle; ++i)
-        curses.handle = dlopen(DL_PATH[i], RTLD_LAZY);
+        curses.handle = dlopen((lib = DL_PATH[i]), RTLD_LAZY);
 
     if (!curses.handle)
         return 0;
 
-    char *func = NULL;
 #define bmLoadFunction(x) (curses.x = dlsym(curses.handle, (func = #x)))
 
     if (!bmLoadFunction(initscr))
@@ -473,7 +473,7 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     return 1;
 
 function_pointer_exception:
-    fprintf(stderr, "-!- Could not load function '%s' from '%s'\n", func, DL_PATH[i]);
+    fprintf(stderr, "-!- Could not load function '%s' from '%s'\n", func, lib);
     _bmDrawCursesFree();
     return 0;
 }
