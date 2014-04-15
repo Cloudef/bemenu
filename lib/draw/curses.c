@@ -410,7 +410,8 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     if (!curses.handle)
         return 0;
 
-#define bmLoadFunction(x) (curses.x = dlsym(curses.handle, #x))
+    char *func = NULL;
+#define bmLoadFunction(x) (curses.x = dlsym(curses.handle, (func = #x)))
 
     if (!bmLoadFunction(initscr))
         goto function_pointer_exception;
@@ -471,6 +472,7 @@ int _bmDrawCursesInit(struct _bmRenderApi *api)
     return 1;
 
 function_pointer_exception:
+    fprintf(stderr, "-!- Could not load function '%s' from '%s'\n", func, DL_PATH[i]);
     _bmDrawCursesFree();
     return 0;
 }
