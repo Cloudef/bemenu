@@ -252,6 +252,9 @@ static unsigned int _bmDrawCursesDisplayedCount(const bmMenu *menu)
 
 static void _bmDrawCursesEndWin(void)
 {
+    if (!curses.stdscr)
+        return;
+
     freopen(TTY, "w", stdout);
 
     if (curses.refresh)
@@ -260,12 +263,10 @@ static void _bmDrawCursesEndWin(void)
     if (curses.endwin)
         curses.endwin();
 
-    if (curses.stdscr) {
-        dup2(curses.oldStdin, STDIN_FILENO);
-        dup2(curses.oldStdout, STDOUT_FILENO);
-        close(curses.oldStdin);
-        close(curses.oldStdout);
-    }
+    dup2(curses.oldStdin, STDIN_FILENO);
+    dup2(curses.oldStdout, STDOUT_FILENO);
+    close(curses.oldStdin);
+    close(curses.oldStdout);
 
     curses.stdscr = NULL;
 }
