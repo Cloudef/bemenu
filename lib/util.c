@@ -57,12 +57,7 @@ size_t _bmStripToken(char *string, const char *token, size_t *outNext)
  */
 int _bmStrupcmp(const char *hay, const char *needle)
 {
-    size_t len, len2;
-
-    if ((len = strlen(hay)) != (len2 = strlen(needle)))
-        return hay[len] - needle[len2];
-
-    return _bmStrnupcmp(hay, needle, len);
+    return _bmStrnupcmp(hay, needle, strlen(hay));
 }
 
 /**
