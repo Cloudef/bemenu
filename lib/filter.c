@@ -66,6 +66,7 @@ static char* _bmFilterTokenize(bmMenu *menu, char ***outTokv, unsigned int *outT
 
         tmp[tokc - 1] = s;
         s += next;
+        for (; *s && *s == ' '; ++s);
     }
 
     *outTokv = tmp;
