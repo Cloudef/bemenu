@@ -118,7 +118,7 @@ draw_line(int32_t pair, int32_t y, const char *format, ...)
         return;
 
     va_start(args, format);
-    vsnprintf(buffer, blen - 1, format, args);
+    vsnprintf(buffer, blen, format, args);
     va_end(args);
 
     size_t dw = 0, i = 0;
