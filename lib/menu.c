@@ -39,7 +39,7 @@ bm_menu_new(const char *renderer)
         if (renderer && strcmp(renderer, renderers[i]->name))
             continue;
 
-        if (bm_renderer_activate((struct bm_renderer*)renderers[i])) {
+        if (bm_renderer_activate((struct bm_renderer*)renderers[i], menu)) {
             status = true;
             menu->renderer = renderers[i];
             break;
@@ -60,7 +60,7 @@ bm_menu_free(struct bm_menu *menu)
     assert(menu);
 
     if (menu->renderer && menu->renderer->api.destructor)
-        menu->renderer->api.destructor();
+        menu->renderer->api.destructor(menu);
 
     free(menu->title);
     free(menu->filter);
@@ -356,7 +356,7 @@ bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode)
     enum bm_key key = BM_KEY_NONE;
 
     if (menu->renderer->api.poll_key)
-        key = menu->renderer->api.poll_key(out_unicode);
+        key = menu->renderer->api.poll_key(menu, out_unicode);
 
     return key;
 }

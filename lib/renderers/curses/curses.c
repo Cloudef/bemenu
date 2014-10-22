@@ -239,8 +239,9 @@ get_displayed_count(const struct bm_menu *menu)
 }
 
 static enum bm_key
-poll_key(uint32_t *unicode)
+poll_key(const struct bm_menu *menu, uint32_t *unicode)
 {
+    (void)menu;
     assert(unicode);
     *unicode = 0;
 
@@ -341,8 +342,9 @@ poll_key(uint32_t *unicode)
 }
 
 static void
-destructor(void)
+destructor(struct bm_menu *menu)
 {
+    (void)menu;
     terminate();
     sigaction(SIGABRT, &curses.abrt_action, NULL);
     sigaction(SIGSEGV, &curses.segv_action, NULL);
@@ -351,8 +353,9 @@ destructor(void)
 }
 
 static bool
-constructor(void)
+constructor(struct bm_menu *menu)
 {
+    (void)menu;
     memset(&curses, 0, sizeof(curses));
 
     struct sigaction action;

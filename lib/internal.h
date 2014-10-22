@@ -37,12 +37,12 @@ struct render_api {
     /**
      * Create underlying renderer.
      */
-    bool (*constructor)(void);
+    bool (*constructor)(struct bm_menu *menu);
 
     /**
      * Release underlying renderer.
      */
-    void (*destructor)(void);
+    void (*destructor)(struct bm_menu *menu);
 
     /**
      * Get count of displayed items by the underlying renderer.
@@ -53,7 +53,7 @@ struct render_api {
      * If the underlying renderer is a UI toolkit. (curses, etc...)
      * There might be possibility to get user input, and this should be thus implemented.
      */
-    enum bm_key (*poll_key)(uint32_t *unicode);
+    enum bm_key (*poll_key)(const struct bm_menu *menu, uint32_t *unicode);
 
     /**
      * Tells underlying renderer to draw the menu.
@@ -182,7 +182,7 @@ struct bm_menu {
 };
 
 /* library.c */
-bool bm_renderer_activate(struct bm_renderer *renderer);
+bool bm_renderer_activate(struct bm_renderer *renderer, struct bm_menu *menu);
 
 /* menu.c */
 bool bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item);

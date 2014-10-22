@@ -69,14 +69,14 @@ fail:
 }
 
 bool
-bm_renderer_activate(struct bm_renderer *renderer)
+bm_renderer_activate(struct bm_renderer *renderer, struct bm_menu *menu)
 {
     assert(renderer);
 
     if (!load(renderer->file, renderer))
         return false;
 
-    if (!renderer->api.constructor())
+    if (!renderer->api.constructor(menu))
         goto fail;
 
     return true;
