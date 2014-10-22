@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -9,6 +10,8 @@ int
 main(int argc, char **argv)
 {
     (void)argc, (void)argv;
+
+    setenv("BEMENU_RENDERERS", "../renderers", true);
 
     if (!bm_init())
         return EXIT_FAILURE;
@@ -25,7 +28,7 @@ main(int argc, char **argv)
             struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
             assert(menu);
             bm_menu_render(menu);
-            bm_menu_render(menu);
+            bm_menu_free(menu);
         }
     }
 
