@@ -37,7 +37,7 @@ struct render_api {
     /**
      * Create underlying renderer.
      */
-    void (*constructor)(void);
+    bool (*constructor)(void);
 
     /**
      * Release underlying renderer.

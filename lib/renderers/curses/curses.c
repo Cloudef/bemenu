@@ -350,7 +350,7 @@ destructor(void)
     memset(&curses, 0, sizeof(curses));
 }
 
-static void
+static bool
 constructor(void)
 {
     memset(&curses, 0, sizeof(curses));
@@ -363,6 +363,7 @@ constructor(void)
 
     action.sa_handler = resize_handler;
     sigaction(SIGWINCH, &action, &curses.winch_action);
+    return true;
 }
 
 extern const char*

@@ -76,7 +76,14 @@ bm_renderer_activate(struct bm_renderer *renderer)
     if (!load(renderer->file, renderer))
         return false;
 
+    if (!renderer->api.constructor())
+        goto fail;
+
     return true;
+
+fail:
+    chckDlUnload(renderer->handle);
+    return false;
 }
 
 bool
