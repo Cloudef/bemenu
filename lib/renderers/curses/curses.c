@@ -26,9 +26,6 @@ static const char *TTY = "CON";
 static const char *TTY = "/dev/tty";
 #endif
 
-/**
- * Dynamically loaded curses API.
- */
 static struct curses {
     WINDOW *stdscr;
     struct sigaction abrt_action;
