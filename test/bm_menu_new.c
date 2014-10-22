@@ -25,7 +25,7 @@ main(int argc, char **argv)
             struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
             assert(menu);
             bm_menu_render(menu);
-            bm_menu_free(menu);
+            bm_menu_render(menu);
         }
     }
 

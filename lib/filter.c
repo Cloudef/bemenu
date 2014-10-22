@@ -4,54 +4,54 @@
 #include <string.h>
 
 /**
- * Shrink bmItem** list pointer.
+ * Shrink struct bm_item** list pointer.
  *
  * Useful helper function for filter functions.
  *
- * @param list Pointer to pointer to list of bmItem pointers.
+ * @param in_out_list Pointer to pointer to list of bm_item pointers.
  * @param osize Current size of the list.
  * @param nsize New size the list will be shrinked to.
- * @return Pointer to list of bmItem pointers.
+ * @return Pointer to list of bm_item pointers.
  */
-static bmItem** _bmFilterShrinkList(bmItem ***inOutList, size_t osize, size_t nsize)
+static struct bm_item**
+shrink_list(struct bm_item ***in_out_list, size_t osize, size_t nsize)
 {
-    assert(inOutList);
+    assert(in_out_list);
 
     if (nsize == 0) {
-        free(*inOutList);
-        return (*inOutList = NULL);
+        free(*in_out_list);
+        return (*in_out_list = NULL);
     }
 
     if (nsize >= osize)
-        return *inOutList;
+        return *in_out_list;
 
-    void *tmp = malloc(sizeof(bmItem*) * nsize);
+    void *tmp = malloc(sizeof(struct bm_item*) * nsize);
     if (!tmp)
-        return *inOutList;
+        return *in_out_list;
 
-    memcpy(tmp, *inOutList, sizeof(bmItem*) * nsize);
-    free(*inOutList);
-    return (*inOutList = tmp);
+    memcpy(tmp, *in_out_list, sizeof(struct bm_item*) * nsize);
+    free(*in_out_list);
+    return (*in_out_list = tmp);
 }
 
 /**
  * Text filter tokenizer helper.
  *
- * @param menu bmMenu instance which filter to tokenize.
- * @param outTokv char pointer reference to list of tokens, this should be freed after use.
- * @param outTokc unsigned int reference to number of tokens.
+ * @param menu bm_menu instance which filter to tokenize.
+ * @param out_tokv char pointer reference to list of tokens, this should be freed after use.
+ * @param out_tokc uint32_t reference to number of tokens.
  * @return Pointer to buffer that contains tokenized string, this should be freed after use.
  */
-static char* _bmFilterTokenize(bmMenu *menu, char ***outTokv, unsigned int *outTokc)
+static char*
+tokenize(struct bm_menu *menu, char ***out_tokv, uint32_t *out_tokc)
 {
-    assert(menu);
-    assert(outTokv);
-    assert(outTokc);
-    *outTokv = NULL;
-    *outTokc = 0;
+    assert(menu && out_tokv && out_tokc);
+    *out_tokv = NULL;
+    *out_tokc = 0;
 
     char **tokv = NULL, *buffer = NULL;
-    if (!(buffer = _bmStrdup(menu->filter)))
+    if (!(buffer = bm_strdup(menu->filter)))
         goto fail;
 
     char *s;
@@ -59,8 +59,8 @@ static char* _bmFilterTokenize(bmMenu *menu, char ***outTokv, unsigned int *outT
 
     char **tmp = NULL;
     size_t pos = 0, next;
-    unsigned int tokc = 0, tokn = 0;
-    for (; (pos = _bmStripToken(s, " ", &next)) > 0; tokv = tmp) {
+    uint32_t tokc = 0, tokn = 0;
+    for (; (pos = bm_strip_token(s, " ", &next)) > 0; tokv = tmp) {
         if (++tokc > tokn && !(tmp = realloc(tokv, ++tokn * sizeof(char*))))
             goto fail;
 
@@ -69,74 +69,70 @@ static char* _bmFilterTokenize(bmMenu *menu, char ***outTokv, unsigned int *outT
         for (; *s && *s == ' '; ++s);
     }
 
-    *outTokv = tmp;
-    *outTokc = tokc;
+    *out_tokv = tmp;
+    *out_tokc = tokc;
     return buffer;
 
 fail:
-    if (buffer)
-        free(buffer);
-    if (tokv)
-        free(tokv);
+    free(buffer);
+    free(tokv);
     return NULL;
 }
 
 /**
  * Dmenu filterer that accepts substring function.
  *
- * @param menu bmMenu instance to filter.
+ * @param menu bm_menu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param fstrstr Substring function used to match items.
- * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @return Pointer to array of bmItem pointers.
+ * @param out_nmemb uint32_t reference to filtered items count.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), unsigned int *outNmemb)
+struct bm_item**
+filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), uint32_t *out_nmemb)
 {
-    assert(menu);
-    assert(fstrstr);
-    assert(fstrncmp);
-    assert(outNmemb);
-    *outNmemb = 0;
+    assert(menu && fstrstr && fstrncmp && out_nmemb);
+    *out_nmemb = 0;
 
-    unsigned int itemsCount;
-    bmItem **items;
+    uint32_t count;
+    struct bm_item **items;
 
     if (addition) {
-        items = bmMenuGetFilteredItems(menu, &itemsCount);
+        items = bm_menu_get_filtered_items(menu, &count);
     } else {
-        items = bmMenuGetItems(menu, &itemsCount);
+        items = bm_menu_get_items(menu, &count);
     }
 
     char *buffer = NULL;
-    bmItem **filtered = calloc(itemsCount, sizeof(bmItem*));
-    if (!filtered)
+    struct bm_item **filtered;
+    if (!(filtered = calloc(count, sizeof(struct bm_item*))))
         goto fail;
 
     char **tokv;
-    unsigned int tokc;
-    if (!(buffer = _bmFilterTokenize(menu, &tokv, &tokc)))
+    uint32_t tokc;
+    if (!(buffer = tokenize(menu, &tokv, &tokc)))
         goto fail;
 
     size_t len = (tokc ? strlen(tokv[0]) : 0);
-    unsigned int i, f, e;
-    for (e = f = i = 0; i < itemsCount; ++i) {
-        bmItem *item = items[i];
+    uint32_t i, f, e;
+    for (e = f = i = 0; i < count; ++i) {
+        struct bm_item *item = items[i];
         if (!item->text && tokc != 0)
             continue;
 
         if (tokc && item->text) {
-            unsigned int t;
+            uint32_t t;
             for (t = 0; t < tokc && fstrstr(item->text, tokv[t]); ++t);
             if (t < tokc)
                 continue;
         }
 
         if (tokc && item->text && !fstrncmp(tokv[0], item->text, len + 1)) { /* exact matches */
-            memmove(&filtered[1], filtered, f * sizeof(bmItem*));
+            memmove(&filtered[1], filtered, f * sizeof(struct bm_item*));
             filtered[0] = item;
             e++; /* where do exact matches end */
         } else if (tokc && item->text && !fstrncmp(tokv[0], item->text, len)) { /* prefixes */
-            memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(bmItem*));
+            memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(struct bm_item*));
             filtered[e] = item;
             e++; /* where do exact matches end */
         } else {
@@ -145,45 +141,42 @@ bmItem** _bmFilterDmenuFun(bmMenu *menu, char addition, char* (*fstrstr)(const c
         f++; /* where do all matches end */
     }
 
-    if (buffer)
-        free(buffer);
-    if (tokv)
-        free(tokv);
-
-    return _bmFilterShrinkList(&filtered, menu->items.count, (*outNmemb = f));
+    free(buffer);
+    free(tokv);
+    return shrink_list(&filtered, menu->items.count, (*out_nmemb = f));
 
 fail:
-    if (filtered)
-        free(filtered);
-    if (buffer)
-        free(buffer);
+    free(filtered);
+    free(buffer);
     return NULL;
 }
 
 /**
  * Filter that mimics the vanilla dmenu filtering.
  *
- * @param menu bmMenu instance to filter.
+ * @param menu bm_menu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
- * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @return Pointer to array of bmItem pointers.
+ * @param outNmemb uint32_t reference to filtered items count.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb)
+struct bm_item**
+bm_filter_dmenu(struct bm_menu *menu, bool addition, uint32_t *out_nmemb)
 {
-    return _bmFilterDmenuFun(menu, addition, strstr, strncmp, outNmemb);
+    return filter_dmenu_fun(menu, addition, strstr, strncmp, out_nmemb);
 }
 
 /**
  * Filter that mimics the vanilla case-insensitive dmenu filtering.
  *
- * @param menu bmMenu instance to filter.
+ * @param menu bm_menu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
- * @param outNmemb unsigned int reference to filtered items outNmemb.
- * @return Pointer to array of bmItem pointers.
+ * @param outNmemb uint32_t reference to filtered items count.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb)
+struct bm_item**
+bm_filter_dmenu_case_insensitive(struct bm_menu *menu, bool addition, uint32_t *out_nmemb)
 {
-    return _bmFilterDmenuFun(menu, addition, _bmStrupstr, _bmStrnupcmp, outNmemb);
+    return filter_dmenu_fun(menu, addition, bm_strupstr, bm_strnupcmp, out_nmemb);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

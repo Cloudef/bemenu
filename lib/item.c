@@ -3,91 +3,55 @@
 #include <assert.h>
 #include <string.h>
 
-/**
- * Allocate a new item.
- *
- * @param text Pointer to null terminated C "string", can be **NULL** for empty text.
- * @return bmItem for new item instance, **NULL** if creation failed.
- */
-bmItem* bmItemNew(const char *text)
+struct bm_item*
+bm_item_new(const char *text)
 {
-    bmItem *item = calloc(1, sizeof(bmItem));
-
-    if (!item)
+    struct bm_item *item;
+    if (!(item = calloc(1, sizeof(struct bm_item))))
         return NULL;
 
-    bmItemSetText(item, text);
+    bm_item_set_text(item, text);
     return item;
 }
 
-/**
- * Release bmItem instance.
- *
- * @param item bmItem instance to be freed from memory.
- */
-void bmItemFree(bmItem *item)
+void
+bm_item_free(struct bm_item *item)
 {
     assert(item);
-
-    if (item->text)
-        free(item->text);
-
+    free(item->text);
     free(item);
 }
 
-/**
- * Set userdata pointer to bmItem instance.
- * Userdata will be carried unmodified by the instance.
- *
- * @param item bmItem instance where to set userdata pointer.
- * @param userdata Pointer to userdata.
- */
-void bmItemSetUserdata(bmItem *item, void *userdata)
+void
+bm_item_set_userdata(struct bm_item *item, void *userdata)
 {
     assert(item);
     item->userdata = userdata;
 }
 
-/**
- * Get userdata pointer from bmItem instance.
- *
- * @param item bmItem instance which userdata pointer to get.
- * @return Pointer for unmodified userdata.
- */
-void* bmItemGetUserdata(bmItem *item)
+void*
+bm_item_get_userdata(struct bm_item *item)
 {
     assert(item);
     return item->userdata;
 }
 
-/**
- * Set text to bmItem instance.
- *
- * @param item bmItem instance where to set text.
- * @param text C "string" to set as text, can be **NULL** for empty text.
- */
-int bmItemSetText(bmItem *item, const char *text)
+bool
+bm_item_set_text(struct bm_item *item, const char *text)
 {
     assert(item);
 
     char *copy = NULL;
-    if (text && !(copy = _bmStrdup(text)))
-        return 0;
+    if (text && !(copy = bm_strdup(text)))
+        return false;
 
-    if (item->text)
-        free(item->text);
-
+    free(item->text);
     item->text = copy;
-    return 1;
+    return true;
 }
 
-/**
- * Get text from bmItem instance.
- *
- * @param item bmItem instance where to get text from.
- * @return Pointer to null terminated C "string", can be **NULL** for empty text.
- */
-const char* bmItemGetText(const bmItem *item)
+const char*
+bm_item_get_text(const struct bm_item *item)
 {
     assert(item);
     return item->text;

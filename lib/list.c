@@ -3,137 +3,142 @@
 #include <string.h>
 #include <assert.h>
 
-void _bmItemListFreeList(struct _bmItemList *list)
+void
+list_free_list(struct list *list)
 {
     assert(list);
-
-    if (list->list)
-        free(list->list);
-
+    free(list->items);
     list->allocated = list->count = 0;
-    list->list = NULL;
+    list->items = NULL;
 }
 
-void _bmItemListFreeItems(struct _bmItemList *list)
+void
+list_free_items(struct list *list, list_free_fun destructor)
 {
     assert(list);
 
-    unsigned int i;
-    for (i = 0; i < list->count; ++i)
-        bmItemFree(list->list[i]);
+    for (uint32_t i = 0; i < list->count; ++i)
+        destructor(list->items[i]);
 
-    _bmItemListFreeList(list);
+    list_free_list(list);
 }
 
-bmItem** _bmItemListGetItems(const struct _bmItemList *list, unsigned int *outNmemb)
+void*
+list_get_items(const struct list *list, uint32_t *out_nmemb)
 {
     assert(list);
 
-    if (outNmemb)
-        *outNmemb = list->count;
+    if (out_nmemb)
+        *out_nmemb = list->count;
 
-    return list->list;
+    return list->items;
 }
 
 /** !!! Frees the old list, not items !!! */
-int _bmItemListSetItemsNoCopy(struct _bmItemList *list, bmItem **items, unsigned int nmemb)
+bool
+list_set_items_no_copy(struct list *list, void *items, uint32_t nmemb)
 {
     assert(list);
 
-    _bmItemListFreeList(list);
+    list_free_list(list);
 
     if (!items || nmemb == 0) {
         items = NULL;
         nmemb = 0;
     }
 
-    list->list = items;
+    list->items = items;
     list->allocated = list->count = nmemb;
-    return 1;
+    return true;
 }
 
 /** !!! Frees the old items and list !!! */
-int _bmItemListSetItems(struct _bmItemList *list, const bmItem **items, unsigned int nmemb)
+bool
+list_set_items(struct list *list, const void *items, uint32_t nmemb, list_free_fun destructor)
 {
     assert(list);
 
     if (!items || nmemb == 0) {
-        _bmItemListFreeItems(list);
-        return 1;
+        list_free_items(list, destructor);
+        return true;
     }
 
-    bmItem **newItems;
-    if (!(newItems = calloc(sizeof(bmItem*), nmemb)))
-        return 0;
+    void *new_items;
+    if (!(new_items = calloc(sizeof(void*), nmemb)))
+        return false;
 
-    memcpy(newItems, items, sizeof(bmItem*) * nmemb);
-    return _bmItemListSetItemsNoCopy(list, newItems, nmemb);
+    memcpy(new_items, items, sizeof(void*) * nmemb);
+    return list_set_items_no_copy(list, new_items, nmemb);
 }
 
-int _bmItemListGrow(struct _bmItemList *list, unsigned int step)
+bool
+list_grow(struct list *list, uint32_t step)
 {
     assert(list);
 
     void *tmp;
-    unsigned int nsize = sizeof(bmItem*) * (list->allocated + step);
+    uint32_t nsize = sizeof(struct bm_item*) * (list->allocated + step);
 
-    if (!list->list || !(tmp = realloc(list->list, nsize))) {
+    if (!list->items || !(tmp = realloc(list->items, nsize))) {
         if (!(tmp = malloc(nsize)))
-            return 0;
+            return false;
 
-        if (list->list) {
-            memcpy(tmp, list->list, sizeof(bmItem*) * list->allocated);
-            free(list->list);
+        if (list->items) {
+            memcpy(tmp, list->items, sizeof(struct bm_item*) * list->allocated);
+            free(list->items);
         }
     }
 
-    list->list = tmp;
+    list->items = tmp;
     list->allocated += step;
-    memset(&list->list[list->count], 0, sizeof(bmItem*) * (list->allocated - list->count));
-    return 1;
+    memset(&list->items[list->count], 0, sizeof(struct bm_item*) * (list->allocated - list->count));
+    return true;
 }
 
-int _bmItemListAddItemAt(struct _bmItemList *list, bmItem *item, unsigned int index)
+bool
+list_add_item_at(struct list *list, void *item, uint32_t index)
 {
-    assert(list);
-    assert(item);
+    assert(list && item);
 
-    if ((!list->list || list->allocated <= list->count) && !_bmItemListGrow(list, 32))
-        return 0;
+    if ((!list->items || list->allocated <= list->count) && !list_grow(list, 32))
+        return false;
 
     if (index + 1 != list->count) {
-        unsigned int i = index;
-        memmove(&list->list[i + 1], &list->list[i], sizeof(bmItem*) * (list->count - i));
+        uint32_t i = index;
+        memmove(&list->items[i + 1], &list->items[i], sizeof(struct bm_item*) * (list->count - i));
     }
 
-    list->list[index] = item;
+    list->items[index] = item;
     list->count++;
-    return 1;
+    return true;
 }
 
-int _bmItemListAddItem(struct _bmItemList *list, bmItem *item)
+bool
+list_add_item(struct list *list, void *item)
 {
     assert(list);
-    return _bmItemListAddItemAt(list, item, list->count);
+    return list_add_item_at(list, item, list->count);
 }
 
-int _bmItemListRemoveItemAt(struct _bmItemList *list, unsigned int index)
+bool
+list_remove_item_at(struct list *list, uint32_t index)
 {
     assert(list);
 
-    unsigned int i = index;
-    if (!list->list || list->count <= i)
-        return 0;
+    uint32_t i = index;
+    if (!list->items || list->count <= i)
+        return false;
 
-    memmove(&list->list[i], &list->list[i], sizeof(bmItem*) * (list->count - i));
-    return 1;
+    memmove(&list->items[i], &list->items[i], sizeof(void*) * (list->count - i));
+    return true;
 }
 
-int _bmItemListRemoveItem(struct _bmItemList *list, const bmItem *item)
+bool
+list_remove_item(struct list *list, const void *item)
 {
-    unsigned int i;
-    for (i = 0; i < list->count && list->list[i] != item; ++i);
-    return _bmItemListRemoveItemAt(list, i);
+    uint32_t i;
+    for (i = 0; i < list->count && list->items[i] != item; ++i);
+    return list_remove_item_at(list, i);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

@@ -4,8 +4,12 @@
  * Public API header.
  */
 
-typedef struct _bmMenu bmMenu;
-typedef struct _bmItem bmItem;
+struct bm_renderer;
+struct bm_menu;
+struct bm_item;
+
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * @defgroup Library
@@ -33,6 +37,28 @@ typedef struct _bmItem bmItem;
  * @{ */
 
 /**
+ * @name Library Initialization
+ * @{ */
+
+/**
+ * Init bemenu.
+ * Loads up the renderers.
+ *
+ * @return true on success, false on failure.
+ */
+bool bm_init(void);
+
+/**
+ * Get list of available renderers.
+ *
+ * @param out_nmemb Reference to uint32_t where total count of returned renderers will be stored.
+ * @return Pointer to array of bm_renderer instances.
+ */
+const struct bm_renderer** bm_get_renderers(uint32_t *out_nmemb);
+
+/** @} Library Initialization */
+
+/**
  * @name Library Version
  * @{ */
 
@@ -43,59 +69,62 @@ typedef struct _bmItem bmItem;
  *
  * @return Null terminated C "string" to version string.
  */
-const char* bmVersion(void);
+const char* bm_version(void);
 
 /**  @} Library Version */
 
 /**  @} Library */
 
 /**
+ * @addtogroup Renderer
+ * @{ */
+
+/**
+ * Get name of the renderer.
+ *
+ * @param renderer bm_renderer instance.
+ * @return Null terminated C "string" to renderer's name.
+ */
+const char* bm_renderer_get_name(const struct bm_renderer *renderer);
+
+/**
+ * @} Renderer */
+
+/**
  * @addtogroup Menu
  * @{ */
 
 /**
- * Draw mode constants for bmMenu instance draw mode.
+ * Filter mode constants for bm_menu instance filter mode.
  *
- * @link ::bmDrawMode BM_DRAW_MODE_LAST @endlink is provided for enumerating draw modes.
- * Instancing with it however provides exactly same functionality as BM_DRAW_MODE_NONE.
- */
-typedef enum bmDrawMode {
-    BM_DRAW_MODE_NONE,
-    BM_DRAW_MODE_CURSES,
-    BM_DRAW_MODE_LAST
-} bmDrawMode;
-
-/**
- * Filter mode constants for bmMenu instance filter mode.
- *
- * @link ::bmFilterMode BM_FILTER_MODE_LAST @endlink is provided for enumerating filter modes.
+ * @link ::bm_filter_mode BM_FILTER_MODE_LAST @endlink is provided for enumerating filter modes.
  * Using it as filter mode however provides exactly same functionality as BM_FILTER_MODE_DMENU.
  */
-typedef enum bmFilterMode {
+enum bm_filter_mode {
     BM_FILTER_MODE_DMENU,
     BM_FILTER_MODE_DMENU_CASE_INSENSITIVE,
     BM_FILTER_MODE_LAST
-} bmFilterMode;
+};
 
 /**
- * Result constants from bmMenuRunWithKey function.
+ * Result constants from bm_menu_run_with_key function.
  *
- * - @link ::bmRunResult BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
- * - @link ::bmRunResult BM_RUN_RESULT_SELECTED @endlink means that menu was closed and items were selected.
- * - @link ::bmRunResult BM_RUN_RESULT_CANCEL @endlink means that menu was closed and selection was canceled.
+ * - @link ::bm_run_result BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
+ * - @link ::bm_run_result BM_RUN_RESULT_SELECTED @endlink means that menu was closed and items were selected.
+ * - @link ::bm_run_result BM_RUN_RESULT_CANCEL @endlink means that menu was closed and selection was canceled.
  */
-typedef enum bmRunResult {
+enum bm_run_result {
     BM_RUN_RESULT_RUNNING,
     BM_RUN_RESULT_SELECTED,
     BM_RUN_RESULT_CANCEL,
-} bmRunResult;
+};
 
 /**
  * Key constants.
  *
- * @link ::bmKey BM_KEY_LAST @endlink is provided for enumerating keys.
+ * @link ::bm_key BM_KEY_LAST @endlink is provided for enumerating keys.
  */
-typedef enum bmKey {
+enum bm_key {
     BM_KEY_NONE,
     BM_KEY_UP,
     BM_KEY_DOWN,
@@ -119,33 +148,33 @@ typedef enum bmKey {
     BM_KEY_CONTROL_RETURN,
     BM_KEY_UNICODE,
     BM_KEY_LAST
-} bmKey;
+};
 
 /**
  * @name Menu Memory
  * @{ */
 
 /**
- * Create new bmMenu instance.
+ * Create new bm_menu instance.
  *
- * @param drawMode Render method to be used for this menu instance.
- * @return bmMenu for new menu instance, **NULL** if creation failed.
+ * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
+ * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-bmMenu* bmMenuNew(bmDrawMode drawMode);
+struct bm_menu* bm_menu_new(const char *renderer);
 
 /**
- * Release bmMenu instance.
+ * Release bm_menu instance.
  *
- * @param menu bmMenu instance to be freed from memory.
+ * @param menu bm_menu instance to be freed from memory.
  */
-void bmMenuFree(bmMenu *menu);
+void bm_menu_free(struct bm_menu *menu);
 
 /**
- * Release items inside bmMenu instance.
+ * Release items inside bm_menu instance.
  *
- * @param menu bmMenu instance which items will be freed from memory.
+ * @param menu bm_menu instance which items will be freed from memory.
  */
-void bmMenuFreeItems(bmMenu *menu);
+void bm_menu_free_items(struct bm_menu *menu);
 
 /**  @} Menu Memory */
 
@@ -154,85 +183,86 @@ void bmMenuFreeItems(bmMenu *menu);
  * @{ */
 
 /**
- * Set userdata pointer to bmMenu instance.
+ * Set userdata pointer to bm_menu instance.
  * Userdata will be carried unmodified by the instance.
  *
- * @param menu bmMenu instance where to set userdata pointer.
+ * @param menu bm_menu instance where to set userdata pointer.
  * @param userdata Pointer to userdata.
  */
-void bmMenuSetUserdata(bmMenu *menu, void *userdata);
+void bm_menu_set_userdata(struct bm_menu *menu, void *userdata);
 
 /**
- * Get userdata pointer from bmMenu instance.
+ * Get userdata pointer from bm_menu instance.
  *
- * @param menu bmMenu instance which userdata pointer to get.
+ * @param menu bm_menu instance which userdata pointer to get.
  * @return Pointer for unmodified userdata.
  */
-void* bmMenuGetUserdata(bmMenu *menu);
+void* bm_menu_get_userdata(struct bm_menu *menu);
 
 /**
- * Set filter text to bmMenu instance.
+ * Set filter text to bm_menu instance.
  *
- * @param menu bmMenu instance where to set filter.
+ * @param menu bm_menu instance where to set filter.
  * @param filter Null terminated C "string" to act as filter.
  */
-void bmMenuSetFilter(bmMenu *menu, const char *filter);
+void bm_menu_set_filter(struct bm_menu *menu, const char *filter);
 
 /**
- * Get filter text from  bmMenu instance.
+ * Get filter text from bm_menu instance.
  *
- * @param menu bmMenu instance where to get filter.
+ * @param menu bm_menu instance where to get filter.
  * @return Const pointer to current filter text, may be **NULL** if empty.
  */
-const char* bmMenuGetFilter(bmMenu *menu);
+const char* bm_menu_get_filter(struct bm_menu *menu);
 
 /**
- * Set active filter mode to bmMenu instance.
+ * Set active filter mode to bm_menu instance.
  *
- * @param menu bmMenu instance where to set filter mode.
- * @param mode bmFilterMode constant.
+ * @param menu bm_menu instance where to set filter mode.
+ * @param mode bm_filter_mode constant.
  */
-void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode);
+void bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode);
 
 /**
- * Get active filter mode from bmMenu instance.
+ * Get active filter mode from bm_menu instance.
  *
- * @param menu bmMenu instance where to get filter mode.
- * @return bmFilterMode constant.
+ * @param menu bm_menu instance where to get filter mode.
+ * @return bm_filter_mode constant.
  */
-bmFilterMode bmMenuGetFilterMode(const bmMenu *menu);
+enum bm_filter_mode bm_menu_get_filter_mode(const struct bm_menu *menu);
 
 /**
  * Set selection wrapping on/off.
  *
- * @param menu bmMenu instance where to toggle selection wrapping.
- * @param int 1 == on, 0 == off.
+ * @param menu bm_menu instance where to toggle selection wrapping.
+ * @param bool true/false.
  */
-void bmMenuSetWrap(bmMenu *menu, int wrap);
+void bm_menu_set_wrap(struct bm_menu *menu, bool wrap);
 
 /**
  * Get selection wrapping state.
  *
- * @param menu bmMenu instance where to get selection wrapping state.
+ * @param menu bm_menu instance where to get selection wrapping state.
  * @return int for wrap state.
  */
-int bmMenuGetWrap(const bmMenu *menu);
+bool bm_menu_get_wrap(const struct bm_menu *menu);
 
 /**
- * Set title to bmMenu instance.
+ * Set title to bm_menu instance.
  *
- * @param menu bmMenu instance where to set title.
+ * @param menu bm_menu instance where to set title.
  * @param title C "string" to set as title, can be **NULL** for empty title.
+ * @return true if set was succesful, false if out of memory.
  */
-int bmMenuSetTitle(bmMenu *menu, const char *title);
+bool bm_menu_set_title(struct bm_menu *menu, const char *title);
 
 /**
- * Get title from bmMenu instance.
+ * Get title from bm_menu instance.
  *
- * @param menu bmMenu instance where to get title from.
+ * @param menu bm_menu instance where to get title from.
  * @return Pointer to null terminated C "string", can be **NULL** for empty title.
  */
-const char* bmMenuGetTitle(const bmMenu *menu);
+const char* bm_menu_get_title(const struct bm_menu *menu);
 
 /**  @} Properties */
 
@@ -241,130 +271,130 @@ const char* bmMenuGetTitle(const bmMenu *menu);
  * @{ */
 
 /**
- * Add item to bmMenu instance at specific index.
+ * Add item to bm_menu instance at specific index.
  *
- * @param menu bmMenu instance where item will be added.
- * @param item bmItem instance to add.
+ * @param menu bm_menu instance where item will be added.
+ * @param item bm_item instance to add.
  * @param index Index where item will be added.
- * @return 1 on successful add, 0 on failure.
+ * @return true on successful add, false on failure.
  */
-int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index);
+bool bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t index);
 
 /**
- * Add item to bmMenu instance.
+ * Add item to bm_menu instance.
  *
- * @param menu bmMenu instance where item will be added.
- * @param item bmItem instance to add.
- * @return 1 on successful add, 0 on failure.
+ * @param menu bm_menu instance where item will be added.
+ * @param item bm_item instance to add.
+ * @return true on successful add, false on failure.
  */
-int bmMenuAddItem(bmMenu *menu, bmItem *item);
+bool bm_menu_add_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
- * Remove item from bmMenu instance at specific index.
+ * Remove item from bm_menu instance at specific index.
  *
- * @warning The item won't be freed, use bmItemFree to do that.
+ * @warning The item won't be freed, use bm_item_free to do that.
  *
- * @param menu bmMenu instance from where item will be removed.
+ * @param menu bm_menu instance from where item will be removed.
  * @param index Index of item to remove.
- * @return 1 on successful add, 0 on failure.
+ * @return true on successful add, false on failure.
  */
-int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index);
+bool bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index);
 
 /**
- * Remove item from bmMenu instance.
+ * Remove item from bm_menu instance.
  *
- * @warning The item won't be freed, use bmItemFree to do that.
+ * @warning The item won't be freed, use bm_item_free to do that.
  *
- * @param menu bmMenu instance from where item will be removed.
- * @param item bmItem instance to remove.
- * @return 1 on successful add, 0 on failure.
+ * @param menu bm_menu instance from where item will be removed.
+ * @param item bm_item instance to remove.
+ * @return true on successful add, false on failure.
  */
-int bmMenuRemoveItem(bmMenu *menu, bmItem *item);
+bool bm_menu_remove_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
  * Highlight item in menu by index.
  *
- * @param menu bmMenu instance from where to highlight item.
+ * @param menu bm_menu instance from where to highlight item.
  * @param index Index of item to highlight.
- * @return 1 on successful highlight, 0 on failure.
+ * @return true on successful highlight, false on failure.
  */
-int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index);
+bool bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index);
 
 /**
  * Highlight item in menu.
  *
- * @param menu bmMenu instance from where to highlight item.
- * @param item bmItem instance to highlight.
- * @return 1 on successful highlight, 0 on failure.
+ * @param menu bm_menu instance from where to highlight item.
+ * @param item bm_item instance to highlight.
+ * @return true on successful highlight, false on failure.
  */
-int bmMenuSetHighlighted(bmMenu *menu, bmItem *item);
+bool bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
- * Get highlighted item from bmMenu instance.
+ * Get highlighted item from bm_menu instance.
  *
  * @warning The pointer returned by this function may be invalid after items change.
  *
- * @param menu bmMenu instance from where to get highlighted item.
- * @return Selected bmItem instance, **NULL** if none highlighted.
+ * @param menu bm_menu instance from where to get highlighted item.
+ * @return Selected bm_item instance, **NULL** if none highlighted.
  */
-bmItem* bmMenuGetHighlightedItem(const bmMenu *menu);
+struct bm_item* bm_menu_get_highlighted_item(const struct bm_menu *menu);
 
 /**
- * Set selected items to bmMenu instance.
+ * Set selected items to bm_menu instance.
  *
- * @param menu bmMenu instance where items will be set.
- * @param items Array of bmItem pointers to set.
+ * @param menu bm_menu instance where items will be set.
+ * @param items Array of bm_item pointers to set.
  * @param nmemb Total count of items in array.
- * @return 1 on successful set, 0 on failure.
+ * @return true on successful set, false on failure.
  */
-int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb);
+bool bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_t nmemb);
 
 /**
- * Get selected items from bmMenu instance.
+ * Get selected items from bm_menu instance.
  *
  * @warning The pointer returned by this function may be invalid after selection or items change.
  *
- * @param menu bmMenu instance from where to get selected items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
+ * @param menu bm_menu instance from where to get selected items.
+ * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb);
+struct bm_item** bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**
- * Set items to bmMenu instance.
- * Will replace all the old items on bmMenu instance.
+ * Set items to bm_menu instance.
+ * Will replace all the old items on bm_menu instance.
  *
  * If items is **NULL**, or nmemb is zero, all items will be freed from the menu.
  *
- * @param menu bmMenu instance where items will be set.
- * @param items Array of bmItem pointers to set.
+ * @param menu bm_menu instance where items will be set.
+ * @param items Array of bm_item pointers to set.
  * @param nmemb Total count of items in array.
- * @return 1 on successful set, 0 on failure.
+ * @return true on successful set, false on failure.
  */
-int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb);
+bool bm_menu_set_items(struct bm_menu *menu, const struct bm_item **items, uint32_t nmemb);
 
 /**
- * Get items from bmMenu instance.
+ * Get items from bm_menu instance.
  *
  * @warning The pointer returned by this function may be invalid after removing or adding new items.
  *
- * @param menu bmMenu instance from where to get items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
+ * @param menu bm_menu instance from where to get items.
+ * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb);
+struct bm_item** bm_menu_get_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**
- * Get filtered (displayed) items from bmMenu instance.
+ * Get filtered (displayed) items from bm_menu instance.
  *
  * @warning The pointer returned by this function _will_ be invalid when menu internally filters its list again.
  *          Do not store this pointer.
  *
- * @param menu bmMenu instance from where to get filtered items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
+ * @param menu bm_menu instance from where to get filtered items.
+ * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
+ * @return Pointer to array of bm_item pointers.
  */
-bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb);
+struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**  @} Menu Items */
 
@@ -373,11 +403,11 @@ bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb);
  * @{ */
 
 /**
- * Render bmMenu instance using chosen draw method.
+ * Render bm_menu instance using chosen renderer.
  *
- * @param menu bmMenu instance to be rendered.
+ * @param menu bm_menu instance to be rendered.
  */
-void bmMenuRender(const bmMenu *menu);
+void bm_menu_render(const struct bm_menu *menu);
 
 /**
  * Trigger filtering of menu manually.
@@ -386,30 +416,30 @@ void bmMenuRender(const bmMenu *menu);
  * Do note that filtering might be heavy, so you should only call it after batch manipulation of items.
  * Not after manipulation of each single item.
  *
- * @param menu bmMenu instance which to filter.
+ * @param menu bm_menu instance which to filter.
  */
-void bmMenuFilter(bmMenu *menu);
+void bm_menu_filter(struct bm_menu *menu);
 
 /**
  * Poll key and unicode from underlying UI toolkit.
  *
- * This function will block on @link ::bmDrawMode BM_DRAW_MODE_CURSES @endlink draw mode.
+ * This function will block on **curses** renderer.
  *
- * @param menu bmMenu instance from which to poll.
- * @param outUnicode Reference to unsigned int.
- * @return bmKey for polled key.
+ * @param menu bm_menu instance from which to poll.
+ * @param out_unicode Reference to uint32_t.
+ * @return bm_key for polled key.
  */
-bmKey bmMenuGetKey(bmMenu *menu, unsigned int *outUnicode);
+enum bm_key bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode);
 
 /**
  * Advances menu logic with key and unicode as input.
  *
- * @param menu bmMenu instance to be advanced.
+ * @param menu bm_menu instance to be advanced.
  * @param key Key input that will advance menu logic.
  * @param unicode Unicode input that will advance menu logic.
- * @return bmRunResult for menu state.
+ * @return bm_run_result for menu state.
  */
-bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode);
+enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode);
 
 /**  @} Menu Logic */
 
@@ -427,16 +457,16 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode);
  * Allocate a new item.
  *
  * @param text Pointer to null terminated C "string", can be **NULL** for empty text.
- * @return bmItem for new item instance, **NULL** if creation failed.
+ * @return bm_item for new item instance, **NULL** if creation failed.
  */
-bmItem* bmItemNew(const char *text);
+struct bm_item* bm_item_new(const char *text);
 
 /**
- * Release bmItem instance.
+ * Release bm_item instance.
  *
- * @param item bmItem instance to be freed from memory.
+ * @param item bm_item instance to be freed from memory.
  */
-void bmItemFree(bmItem *item);
+void bm_item_free(struct bm_item *item);
 
 /**  @} Item Memory */
 
@@ -445,37 +475,38 @@ void bmItemFree(bmItem *item);
  * @{ */
 
 /**
- * Set userdata pointer to bmItem instance.
+ * Set userdata pointer to bm_item instance.
  * Userdata will be carried unmodified by the instance.
  *
- * @param item bmItem instance where to set userdata pointer.
+ * @param item bm_item instance where to set userdata pointer.
  * @param userdata Pointer to userdata.
  */
-void bmItemSetUserdata(bmItem *item, void *userdata);
+void bm_item_set_userdata(struct bm_item *item, void *userdata);
 
 /**
- * Get userdata pointer from bmItem instance.
+ * Get userdata pointer from bm_item instance.
  *
- * @param item bmItem instance which userdata pointer to get.
+ * @param item bm_item instance which userdata pointer to get.
  * @return Pointer for unmodified userdata.
  */
-void* bmItemGetUserdata(bmItem *item);
+void* bm_item_get_userdata(struct bm_item *item);
 
 /**
- * Set text to bmItem instance.
+ * Set text to bm_item instance.
  *
- * @param item bmItem instance where to set text.
+ * @param item bm_item instance where to set text.
  * @param text C "string" to set as text, can be **NULL** for empty text.
+ * @return true if set was succesful, false if out of memory.
  */
-int bmItemSetText(bmItem *item, const char *text);
+bool bm_item_set_text(struct bm_item *item, const char *text);
 
 /**
- * Get text from bmItem instance.
+ * Get text from bm_item instance.
  *
- * @param item bmItem instance where to get text from.
+ * @param item bm_item instance where to get text from.
  * @return Pointer to null terminated C "string", can be **NULL** for empty text.
  */
-const char* bmItemGetText(const bmItem *item);
+const char* bm_item_get_text(const struct bm_item *item);
 
 /**  @} Item Properties */
 

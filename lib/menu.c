@@ -7,359 +7,241 @@
 /**
  * Filter function map.
  */
-static bmItem** (*filterFunc[BM_FILTER_MODE_LAST])(bmMenu *menu, char addition, unsigned int *outNmemb) = {
-    _bmFilterDmenu, /* BM_FILTER_DMENU */
-    _bmFilterDmenuCaseInsensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
+static struct bm_item** (*filter_func[BM_FILTER_MODE_LAST])(struct bm_menu *menu, bool addition, uint32_t *out_nmemb) = {
+    bm_filter_dmenu, /* BM_FILTER_DMENU */
+    bm_filter_dmenu_case_insensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
 
-int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item)
+bool
+bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
 {
     assert(menu);
     assert(item);
 
-    unsigned int i, count;
-    bmItem **items = bmMenuGetSelectedItems(menu, &count);
+    uint32_t i, count;
+    struct bm_item **items = bm_menu_get_selected_items(menu, &count);
     for (i = 0; i < count && items[i] != item; ++i);
     return (i < count);
 }
 
-/**
- * Create new bmMenu instance.
- *
- * @param drawMode Render method to be used for this menu instance.
- * @return bmMenu for new menu instance, **NULL** if creation failed.
- */
-bmMenu* bmMenuNew(bmDrawMode drawMode)
+struct bm_menu*
+bm_menu_new(const char *renderer)
 {
-    bmMenu *menu = calloc(1, sizeof(bmMenu));
-
-    menu->drawMode = drawMode;
-
-    if (!menu)
+    struct bm_menu *menu;
+    if (!(menu = calloc(1, sizeof(struct bm_menu))))
         return NULL;
 
-    int status = 1;
+    uint32_t count;
+    const struct bm_renderer **renderers = bm_get_renderers(&count);
 
-    switch (menu->drawMode) {
-        case BM_DRAW_MODE_CURSES:
-            status = _bmDrawCursesInit(&menu->renderApi);
+    bool status = false;
+    for (uint32_t i = 0; i < count; ++i) {
+        if (renderer && strcmp(renderer, renderers[i]->name))
+            continue;
+
+        if (bm_renderer_activate((struct bm_renderer*)renderers[i])) {
+            status = true;
+            menu->renderer = renderers[i];
             break;
-
-        default: break;
+        }
     }
 
-    if (status == 0) {
-        bmMenuFree(menu);
+    if (!status) {
+        bm_menu_free(menu);
         return NULL;
     }
 
     return menu;
 }
 
-/**
- * Release bmMenu instance.
- *
- * @param menu bmMenu instance to be freed from memory.
- */
-void bmMenuFree(bmMenu *menu)
+void
+bm_menu_free(struct bm_menu *menu)
 {
     assert(menu);
 
-    if (menu->renderApi.free)
-        menu->renderApi.free();
+    if (menu->renderer && menu->renderer->api.destructor)
+        menu->renderer->api.destructor();
 
-    if (menu->title)
-        free(menu->title);
+    free(menu->title);
+    free(menu->filter);
+    free(menu->old_filter);
 
-    if (menu->filter)
-        free(menu->filter);
-
-    if (menu->oldFilter)
-        free(menu->oldFilter);
-
-    bmMenuFreeItems(menu);
+    bm_menu_free_items(menu);
     free(menu);
 }
 
-/**
- * Release items inside bmMenu instance.
- *
- * @param menu bmMenu instance which items will be freed from memory.
- */
-void bmMenuFreeItems(bmMenu *menu)
+void
+bm_menu_free_items(struct bm_menu *menu)
 {
     assert(menu);
-    _bmItemListFreeList(&menu->selection);
-    _bmItemListFreeList(&menu->filtered);
-    _bmItemListFreeItems(&menu->items);
+    list_free_list(&menu->selection);
+    list_free_list(&menu->filtered);
+    list_free_items(&menu->items, (list_free_fun)bm_item_free);
 }
 
-/**
- * Set userdata pointer to bmMenu instance.
- * Userdata will be carried unmodified by the instance.
- *
- * @param menu bmMenu instance where to set userdata pointer.
- * @param userdata Pointer to userdata.
- */
-void bmMenuSetUserdata(bmMenu *menu, void *userdata)
+void
+bm_menu_set_userdata(struct bm_menu *menu, void *userdata)
 {
     assert(menu);
     menu->userdata = userdata;
 }
 
-/**
- * Get userdata pointer from bmMenu instance.
- *
- * @param menu bmMenu instance which userdata pointer to get.
- * @return Pointer for unmodified userdata.
- */
-void* bmMenuGetUserdata(bmMenu *menu)
+void*
+bm_menu_get_userdata(struct bm_menu *menu)
 {
     assert(menu);
     return menu->userdata;
 }
 
-/**
- * Set filter text to bmMenu instance.
- *
- * @param menu bmMenu instance where to set filter.
- * @param filter Null terminated C "string" to act as filter.
- */
-void bmMenuSetFilter(bmMenu *menu, const char *filter)
+void
+bm_menu_set_filter(struct bm_menu *menu, const char *filter)
 {
     assert(menu);
 
-    if (menu->filter)
-        free(menu->filter);
-
-    menu->filter = (filter ? _bmStrdup(filter) : NULL);
-    menu->filterSize = (filter ? strlen(filter) : 0);
+    free(menu->filter);
+    menu->filter = (filter ? bm_strdup(filter) : NULL);
+    menu->filter_size = (filter ? strlen(filter) : 0);
 }
 
-/**
- * Get filter text from  bmMenu instance.
- *
- * @param menu bmMenu instance where to get filter.
- * @return Const pointer to current filter text, may be **NULL** if empty.
- */
-const char* bmMenuGetFilter(bmMenu *menu)
+const char*
+bm_menu_get_filter(struct bm_menu *menu)
 {
     assert(menu);
     return menu->filter;
 }
 
-/**
- * Set active filter mode to bmMenu instance.
- *
- * @param menu bmMenu instance where to set filter mode.
- * @param mode bmFilterMode constant.
- */
-void bmMenuSetFilterMode(bmMenu *menu, bmFilterMode mode)
+void
+bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode)
 {
     assert(menu);
-    menu->filterMode = (mode >= BM_FILTER_MODE_LAST ? BM_FILTER_MODE_DMENU : mode);
+    menu->filter_mode = (mode >= BM_FILTER_MODE_LAST ? BM_FILTER_MODE_DMENU : mode);
 }
 
-/**
- * Get active filter mode from bmMenu instance.
- *
- * @param menu bmMenu instance where to get filter mode.
- * @return bmFilterMode constant.
- */
-bmFilterMode bmMenuGetFilterMode(const bmMenu *menu)
+enum bm_filter_mode
+bm_menu_get_filter_mode(const struct bm_menu *menu)
 {
     assert(menu);
-    return menu->filterMode;
+    return menu->filter_mode;
 }
 
-/**
- * Set selection wrapping on/off.
- *
- * @param menu bmMenu instance where to toggle selection wrapping.
- * @param int 1 == on, 0 == off.
- */
-void bmMenuSetWrap(bmMenu *menu, int wrap)
+void
+bm_menu_set_wrap(struct bm_menu *menu, bool wrap)
 {
     assert(menu);
-    menu->wrap = (wrap ? 1 : 0);
+    menu->wrap = wrap;
 }
 
-/**
- * Get selection wrapping state.
- *
- * @param menu bmMenu instance where to get selection wrapping state.
- * @return int for wrap state.
- */
-int bmMenuGetWrap(const bmMenu *menu)
+bool
+bm_menu_get_wrap(const struct bm_menu *menu)
 {
     assert(menu);
     return menu->wrap;
 }
 
-/**
- * Set title to bmMenu instance.
- *
- * @param menu bmMenu instance where to set title.
- * @param title C "string" to set as title, can be **NULL** for empty title.
- */
-int bmMenuSetTitle(bmMenu *menu, const char *title)
+bool
+bm_menu_set_title(struct bm_menu *menu, const char *title)
 {
     assert(menu);
 
     char *copy = NULL;
-    if (title && !(copy = _bmStrdup(title)))
-        return 0;
+    if (title && !(copy = bm_strdup(title)))
+        return false;
 
-    if (menu->title)
-        free(menu->title);
-
+    free(menu->title);
     menu->title = copy;
-    return 1;
+    return true;
 }
 
-/**
- * Get title from bmMenu instance.
- *
- * @param menu bmMenu instance where to get title from.
- * @return Pointer to null terminated C "string", can be **NULL** for empty title.
- */
-const char* bmMenuGetTitle(const bmMenu *menu)
+const char*
+bm_menu_get_title(const struct bm_menu *menu)
 {
     assert(menu);
     return menu->title;
 }
 
-/**
- * Add item to bmMenu instance at specific index.
- *
- * @param menu bmMenu instance where item will be added.
- * @param item bmItem instance to add.
- * @param index Index where item will be added.
- * @return 1 on successful add, 0 on failure.
- */
-int bmMenuAddItemAt(bmMenu *menu, bmItem *item, unsigned int index)
+bool
+bm_menu_add_items_at(struct bm_menu *menu, struct bm_item *item, uint32_t index)
 {
     assert(menu);
-    return _bmItemListAddItemAt(&menu->items, item, index);
+    return list_add_item_at(&menu->items, item, index);
 }
 
-/**
- * Add item to bmMenu instance.
- *
- * @param menu bmMenu instance where item will be added.
- * @param item bmItem instance to add.
- * @return 1 on successful add, 0 on failure.
- */
-int bmMenuAddItem(bmMenu *menu, bmItem *item)
+bool
+bm_menu_add_item(struct bm_menu *menu, struct bm_item *item)
 {
-    return _bmItemListAddItem(&menu->items, item);
+    return list_add_item(&menu->items, item);
 }
 
-/**
- * Remove item from bmMenu instance at specific index.
- *
- * @warning The item won't be freed, use bmItemFree to do that.
- *
- * @param menu bmMenu instance from where item will be removed.
- * @param index Index of item to remove.
- * @return 1 on successful add, 0 on failure.
- */
-int bmMenuRemoveItemAt(bmMenu *menu, unsigned int index)
+bool
+bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index)
 {
     assert(menu);
 
-    if (!menu->items.list || menu->items.count <= index)
+    if (!menu->items.items || menu->items.count <= index)
         return 0;
 
-    bmItem *item = menu->items.list[index];
-    int ret = _bmItemListRemoveItemAt(&menu->items, index);
+    bool ret = list_remove_item_at(&menu->items, index);
 
     if (ret) {
-        _bmItemListRemoveItem(&menu->selection, item);
-        _bmItemListRemoveItem(&menu->filtered, item);
+        struct bm_item *item = ((struct bm_item**)menu->items.items)[index];
+        list_remove_item(&menu->selection, item);
+        list_remove_item(&menu->filtered, item);
     }
 
     return ret;
 }
 
-/**
- * Remove item from bmMenu instance.
- *
- * @warning The item won't be freed, use bmItemFree to do that.
- *
- * @param menu bmMenu instance from where item will be removed.
- * @param item bmItem instance to remove.
- * @return 1 on successful add, 0 on failure.
- */
-int bmMenuRemoveItem(bmMenu *menu, bmItem *item)
+bool
+bm_menu_remove_item(struct bm_menu *menu, struct bm_item *item)
 {
     assert(menu);
 
-    int ret = _bmItemListRemoveItem(&menu->items, item);
+    bool ret = list_remove_item(&menu->items, item);
 
     if (ret) {
-        _bmItemListRemoveItem(&menu->selection, item);
-        _bmItemListRemoveItem(&menu->filtered, item);
+        list_remove_item(&menu->selection, item);
+        list_remove_item(&menu->filtered, item);
     }
 
     return ret;
 }
 
-/**
- * Highlight item in menu by index.
- *
- * @param menu bmMenu instance from where to highlight item.
- * @param index Index of item to highlight.
- * @return 1 on successful highlight, 0 on failure.
- */
-int bmMenuSetHighlightedIndex(bmMenu *menu, unsigned int index)
+bool
+bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index)
 {
     assert(menu);
 
-    unsigned int itemsCount;
-    bmMenuGetFilteredItems(menu, &itemsCount);
+    uint32_t count;
+    bm_menu_get_filtered_items(menu, &count);
 
-    if (itemsCount <= index)
+    if (count <= index)
         return 0;
 
     return (menu->index = index);
 }
 
-/**
- * Highlight item in menu.
- *
- * @param menu bmMenu instance from where to highlight item.
- * @param item bmItem instance to highlight.
- * @return 1 on successful highlight, 0 on failure.
- */
-int bmMenuSetHighlighted(bmMenu *menu, bmItem *item)
+bool
+bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item)
 {
     assert(menu);
 
-    unsigned int i, itemsCount;
-    bmItem **items = bmMenuGetFilteredItems(menu, &itemsCount);
-    for (i = 0; i < itemsCount && items[i] != item; ++i);
+    uint32_t i, count;
+    struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
+    for (i = 0; i < count && items[i] != item; ++i);
 
-    if (itemsCount <= i)
+    if (count <= i)
         return 0;
 
     return (menu->index = i);
 }
 
-/**
- * Get highlighted item from bmMenu instance.
- *
- * @warning The pointer returned by this function may be invalid after items change.
- *
- * @param menu bmMenu instance from where to get highlighted item.
- * @return Selected bmItem instance, **NULL** if none highlighted.
- */
-bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
+struct bm_item*
+bm_menu_get_highlighted_item(const struct bm_menu *menu)
 {
     assert(menu);
 
-    unsigned int count;
-    bmItem **items = bmMenuGetFilteredItems(menu, &count);
+    uint32_t count;
+    struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
 
     if (!items || count <= menu->index)
         return NULL;
@@ -367,244 +249,169 @@ bmItem* bmMenuGetHighlightedItem(const bmMenu *menu)
     return items[menu->index];
 }
 
-/**
- * Set selected items to bmMenu instance.
- *
- * @param menu bmMenu instance where items will be set.
- * @param items Array of bmItem pointers to set.
- * @param nmemb Total count of items in array.
- * @return 1 on successful set, 0 on failure.
- */
-int bmMenuSetSelectedItems(bmMenu *menu, bmItem **items, unsigned int nmemb)
+bool
+bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_t nmemb)
 {
     assert(menu);
 
-    bmItem **newItems;
-    if (!(newItems = calloc(sizeof(bmItem*), nmemb)))
+    struct bm_item **new_items;
+    if (!(new_items = calloc(sizeof(struct bm_item*), nmemb)))
         return 0;
 
-    memcpy(newItems, items, sizeof(bmItem*) * nmemb);
-    return _bmItemListSetItemsNoCopy(&menu->selection, newItems, nmemb);
+    memcpy(new_items, items, sizeof(struct bm_item*) * nmemb);
+    return list_set_items_no_copy(&menu->selection, new_items, nmemb);
 }
 
-/**
- * Get selected items from bmMenu instance.
- *
- * @warning The pointer returned by this function may be invalid after selection or items change.
- *
- * @param menu bmMenu instance from where to get selected items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
- */
-bmItem** bmMenuGetSelectedItems(const bmMenu *menu, unsigned int *outNmemb)
+struct bm_item**
+bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t *out_nmemb)
 {
     assert(menu);
-    return _bmItemListGetItems(&menu->selection, outNmemb);
+    return list_get_items(&menu->selection, out_nmemb);
 }
 
-/**
- * Set items to bmMenu instance.
- * Will replace all the old items on bmMenu instance.
- *
- * If items is **NULL**, or nmemb is zero, all items will be freed from the menu.
- *
- * @param menu bmMenu instance where items will be set.
- * @param items Array of bmItem pointers to set.
- * @param nmemb Total count of items in array.
- * @return 1 on successful set, 0 on failure.
- */
-int bmMenuSetItems(bmMenu *menu, const bmItem **items, unsigned int nmemb)
+bool
+bm_menu_set_items(struct bm_menu *menu, const struct bm_item **items, uint32_t nmemb)
 {
     assert(menu);
 
-    int ret = _bmItemListSetItems(&menu->items, items, nmemb);
+    bool ret = list_set_items(&menu->items, items, nmemb, (list_free_fun)bm_item_free);
 
     if (ret) {
-        _bmItemListFreeList(&menu->selection);
-        _bmItemListFreeList(&menu->filtered);
+        list_free_list(&menu->selection);
+        list_free_list(&menu->filtered);
     }
 
     return ret;
 }
 
-/**
- * Get items from bmMenu instance.
- *
- * @warning The pointer returned by this function may be invalid after removing or adding new items.
- *
- * @param menu bmMenu instance from where to get items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
- */
-bmItem** bmMenuGetItems(const bmMenu *menu, unsigned int *outNmemb)
+struct bm_item**
+bm_menu_get_items(const struct bm_menu *menu, uint32_t *out_nmemb)
 {
     assert(menu);
-    return _bmItemListGetItems(&menu->items, outNmemb);
+    return list_get_items(&menu->items, out_nmemb);
 }
 
-/**
- * Get filtered (displayed) items from bmMenu instance.
- *
- * @warning The pointer returned by this function _will_ be invalid when menu internally filters its list again.
- *          Do not store this pointer.
- *
- * @param menu bmMenu instance from where to get filtered items.
- * @param outNmemb Reference to unsigned int where total count of returned items will be stored.
- * @return Pointer to array of bmItem pointers.
- */
-bmItem** bmMenuGetFilteredItems(const bmMenu *menu, unsigned int *outNmemb)
+struct bm_item**
+bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb)
 {
     assert(menu);
 
     if (menu->filter && strlen(menu->filter))
-        return _bmItemListGetItems(&menu->filtered, outNmemb);
+        return list_get_items(&menu->filtered, out_nmemb);
 
-    return _bmItemListGetItems(&menu->items, outNmemb);
+    return list_get_items(&menu->items, out_nmemb);
 }
 
-/**
- * Render bmMenu instance using chosen draw method.
- *
- * @param menu bmMenu instance to be rendered.
- */
-void bmMenuRender(const bmMenu *menu)
+void
+bm_menu_render(const struct bm_menu *menu)
 {
     assert(menu);
 
-    if (menu->renderApi.render)
-        menu->renderApi.render(menu);
+    if (menu->renderer->api.render)
+        menu->renderer->api.render(menu);
 }
 
-/**
- * Trigger filtering of menu manually.
- * This is useful when adding new items and want to dynamically see them filtered.
- *
- * Do note that filtering might be heavy, so you should only call it after batch manipulation of items.
- * Not after manipulation of each single item.
- *
- * @param menu bmMenu instance which to filter.
- */
-void bmMenuFilter(bmMenu *menu)
+void
+bm_menu_filter(struct bm_menu *menu)
 {
     assert(menu);
 
     char addition = 0;
     size_t len = (menu->filter ? strlen(menu->filter) : 0);
 
-    if (!len || !menu->items.list || menu->items.count <= 0) {
-        _bmItemListFreeList(&menu->filtered);
-
-        if (menu->oldFilter)
-            free(menu->oldFilter);
-
-        menu->oldFilter = NULL;
+    if (!len || !menu->items.items || menu->items.count <= 0) {
+        list_free_list(&menu->filtered);
+        free(menu->old_filter);
+        menu->old_filter = NULL;
         return;
     }
 
-    if (menu->oldFilter) {
-        size_t oldLen = strlen(menu->oldFilter);
-        addition = (oldLen < len && !memcmp(menu->oldFilter, menu->filter, oldLen));
+    if (menu->old_filter) {
+        size_t oldLen = strlen(menu->old_filter);
+        addition = (oldLen < len && !memcmp(menu->old_filter, menu->filter, oldLen));
     }
 
-    if (menu->oldFilter && addition && menu->filtered.count <= 0)
+    if (menu->old_filter && addition && menu->filtered.count <= 0)
         return;
 
-    if (menu->oldFilter && !strcmp(menu->filter, menu->oldFilter))
+    if (menu->old_filter && !strcmp(menu->filter, menu->old_filter))
         return;
 
-    unsigned int count;
-    bmItem **filtered = filterFunc[menu->filterMode](menu, addition, &count);
+    uint32_t count;
+    struct bm_item **filtered = filter_func[menu->filter_mode](menu, addition, &count);
 
-    _bmItemListSetItemsNoCopy(&menu->filtered, filtered, count);
+    list_set_items_no_copy(&menu->filtered, filtered, count);
     menu->index = 0;
 
-    if (menu->oldFilter)
-        free(menu->oldFilter);
-
-    menu->oldFilter = _bmStrdup(menu->filter);
+    free(menu->old_filter);
+    menu->old_filter = bm_strdup(menu->filter);
 }
 
-/**
- * Poll key and unicode from underlying UI toolkit.
- *
- * This function will block on @link ::bmDrawMode BM_DRAW_MODE_CURSES @endlink draw mode.
- *
- * @param menu bmMenu instance from which to poll.
- * @param outUnicode Reference to unsigned int.
- * @return bmKey for polled key.
- */
-bmKey bmMenuGetKey(bmMenu *menu, unsigned int *outUnicode)
+enum bm_key
+bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode)
 {
-    assert(menu);
-    assert(outUnicode);
+    assert(menu && out_unicode);
 
-    *outUnicode = 0;
-    bmKey key = BM_KEY_NONE;
+    *out_unicode = 0;
+    enum bm_key key = BM_KEY_NONE;
 
-    if (menu->renderApi.getKey)
-        key = menu->renderApi.getKey(outUnicode);
+    if (menu->renderer->api.poll_key)
+        key = menu->renderer->api.poll_key(out_unicode);
 
     return key;
 }
 
-/**
- * Advances menu logic with key and unicode as input.
- *
- * @param menu bmMenu instance to be advanced.
- * @param key Key input that will advance menu logic.
- * @param unicode Unicode input that will advance menu logic.
- * @return bmRunResult for menu state.
- */
-bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
+enum bm_run_result
+bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 {
     assert(menu);
 
-    unsigned int itemsCount;
-    bmMenuGetFilteredItems(menu, &itemsCount);
+    uint32_t count;
+    bm_menu_get_filtered_items(menu, &count);
 
-    unsigned int displayed = 0;
-    if (menu->renderApi.displayedCount)
-        displayed = menu->renderApi.displayedCount(menu);
+    uint32_t displayed = 0;
+    if (menu->renderer->api.get_displayed_count)
+        displayed = menu->renderer->api.get_displayed_count(menu);
 
     if (!displayed)
-        displayed = itemsCount;
+        displayed = count;
 
     switch (key) {
         case BM_KEY_LEFT:
             if (menu->filter) {
-                unsigned int oldCursor = menu->cursor;
-                menu->cursor -= _bmUtf8RunePrev(menu->filter, menu->cursor);
-                menu->cursesCursor -= _bmUtf8RuneWidth(menu->filter + menu->cursor, oldCursor - menu->cursor);
+                uint32_t oldCursor = menu->cursor;
+                menu->cursor -= bm_utf8_rune_prev(menu->filter, menu->cursor);
+                menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, oldCursor - menu->cursor);
             }
             break;
 
         case BM_KEY_RIGHT:
             if (menu->filter) {
-                unsigned int oldCursor = menu->cursor;
-                menu->cursor += _bmUtf8RuneNext(menu->filter, menu->cursor);
-                menu->cursesCursor += _bmUtf8RuneWidth(menu->filter + oldCursor, menu->cursor - oldCursor);
+                uint32_t oldCursor = menu->cursor;
+                menu->cursor += bm_utf8_rune_next(menu->filter, menu->cursor);
+                menu->curses_cursor += bm_utf8_rune_width(menu->filter + oldCursor, menu->cursor - oldCursor);
             }
             break;
 
         case BM_KEY_HOME:
-            menu->cursesCursor = menu->cursor = 0;
+            menu->curses_cursor = menu->cursor = 0;
             break;
 
         case BM_KEY_END:
             menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
-            menu->cursesCursor = (menu->filter ? _bmUtf8StringScreenWidth(menu->filter) : 0);
+            menu->curses_cursor = (menu->filter ? bm_utf8_string_screen_width(menu->filter) : 0);
             break;
 
         case BM_KEY_UP:
             if (menu->index > 0) {
                 menu->index--;
             } else if (menu->wrap) {
-                menu->index = itemsCount - 1;
+                menu->index = count - 1;
             }
             break;
 
         case BM_KEY_DOWN:
-            if (menu->index < itemsCount - 1) {
+            if (menu->index < count - 1) {
                 menu->index++;
             } else if (menu->wrap) {
                 menu->index = 0;
@@ -616,7 +423,7 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_PAGE_DOWN:
-            menu->index = (menu->index + displayed >= itemsCount ? itemsCount - 1 : menu->index + (displayed - 1));
+            menu->index = (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1));
             break;
 
         case BM_KEY_SHIFT_PAGE_UP:
@@ -624,28 +431,28 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
             break;
 
         case BM_KEY_SHIFT_PAGE_DOWN:
-            menu->index = itemsCount - 1;
+            menu->index = count - 1;
             break;
 
         case BM_KEY_BACKSPACE:
             if (menu->filter) {
                 size_t width;
-                menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
-                menu->cursesCursor -= width;
+                menu->cursor -= bm_utf8_rune_remove(menu->filter, menu->cursor, &width);
+                menu->curses_cursor -= width;
             }
             break;
 
         case BM_KEY_DELETE:
             if (menu->filter)
-                _bmUtf8RuneRemove(menu->filter, menu->cursor + 1, NULL);
+                bm_utf8_rune_remove(menu->filter, menu->cursor + 1, NULL);
             break;
 
         case BM_KEY_LINE_DELETE_LEFT:
             if (menu->filter) {
                 while (menu->cursor > 0) {
                     size_t width;
-                    menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
-                    menu->cursesCursor -= width;
+                    menu->cursor -= bm_utf8_rune_remove(menu->filter, menu->cursor, &width);
+                    menu->curses_cursor -= width;
                 }
             }
             break;
@@ -658,19 +465,19 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
         case BM_KEY_WORD_DELETE:
            if (menu->filter) {
                 while (menu->cursor < strlen(menu->filter) && !isspace(menu->filter[menu->cursor])) {
-                    unsigned int oldCursor = menu->cursor;
-                    menu->cursor += _bmUtf8RuneNext(menu->filter, menu->cursor);
-                    menu->cursesCursor += _bmUtf8RuneWidth(menu->filter + oldCursor, menu->cursor - oldCursor);
+                    uint32_t oldCursor = menu->cursor;
+                    menu->cursor += bm_utf8_rune_next(menu->filter, menu->cursor);
+                    menu->curses_cursor += bm_utf8_rune_width(menu->filter + oldCursor, menu->cursor - oldCursor);
                 }
                 while (menu->cursor > 0 && isspace(menu->filter[menu->cursor - 1])) {
-                    unsigned int oldCursor = menu->cursor;
-                    menu->cursor -= _bmUtf8RunePrev(menu->filter, menu->cursor);
-                    menu->cursesCursor -= _bmUtf8RuneWidth(menu->filter + menu->cursor, oldCursor - menu->cursor);
+                    uint32_t oldCursor = menu->cursor;
+                    menu->cursor -= bm_utf8_rune_prev(menu->filter, menu->cursor);
+                    menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, oldCursor - menu->cursor);
                 }
                 while (menu->cursor > 0 && !isspace(menu->filter[menu->cursor - 1])) {
                     size_t width;
-                    menu->cursor -= _bmUtf8RuneRemove(menu->filter, menu->cursor, &width);
-                    menu->cursesCursor -= width;
+                    menu->cursor -= bm_utf8_rune_remove(menu->filter, menu->cursor, &width);
+                    menu->curses_cursor -= width;
                 }
             }
             break;
@@ -678,19 +485,19 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
         case BM_KEY_UNICODE:
             {
                 size_t width;
-                menu->cursor += _bmUnicodeInsert(&menu->filter, &menu->filterSize, menu->cursor, unicode, &width);
-                menu->cursesCursor += width;
+                menu->cursor += bm_unicode_insert(&menu->filter, &menu->filter_size, menu->cursor, unicode, &width);
+                menu->curses_cursor += width;
             }
             break;
 
         case BM_KEY_TAB:
             {
                 const char *text;
-                bmItem *highlighted = bmMenuGetHighlightedItem(menu);
-                if (highlighted && (text = bmItemGetText(highlighted))) {
-                    bmMenuSetFilter(menu, text);
+                struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                if (highlighted && (text = bm_item_get_text(highlighted))) {
+                    bm_menu_set_filter(menu, text);
                     menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
-                    menu->cursesCursor = (menu->filter ? _bmUtf8StringScreenWidth(menu->filter) : 0);
+                    menu->curses_cursor = (menu->filter ? bm_utf8_string_screen_width(menu->filter) : 0);
                 }
             }
             break;
@@ -698,21 +505,21 @@ bmRunResult bmMenuRunWithKey(bmMenu *menu, bmKey key, unsigned int unicode)
         case BM_KEY_CONTROL_RETURN:
         case BM_KEY_RETURN:
             {
-                bmItem *highlighted = bmMenuGetHighlightedItem(menu);
-                if (highlighted && !_bmMenuItemIsSelected(menu, highlighted))
-                    _bmItemListAddItem(&menu->selection, highlighted);
+                struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
+                    list_add_item(&menu->selection, highlighted);
             }
             break;
 
         case BM_KEY_SHIFT_RETURN:
         case BM_KEY_ESCAPE:
-            _bmItemListFreeList(&menu->selection);
+            list_free_list(&menu->selection);
             break;
 
         default: break;
     }
 
-    bmMenuFilter(menu);
+    bm_menu_filter(menu);
 
     switch (key) {
         case BM_KEY_SHIFT_RETURN:

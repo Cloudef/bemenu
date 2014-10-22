@@ -5,10 +5,92 @@
 #endif
 
 /**
- * Internal bmItem struct that is not exposed to public.
+ * Destructor function pointer for some list calls.
+ */
+typedef void (*list_free_fun)(void*);
+
+/**
+ * List type
+ */
+struct list {
+    /**
+     * Items in the list.
+     */
+    void **items;
+
+    /**
+     * Number of items.
+     */
+    uint32_t count;
+
+    /**
+     * Number of allocated items.
+     */
+    uint32_t allocated;
+};
+
+/**
+ * Internal render api struct.
+ * Renderers should be able to fill this one as they see fit.
+ */
+struct render_api {
+    /**
+     * Create underlying renderer.
+     */
+    void (*constructor)(void);
+
+    /**
+     * Release underlying renderer.
+     */
+    void (*destructor)(void);
+
+    /**
+     * Get count of displayed items by the underlying renderer.
+     */
+    uint32_t (*get_displayed_count)(const struct bm_menu *menu);
+
+    /**
+     * If the underlying renderer is a UI toolkit. (curses, etc...)
+     * There might be possibility to get user input, and this should be thus implemented.
+     */
+    enum bm_key (*poll_key)(uint32_t *unicode);
+
+    /**
+     * Tells underlying renderer to draw the menu.
+     */
+    void (*render)(const struct bm_menu *menu);
+};
+
+/**
+ * Internal bm_renderer struct.
+ */
+struct bm_renderer {
+    /**
+     * Name of the renderer.
+     */
+    char *name;
+
+    /**
+     * File path of the renderer.
+     */
+    char *file;
+
+    /**
+     * Open handle to the plugin file of this renderer.
+     */
+    void *handle;
+
+    /**
+     * API
+     */
+    struct render_api api;
+};
+
+/**
+ * Internal bm_item struct that is not exposed to public.
  * Represents a single item in menu.
  */
-struct _bmItem {
+struct bm_item {
     /**
      * Userdata pointer.
      * This pointer will be passed around with the item untouched.
@@ -23,53 +105,9 @@ struct _bmItem {
 };
 
 /**
- * Internal bmRenderApi struct.
- * Renderers should be able to fill this one as they see fit.
+ * Internal bm_menu struct that is not exposed to public.
  */
-struct _bmRenderApi {
-    /**
-     * Get count of displayed items by the underlying renderer.
-     */
-    unsigned int (*displayedCount)(const bmMenu *menu);
-
-    /**
-     * If the underlying renderer is a UI toolkit. (curses, etc...)
-     * There might be possibility to get user input, and this should be thus implemented.
-     */
-    bmKey (*getKey)(unsigned int *unicode);
-
-    /**
-     * Tells underlying renderer to draw the menu.
-     */
-    void (*render)(const bmMenu *menu);
-
-    /**
-     * Release underlying renderer.
-     */
-    void (*free)(void);
-};
-
-struct _bmItemList {
-    /**
-     * Items in the list.
-     */
-    struct _bmItem **list;
-
-    /**
-     * Number of items.
-     */
-    unsigned int count;
-
-    /**
-     * Number of allocated items.
-     */
-    unsigned int allocated;
-};
-
-/**
- * Internal bmMenu struct that is not exposed to public.
- */
-struct _bmMenu {
+struct bm_menu {
     /**
      * Userdata pointer.
      * This pointer will be passed around with the menu untouched.
@@ -79,22 +117,22 @@ struct _bmMenu {
     /**
      * Underlying renderer access.
      */
-    struct _bmRenderApi renderApi;
+    const struct bm_renderer *renderer;
 
     /**
      * Items contained in menu instance.
      */
-    struct _bmItemList items;
+    struct list items;
 
     /**
      * Filtered/displayed items contained in menu instance.
      */
-    struct _bmItemList filtered;
+    struct list filtered;
 
     /**
      * Selected items.
      */
-    struct _bmItemList selection;
+    struct list selection;
 
     /**
      * Menu instance title.
@@ -109,80 +147,74 @@ struct _bmMenu {
     /**
      * Used as optimization.
      */
-    char *oldFilter;
+    char *old_filter;
 
     /**
      * Size of filter buffer
      */
-    size_t filterSize;
+    size_t filter_size;
 
     /**
      * Current byte offset on filter text.
      */
-    unsigned int cursor;
+    uint32_t cursor;
 
     /**
      * Current column/cursor position on filter text.
      */
-    unsigned int cursesCursor;
+    uint32_t curses_cursor;
 
     /**
      * Current filtered/highlighted item index in menu instance.
      * This index is valid for the list returned by bmMenuGetFilteredItems.
      */
-    unsigned int index;
+    uint32_t index;
 
     /**
      * Current filtering method in menu instance.
      */
-    bmFilterMode filterMode;
-
-    /**
-     * Drawing mode used in menu instance.
-     */
-    bmDrawMode drawMode;
+    enum bm_filter_mode filter_mode;
 
     /**
      * Should selection be wrapped?
      */
-    char wrap;
+    bool wrap;
 };
 
-/* draw/curses.c */
-int _bmDrawCursesInit(struct _bmRenderApi *api);
+/* library.c */
+bool bm_renderer_activate(struct bm_renderer *renderer);
 
 /* menu.c */
-int _bmMenuItemIsSelected(const bmMenu *menu, const bmItem *item);
+bool bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item);
 
 /* filter.c */
-bmItem** _bmFilterDmenu(bmMenu *menu, char addition, unsigned int *outNmemb);
-bmItem** _bmFilterDmenuCaseInsensitive(bmMenu *menu, char addition, unsigned int *outNmemb);
+struct bm_item** bm_filter_dmenu(struct bm_menu *menu, bool addition, uint32_t *out_nmemb);
+struct bm_item** bm_filter_dmenu_case_insensitive(struct bm_menu *menu, bool addition, uint32_t *out_nmemb);
 
 /* list.c */
-void _bmItemListFreeList(struct _bmItemList *list);
-void _bmItemListFreeItems(struct _bmItemList *list);
-bmItem** _bmItemListGetItems(const struct _bmItemList *list, unsigned int *outNmemb);
-int _bmItemListSetItemsNoCopy(struct _bmItemList *list, bmItem **items, unsigned int nmemb);
-int _bmItemListSetItems(struct _bmItemList *list, const bmItem **items, unsigned int nmemb);
-int _bmItemListGrow(struct _bmItemList *list, unsigned int step);
-int _bmItemListAddItemAt(struct _bmItemList *list, bmItem *item, unsigned int index);
-int _bmItemListAddItem(struct _bmItemList *list, bmItem *item);
-int _bmItemListRemoveItemAt(struct _bmItemList *list, unsigned int index);
-int _bmItemListRemoveItem(struct _bmItemList *list, const bmItem *item);
+void list_free_list(struct list *list);
+void list_free_items(struct list *list, list_free_fun destructor);
+void* list_get_items(const struct list *list, uint32_t *out_nmemb);
+bool list_set_items_no_copy(struct list *list, void *items, uint32_t nmemb);
+bool list_set_items(struct list *list, const void *items, uint32_t nmemb, list_free_fun destructor);
+bool list_grow(struct list *list, uint32_t step);
+bool list_add_item_at(struct list *list, void *item, uint32_t index);
+bool list_add_item(struct list *list, void *item);
+bool list_remove_item_at(struct list *list, uint32_t index);
+bool list_remove_item(struct list *list, const void *item);
 
 /* util.c */
-char* _bmStrdup(const char *s);
-size_t _bmStripToken(char *string, const char *token, size_t *outNext);
-int _bmStrupcmp(const char *hay, const char *needle);
-int _bmStrnupcmp(const char *hay, const char *needle, size_t len);
-char* _bmStrupstr(const char *hay, const char *needle);
-bmItem** _bmShrinkItemList(bmItem ***inOutList, size_t osize, size_t nsize);
-int _bmUtf8StringScreenWidth(const char *string);
-size_t _bmUtf8RuneNext(const char *string, size_t start);
-size_t _bmUtf8RunePrev(const char *string, size_t start);
-size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len);
-size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth);
-size_t _bmUtf8RuneInsert(char **string, size_t *bufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth);
-size_t _bmUnicodeInsert(char **string, size_t *bufSize, size_t start, unsigned int unicode, size_t *outRuneWidth);
+char* bm_strdup(const char *s);
+size_t bm_strip_token(char *string, const char *token, size_t *out_next);
+int bm_strupcmp(const char *hay, const char *needle);
+int bm_strnupcmp(const char *hay, const char *needle, size_t len);
+char* bm_strupstr(const char *hay, const char *needle);
+int32_t bm_utf8_string_screen_width(const char *string);
+size_t bm_utf8_rune_next(const char *string, size_t start);
+size_t bm_utf8_rune_prev(const char *string, size_t start);
+size_t bm_utf8_rune_width(const char *rune, uint32_t u8len);
+size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
+size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
+size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
 
 /* vim: set ts=8 sw=4 tw=0 :*/

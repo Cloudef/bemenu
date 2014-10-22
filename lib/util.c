@@ -1,8 +1,8 @@
-#include "internal.h"
-
 #define _XOPEN_SOURCE
 #include <wchar.h> /* wcswidth */
 #undef _XOPEN_SOURCE
+
+#include "internal.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +15,8 @@
  * @param string C "string" to copy.
  * @return Copy of the given C "string".
  */
-char* _bmStrdup(const char *string)
+char*
+bm_strdup(const char *string)
 {
     assert(string);
 
@@ -34,15 +35,16 @@ char* _bmStrdup(const char *string)
  * Replaces next token in string with '\0' and returns position for the replaced token.
  *
  * @param string C "string" where token will be replaced.
- * @param outNext Reference to position of next delimiter, or 0 if none.
+ * @param out_next Reference to position of next delimiter, or 0 if none.
  * @return Position of the replaced token.
  */
-size_t _bmStripToken(char *string, const char *token, size_t *outNext)
+size_t
+bm_strip_token(char *string, const char *token, size_t *out_next)
 {
     size_t len = strcspn(string, token);
 
-    if (outNext)
-        *outNext = len + (string[len] != 0);
+    if (out_next)
+        *out_next = len + (string[len] != 0);
 
     string[len] = 0;
     return len;
@@ -55,9 +57,10 @@ size_t _bmStripToken(char *string, const char *token, size_t *outNext)
  * @param needle C "string" to match.
  * @return Less than, equal to or greater than zero if hay is lexicographically less than, equal to or greater than needle.
  */
-int _bmStrupcmp(const char *hay, const char *needle)
+int
+bm_strupcmp(const char *hay, const char *needle)
 {
-    return _bmStrnupcmp(hay, needle, strlen(hay));
+    return bm_strnupcmp(hay, needle, strlen(hay));
 }
 
 /**
@@ -67,15 +70,14 @@ int _bmStrupcmp(const char *hay, const char *needle)
  * @param needle C "string" to match.
  * @return Less than, equal to or greater than zero if hay is lexicographically less than, equal to or greater than needle.
  */
-int _bmStrnupcmp(const char *hay, const char *needle, size_t len)
+int
+bm_strnupcmp(const char *hay, const char *needle, size_t len)
 {
-    size_t i = 0;
-    unsigned char a = 0, b = 0;
-
     const unsigned char *p1 = (const unsigned char*)hay;
     const unsigned char *p2 = (const unsigned char*)needle;
 
-    for (i = 0; len > 0; --len, ++i)
+    unsigned char a = 0, b = 0;
+    for (size_t i = 0; len > 0; --len, ++i)
         if ((a = toupper(*p1++)) != (b = toupper(*p2++)))
             return a - b;
 
@@ -88,17 +90,18 @@ int _bmStrnupcmp(const char *hay, const char *needle, size_t len)
  * @param hay C "string" to substring against.
  * @param needle C "string" to substring.
  */
-char* _bmStrupstr(const char *hay, const char *needle)
+char*
+bm_strupstr(const char *hay, const char *needle)
 {
-    size_t i, r = 0, p = 0, len, len2;
+    size_t r = 0, p = 0, len, len2;
 
     if ((len = strlen(hay)) < (len2 = strlen(needle)))
         return NULL;
 
-    if (!_bmStrnupcmp(hay, needle, len2))
+    if (!bm_strnupcmp(hay, needle, len2))
         return (char*)hay;
 
-    for (i = 0; i < len; ++i) {
+    for (size_t i = 0; i < len; ++i) {
         if (p == len2)
             return (char*)hay + r;
 
@@ -121,12 +124,13 @@ char* _bmStrupstr(const char *hay, const char *needle)
  * @param string C "string" to determite.
  * @return Number of columns, or -1 on failure.
  */
-int _bmUtf8StringScreenWidth(const char *string)
+int32_t
+bm_utf8_string_screen_width(const char *string)
 {
     assert(string);
 
-    char *mstr = _bmStrdup(string);
-    if (!mstr)
+    char *mstr;
+    if (!(mstr = bm_strdup(string)))
         return strlen(string);
 
     char *s;
@@ -142,7 +146,7 @@ int _bmUtf8StringScreenWidth(const char *string)
         return len;
     }
 
-    int length = wcswidth(wstring, num_char);
+    int32_t length = wcswidth(wstring, num_char);
     free(wstring);
     free(mstr);
     return length;
@@ -155,7 +159,8 @@ int _bmUtf8StringScreenWidth(const char *string)
  * @param start Offset where to figure out next rune. (cursor)
  * @return Number of bytes to next UTF8 rune.
  */
-size_t _bmUtf8RuneNext(const char *string, size_t start)
+size_t
+bm_utf8_rune_next(const char *string, size_t start)
 {
     assert(string);
 
@@ -174,7 +179,8 @@ size_t _bmUtf8RuneNext(const char *string, size_t start)
  * @param start Offset where to figure out previous rune. (cursor)
  * @return Number of bytes to previous UTF8 rune.
  */
-size_t _bmUtf8RunePrev(const char *string, size_t start)
+size_t
+bm_utf8_rune_prev(const char *string, size_t start)
 {
     assert(string);
 
@@ -193,12 +199,13 @@ size_t _bmUtf8RunePrev(const char *string, size_t start)
  * @param u8len Byte length of the rune.
  * @return Number of columns, or -1 on failure.
  */
-size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len)
+size_t
+bm_utf8_rune_width(const char *rune, uint32_t u8len)
 {
     assert(rune);
     char mb[5] = { 0, 0, 0, 0, 0 };
     memcpy(mb, rune, (u8len > 4 ? 4 : u8len));
-    return _bmUtf8StringScreenWidth(mb);
+    return bm_utf8_string_screen_width(mb);
 }
 
 /**
@@ -206,24 +213,25 @@ size_t _bmUtf8RuneWidth(const char *rune, unsigned int u8len)
  *
  * @param string Null terminated C "string".
  * @param start Start offset where to delete from. (cursor)
- * @param outRuneWidth Reference to size_t, return number of columns for removed rune, or -1 on failure.
+ * @param out_rune_width Reference to size_t, return number of columns for removed rune, or -1 on failure.
  * @return Number of bytes removed from buffer.
  */
-size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth)
+size_t
+bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width)
 {
     assert(string);
 
-    if (outRuneWidth)
-        *outRuneWidth = 0;
+    if (out_rune_width)
+        *out_rune_width = 0;
 
     size_t len = strlen(string), oldStart = start;
     if (len == 0 || len < start || !*string)
         return 0;
 
-    start -= _bmUtf8RunePrev(string, start);
+    start -= bm_utf8_rune_prev(string, start);
 
-    if (outRuneWidth)
-        *outRuneWidth = _bmUtf8RuneWidth(string + start, oldStart - start);
+    if (out_rune_width)
+        *out_rune_width = bm_utf8_rune_width(string + start, oldStart - start);
 
     memmove(string + start, string + oldStart, len - oldStart);
     string[len - (oldStart - start)] = 0;
@@ -233,68 +241,69 @@ size_t _bmUtf8RuneRemove(char *string, size_t start, size_t *outRuneWidth)
 /**
  * Insert UTF8 rune to buffer.
  *
- * @param inOutString Reference to buffer.
- * @param inOutBufSize Reference to size of the buffer.
+ * @param in_out_string Reference to buffer.
+ * @param in_out_buf_size Reference to size of the buffer.
  * @param start Start offset where to insert to. (cursor)
  * @param rune Buffer to insert to string.
  * @param u8len Byte length of the rune.
- * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
+ * @param out_rune_width Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUtf8RuneInsert(char **inOutString, size_t *inOutBufSize, size_t start, const char *rune, unsigned int u8len, size_t *outRuneWidth)
+size_t
+bm_utf8_rune_insert(char **in_out_string, size_t *in_out_buf_size, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width)
 {
-    assert(inOutString);
-    assert(inOutBufSize);
+    assert(in_out_string);
+    assert(in_out_buf_size);
 
-    if (outRuneWidth)
-        *outRuneWidth = 0;
+    if (out_rune_width)
+        *out_rune_width = 0;
 
     if (u8len == 1 && !isprint(*rune))
         return 0;
 
-    size_t len = (*inOutString ? strlen(*inOutString) : 0);
-    if (!*inOutString && !(*inOutString = calloc(1, (*inOutBufSize = u8len + 1))))
+    size_t len = (*in_out_string ? strlen(*in_out_string) : 0);
+    if (!*in_out_string && !(*in_out_string = calloc(1, (*in_out_buf_size = u8len + 1))))
         return 0;
 
-    if (len + u8len >= *inOutBufSize) {
+    if (len + u8len >= *in_out_buf_size) {
         void *tmp;
-        if (!(tmp = realloc(*inOutString, (*inOutBufSize * 2)))) {
-            if (!(tmp = malloc((*inOutBufSize * 2))))
+        if (!(tmp = realloc(*in_out_string, (*in_out_buf_size * 2)))) {
+            if (!(tmp = malloc((*in_out_buf_size * 2))))
                 return 0;
 
-            memcpy(tmp, *inOutString, *inOutBufSize);
-            free(*inOutString);
+            memcpy(tmp, *in_out_string, *in_out_buf_size);
+            free(*in_out_string);
         }
 
-        memset(tmp + *inOutBufSize, 0, *inOutBufSize);
-        *inOutString = tmp;
-        *inOutBufSize *= 2;
+        memset(tmp + *in_out_buf_size, 0, *in_out_buf_size);
+        *in_out_string = tmp;
+        *in_out_buf_size *= 2;
     }
 
-    char *str = *inOutString + start;
+    char *str = *in_out_string + start;
     memmove(str + u8len, str, len - start);
     memcpy(str, rune, u8len);
-    (*inOutString)[len + u8len] = 0;
+    (*in_out_string)[len + u8len] = 0;
 
-    if (outRuneWidth)
-        *outRuneWidth = _bmUtf8RuneWidth(rune, u8len);
+    if (out_rune_width)
+        *out_rune_width = bm_utf8_rune_width(rune, u8len);
     return u8len;
 }
 
 /**
  * Insert unicode character to UTF8 buffer.
  *
- * @param inOutString Reference to buffer.
- * @param inOutBufSize Reference to size of the buffer.
+ * @param in_out_string Reference to buffer.
+ * @param in_out_buf_size Reference to size of the buffer.
  * @param start Start offset where to insert to. (cursor)
  * @param unicode Unicode character to insert.
- * @param outRuneWidth Reference to size_t, return number of columns for inserted rune, or -1 on failure.
+ * @param out_rune_width Reference to size_t, return number of columns for inserted rune, or -1 on failure.
  * @return Number of bytes inserted to buffer.
  */
-size_t _bmUnicodeInsert(char **inOutString, size_t *inOutBufSize, size_t start, unsigned int unicode, size_t *outRuneWidth)
+size_t
+bm_unicode_insert(char **in_out_string, size_t *in_out_buf_size, size_t start, uint32_t unicode, size_t *out_rune_width)
 {
-    assert(inOutString);
-    assert(inOutBufSize);
+    assert(in_out_string && in_out_buf_size);
 
     char u8len = ((unicode < 0x80) ? 1 : ((unicode < 0x800) ? 2 : ((unicode < 0x10000) ? 3 : 4)));
     char mb[5] = { 0, 0, 0, 0 };
@@ -308,7 +317,7 @@ size_t _bmUnicodeInsert(char **inOutString, size_t *inOutBufSize, size_t start, 
         mb[0] |= (unicode >> (i * 6 - 6));
     }
 
-    return _bmUtf8RuneInsert(inOutString, inOutBufSize, start, mb, u8len, outRuneWidth);
+    return bm_utf8_rune_insert(in_out_string, in_out_buf_size, start, mb, u8len, out_rune_width);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

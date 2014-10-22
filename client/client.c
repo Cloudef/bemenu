@@ -9,7 +9,7 @@
 #include <bemenu.h>
 
 static struct {
-    bmFilterMode filterMode;
+    enum bm_filter_mode filter_mode;
     int wrap;
     unsigned int lines;
     const char *title;
@@ -18,17 +18,18 @@ static struct {
     int grab;
     int monitor;
 } client = {
-    BM_FILTER_MODE_DMENU, /* filterMode */
-    0, /* wrap */
-    0, /* lines */
-    "bemenu", /* title */
-    0, /* selected */
-    0, /* bottom */
-    0, /* grab */
-    0 /* monitor */
+    .filter_mode = BM_FILTER_MODE_DMENU,
+    .wrap = 0,
+    .lines = 0,
+    .title = "bemenu",
+    .selected = 0,
+    .bottom = 0,
+    .grab = 0,
+    .monitor = 0
 };
 
-static void discoTrap(int sig)
+static void
+disco_trap(int sig)
 {
     (void)sig;
     printf("\e[?25h\n");
@@ -36,11 +37,12 @@ static void discoTrap(int sig)
     exit(EXIT_FAILURE);
 }
 
-static void disco(void)
+static void
+disco(void)
 {
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
-    action.sa_handler = discoTrap;
+    action.sa_handler = disco_trap;
     sigaction(SIGABRT, &action, NULL);
     sigaction(SIGSEGV, &action, NULL);
     sigaction(SIGTRAP, &action, NULL);
@@ -62,14 +64,16 @@ static void disco(void)
     exit(EXIT_SUCCESS);
 }
 
-static void version(const char *name)
+static void
+version(const char *name)
 {
     char *base = strrchr(name, '/');
-    printf("%s v%s\n", (base ? base  + 1 : name), bmVersion());
+    printf("%s v%s\n", (base ? base  + 1 : name), bm_version());
     exit(EXIT_SUCCESS);
 }
 
-static void usage(FILE *out, const char *name)
+static void
+usage(FILE *out, const char *name)
 {
     char *base = strrchr(name, '/');
     fprintf(out, "usage: %s [options]\n", (base ? base + 1 : name));
@@ -89,15 +93,16 @@ static void usage(FILE *out, const char *name)
           " -b, --bottom          appears at the bottom of the screen. ()\n"
           " -f, --grab            grabs the keyboard before reading stdin. ()\n"
           " -m, --monitor         index of monitor where menu will appear. ()\n"
-          " -fn, --fn             defines the font to be used. ()\n"
-          " -nb, --nb             defines the normal background color. ()\n"
-          " -nf, --nf             defines the normal foreground color. ()\n"
-          " -sb, --sb             defines the selected background color. ()\n"
-          " -sf, --sf             defines the selected foreground color. ()\n", out);
+          " --fn                  defines the font to be used. ()\n"
+          " --nb                  defines the normal background color. ()\n"
+          " --nf                  defines the normal foreground color. ()\n"
+          " --sb                  defines the selected background color. ()\n"
+          " --sf                  defines the selected foreground color. ()\n", out);
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
 
-static void parseArgs(int *argc, char **argv[])
+static void
+parse_args(int *argc, char **argv[])
 {
     static const struct option opts[] = {
         { "help",        no_argument,       0, 'h' },
@@ -140,7 +145,7 @@ static void parseArgs(int *argc, char **argv[])
                 break;
 
             case 'i':
-                client.filterMode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
+                client.filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
                 break;
             case 'w':
                 client.wrap = 1;
@@ -188,7 +193,8 @@ static void parseArgs(int *argc, char **argv[])
     *argv += optind;
 }
 
-static void readItemsToMenuFromStdin(bmMenu *menu)
+static void
+read_items_to_menu_from_stdin(struct bm_menu *menu)
 {
     assert(menu);
 
@@ -215,54 +221,58 @@ static void readItemsToMenuFromStdin(bmMenu *menu)
         size_t next = pos + (s[pos] != 0);
         s[pos] = 0;
 
-        bmItem *item = bmItemNew(s);
-        if (!item)
+        struct bm_item *item;
+        if (!(item = bm_item_new(s)))
             break;
 
-        bmMenuAddItem(menu, item);
+        bm_menu_add_item(menu, item);
         s += next;
     }
 
     free(buffer);
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
-    parseArgs(&argc, &argv);
-
-    bmMenu *menu = bmMenuNew(BM_DRAW_MODE_CURSES);
-    if (!menu)
+    if (!bm_init())
         return EXIT_FAILURE;
 
-    bmMenuSetTitle(menu, client.title);
-    bmMenuSetFilterMode(menu, client.filterMode);
-    bmMenuSetWrap(menu, client.wrap);
+    parse_args(&argc, &argv);
 
-    readItemsToMenuFromStdin(menu);
+    struct bm_menu *menu;
+    if (!(menu = bm_menu_new(NULL)))
+        return EXIT_FAILURE;
 
-    bmMenuSetHighlightedIndex(menu, client.selected);
+    bm_menu_set_title(menu, client.title);
+    bm_menu_set_filter_mode(menu, client.filter_mode);
+    bm_menu_set_wrap(menu, client.wrap);
 
-    bmKey key;
+    read_items_to_menu_from_stdin(menu);
+
+    bm_menu_set_highlighted_index(menu, client.selected);
+
+    enum bm_key key;
     unsigned int unicode;
     int status = 0;
     do {
-        bmMenuRender(menu);
-        key = bmMenuGetKey(menu, &unicode);
-    } while ((status = bmMenuRunWithKey(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
+        bm_menu_render(menu);
+        key = bm_menu_poll_key(menu, &unicode);
+    } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
 
     if (status == BM_RUN_RESULT_SELECTED) {
         unsigned int i, count;
-        bmItem **items = bmMenuGetSelectedItems(menu, &count);
+        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
         for (i = 0; i < count; ++i) {
-            const char *text = bmItemGetText(items[i]);
+            const char *text = bm_item_get_text(items[i]);
             printf("%s\n", (text ? text : ""));
         }
 
-        if (!count && bmMenuGetFilter(menu))
-            printf("%s\n", bmMenuGetFilter(menu));
+        if (!count && bm_menu_get_filter(menu))
+            printf("%s\n", bm_menu_get_filter(menu));
     }
 
-    bmMenuFree(menu);
+    bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 

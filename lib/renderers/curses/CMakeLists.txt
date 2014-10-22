@@ -1,0 +1,6 @@
+SET(CURSES_NEED_NCURSES TRUE)
+FIND_PACKAGE(Curses)
+ADD_LIBRARY(bemenu-renderer-curses SHARED curses.c)
+SET_TARGET_PROPERTIES(bemenu-renderer-curses PROPERTIES PREFIX "")
+TARGET_LINK_LIBRARIES(bemenu-renderer-curses ${CURSES_LIBRARY})
+INSTALL(TARGETS bemenu-renderer-curses DESTINATION lib/bemenu)

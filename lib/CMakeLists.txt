@@ -6,7 +6,7 @@ SET(BEMENU_SOURCE
     util.c
     filter.c
     library.c
-    draw/curses.c
+    3rdparty/cdl.c
     )
 
 # Configure
@@ -28,6 +28,9 @@ ENDIF ()
 # Parse soversion version
 STRING(REGEX MATCHALL "[0-9]+" VERSION_COMPONENTS ${BEMENU_VERSION})
 LIST(GET VERSION_COMPONENTS 0 SOVERSION)
+
+# Compile renderer plugins
+ADD_SUBDIRECTORY(renderers)
 
 # Compile
 INCLUDE_DIRECTORIES(${BEMENU_INCLUDE} ${CMAKE_CURRENT_BINARY_DIR})

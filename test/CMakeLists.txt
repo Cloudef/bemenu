@@ -1,11 +1,11 @@
 SET(TESTS
-    "bmMenuNew"
+    "bm_menu_new"
     )
 
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../lib")
 FOREACH (test ${TESTS})
     ADD_EXECUTABLE(${test}_test ${test}.c)
-    TARGET_LINK_LIBRARIES(${test}_test bemenu)
+    TARGET_LINK_LIBRARIES(${test}_test bemenu ${BEMENU_LIBRARIES})
 
     IF (WIN32)
         ADD_TEST(${test}_test ${test}_test.exe)
