@@ -1,5 +1,6 @@
 SET(RENDERERS
     "curses"
+    "wayland"
 )
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/renderers)
