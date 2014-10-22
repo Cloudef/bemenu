@@ -245,7 +245,7 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
     if (!curses.stdscr)
         return BM_KEY_NONE;
 
-    *unicode = getch();
+    get_wch((wint_t*)unicode);
 
     switch (*unicode) {
 #if KEY_RESIZE
