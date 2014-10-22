@@ -11,6 +11,7 @@ main(int argc, char **argv)
 {
     (void)argc, (void)argv;
 
+    unsetenv("BEMENU_RENDERER");
     setenv("BEMENU_RENDERERS", "../renderers", true);
 
     if (!bm_init())
@@ -22,7 +23,10 @@ main(int argc, char **argv)
         const struct bm_renderer **renderers = bm_get_renderers(&count);
         for (int32_t i = 0; i < count; ++i) {
             if (!strcmp(bm_renderer_get_name(renderers[i]), "curses") && !isatty(STDIN_FILENO)) {
-                printf("Skipping test for mode BM_DRAW_MODE_CURSES, as not running on terminal.\n");
+                printf("Skipping test for curses renderer, as not running on terminal.\n");
+                continue;
+            } else if (!strcmp(bm_renderer_get_name(renderers[i]), "wayland") && !getenv("WAYLAND_DISPLAY")) {
+                printf("Skipping test for wayland renderer, as not running on wayland compositor.\n");
                 continue;
             }
             struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
