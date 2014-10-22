@@ -22,14 +22,14 @@ main(int argc, char **argv)
         uint32_t count;
         const struct bm_renderer **renderers = bm_get_renderers(&count);
         for (int32_t i = 0; i < count; ++i) {
+            struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
             if (!strcmp(bm_renderer_get_name(renderers[i]), "curses") && !isatty(STDIN_FILENO)) {
-                printf("Skipping test for curses renderer, as not running on terminal.\n");
+                assert(!menu);
                 continue;
             } else if (!strcmp(bm_renderer_get_name(renderers[i]), "wayland") && !getenv("WAYLAND_DISPLAY")) {
-                printf("Skipping test for wayland renderer, as not running on wayland compositor.\n");
+                assert(!menu);
                 continue;
             }
-            struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
             assert(menu);
             bm_menu_render(menu);
             bm_menu_free(menu);
