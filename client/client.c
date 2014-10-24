@@ -52,10 +52,10 @@ disco(void)
     sigaction(SIGTRAP, &action, NULL);
     sigaction(SIGINT, &action, NULL);
 
-    unsigned int i, cc, c = 80;
+    uint32_t cc, c = 80;
     printf("\e[?25l");
     while (1) {
-        for (i = 1; i < c - 1; ++i) {
+        for (uint32_t i = 1; i < c - 1; ++i) {
             printf("\r    %*s%s %s %s ", (i > c / 2 ? c - i : i), " ", ((i % 2) ? "<o/" : "\\o>"), ((i % 4) ? "DISCO" : "     "), ((i %2) ? "\\o>" : "<o/"));
             for (cc = 0; cc < (i < c / 2 ? c / 2 - i : i - c / 2); ++cc) printf(((i % 2) ? "^" : "'"));
             printf("%s %s \r %s %s", ((i % 2) ? "*" : "•"), ((i % 3) ? "\\o" : "<o"), ((i % 3) ? "o/" : "o>"), ((i % 2) ? "*" : "•"));
@@ -140,7 +140,7 @@ parse_args(int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int opt = getopt_long(*argc, *argv, "hviwl:I:p:I:bfm:", opts, NULL);
+        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:I:bfm:", opts, NULL);
         if (opt < 0)
             break;
 
@@ -272,15 +272,15 @@ main(int argc, char **argv)
     bm_menu_set_highlighted_index(menu, client.selected);
 
     enum bm_key key;
-    unsigned int unicode;
-    int status = 0;
+    uint32_t unicode;
+    int32_t status = 0;
     do {
         bm_menu_render(menu);
         key = bm_menu_poll_key(menu, &unicode);
     } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
 
     if (status == BM_RUN_RESULT_SELECTED) {
-        unsigned int i, count;
+        uint32_t i, count;
         struct bm_item **items = bm_menu_get_selected_items(menu, &count);
         for (i = 0; i < count; ++i) {
             const char *text = bm_item_get_text(items[i]);
