@@ -5,6 +5,7 @@
 #include "internal.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
@@ -29,6 +30,85 @@ bm_strdup(const char *string)
         return NULL;
 
     return (char *)memcpy(copy, string, len);
+}
+
+/**
+ * Small wrapper around realloc.
+ * Resizes the buffer.
+ *
+ * @param in_out_buffer Reference to the input buffer that will be modified on succesful resize.
+ * @param in_out_size Current buffer size, will be modified with new size on succesful resize.
+ * @param nsize New size to resize the buffer to.
+ * @return true for succesful resize, false for failure.
+ */
+bool
+bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize)
+{
+    assert(in_out_buffer && in_out_size);
+
+    if (nsize == 0 || nsize <= *in_out_size)
+        return false;
+
+    void *tmp;
+    if (!(tmp = realloc(*in_out_buffer, nsize)))
+        return false;
+
+    *in_out_buffer = tmp;
+    *in_out_size = nsize;
+    return true;
+}
+
+/**
+ * Formatted printf that returns allocated char array.
+ *
+ * @param fmt Format as C "string".
+ * @return Copy of the formatted C "string".
+ */
+char*
+bm_dprintf(const char *fmt, ...)
+{
+   assert(fmt);
+
+   va_list args;
+   va_start(args, fmt);
+   size_t len = vsnprintf(NULL, 0, fmt, args) + 1;
+   va_end(args);
+
+   char *buffer;
+   if (!(buffer = calloc(1, len)))
+      return NULL;
+
+   va_start(args, fmt);
+   vsnprintf(buffer, len, fmt, args);
+   va_end(args);
+   return buffer;
+}
+
+/**
+ * Formatted printf that reuses and grows buffer when neccessary.
+ *
+ * @param in_out_buffer Reference to buffer that holds the new formatted text.
+ * @param in_out_len Reference to the length of current buffer and outs as resized length.
+ * @param fmt Format as C "string".
+ * @param va_list Argument list.
+ * @return true if successful, false if failure.
+ */
+bool
+bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args)
+{
+    assert(in_out_buffer && in_out_len && fmt);
+
+    va_list copy;
+    va_copy(copy, args);
+
+    size_t len = vsnprintf(NULL, 0, fmt, args) + 1;
+
+    if ((!*in_out_buffer || *in_out_len < len) && !bm_resize_buffer(in_out_buffer, in_out_len, len))
+        return false;
+
+    vsnprintf(*in_out_buffer, len, fmt, copy);
+    va_end(copy);
+    return true;
 }
 
 /**

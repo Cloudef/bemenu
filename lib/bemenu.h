@@ -1,3 +1,6 @@
+#ifndef _BEMENU_H_
+#define _BEMENU_H_
+
 /**
  * @file bemenu.h
  *
@@ -80,12 +83,41 @@ const char* bm_version(void);
  * @{ */
 
 /**
+ * Prioritories for renderer plugins.
+ */
+enum bm_prioritory {
+    /**
+     * Do not use this in renderers.
+     * This flag is for bm_menu_new, if any renderer is fine.
+     */
+    BM_PRIO_ANY,
+
+    /**
+     * Renderer runs in terminal.
+     */
+    BM_PRIO_TERMINAL,
+
+    /**
+     * Renderer runs in GUI.
+     */
+    BM_PRIO_GUI,
+};
+
+/**
  * Get name of the renderer.
  *
  * @param renderer bm_renderer instance.
  * @return Null terminated C "string" to renderer's name.
  */
 const char* bm_renderer_get_name(const struct bm_renderer *renderer);
+
+/**
+ * Get prioritory of the renderer.
+ *
+ * @param renderer bm_renderer instance.
+ * @return bm_prioritory enum value.
+ */
+enum bm_prioritory bm_renderer_get_prioritory(const struct bm_renderer *renderer);
 
 /**
  * @} Renderer */
@@ -158,9 +190,10 @@ enum bm_key {
  * Create new bm_menu instance.
  *
  * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
+ * @param prioritory @link ::bm_prioritory @endlink enum for which kind of renderer is wanted. Pass BM_PRIO_ANY, for anything.
  * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-struct bm_menu* bm_menu_new(const char *renderer);
+struct bm_menu* bm_menu_new(const char *renderer, enum bm_prioritory prioritory);
 
 /**
  * Release bm_menu instance.
@@ -511,5 +544,7 @@ const char* bm_item_get_text(const struct bm_item *item);
 /**  @} Item Properties */
 
 /**  @} Item */
+
+#endif /* _BEMENU_H_ */
 
 /* vim: set ts=8 sw=4 tw=0 :*/

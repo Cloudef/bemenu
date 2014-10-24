@@ -36,10 +36,16 @@ load(const char *file, struct bm_renderer *renderer)
     if (!(regfun = chckDlLoadSymbol(handle, "register_renderer", &error)))
         goto fail;
 
-    renderer->file = bm_strdup(file);
+    const char *name;
+    if (!(name = regfun(&renderer->api)))
+        goto fail;
+
+    if (strcmp(renderer->api.version, BM_VERSION))
+        goto fail;
+
     renderer->handle = handle;
-    const char *name = regfun(&renderer->api);
-    renderer->name = (name ? bm_strdup(name) : NULL);
+    renderer->name = bm_strdup(name);
+    renderer->file = bm_strdup(file);
     return true;
 
 fail:
@@ -47,6 +53,13 @@ fail:
         chckDlUnload(handle);
     fprintf(stderr, "%s\n", error);
     return false;
+}
+
+static int
+compare(const void *a, const void *b)
+{
+    const struct bm_renderer *ra = *(struct bm_renderer**)a, *rb = *(struct bm_renderer**)b;
+    return (ra->api.prioritory > rb->api.prioritory);
 }
 
 static bool
@@ -60,7 +73,12 @@ load_to_list(const char *file)
         goto fail;
 
     chckDlUnload(renderer->handle);
-    return list_add_item(&renderers, renderer);
+
+    if (!list_add_item(&renderers, renderer))
+        goto fail;
+
+    list_sort(&renderers, compare);
+    return true;
 
 fail:
     if (renderer)
@@ -76,6 +94,8 @@ bm_renderer_activate(struct bm_renderer *renderer, struct bm_menu *menu)
     if (!load(renderer->file, renderer))
         return false;
 
+    menu->renderer = renderer;
+
     if (!renderer->api.constructor(menu))
         goto fail;
 
@@ -83,6 +103,7 @@ bm_renderer_activate(struct bm_renderer *renderer, struct bm_menu *menu)
 
 fail:
     chckDlUnload(renderer->handle);
+    menu->renderer = NULL;
     return false;
 }
 
@@ -153,6 +174,13 @@ bm_renderer_get_name(const struct bm_renderer *renderer)
 {
     assert(renderer);
     return renderer->name;
+}
+
+enum bm_prioritory
+bm_renderer_get_prioritory(const struct bm_renderer *renderer)
+{
+    assert(renderer);
+    return renderer->api.prioritory;
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

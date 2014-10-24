@@ -1,24 +1,19 @@
-#if __APPLE__
-#   define _C99_SOURCE
-#   include <stdio.h> /* vsnprintf */
-#   undef _C99_SOURCE
-#endif
-
-#define _XOPEN_SOURCE 500
-#include <signal.h> /* sigaction */
-#include <stdarg.h> /* vsnprintf */
-#undef _XOPEN_SOURCE
+#define _DEFAULT_SOURCE
+#define _XOPEN_SOURCE_EXTENDED
 
 #include "internal.h"
+#include "version.h"
 
 #include <wchar.h>
+#include <signal.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
 #include <locale.h>
-#include <ncurses.h>
 #include <dlfcn.h>
 #include <assert.h>
+
+#include <ncurses.h>
 
 #if _WIN32
 static const char *TTY = "CON";
@@ -61,7 +56,8 @@ crash_handler(int sig)
     terminate();
 }
 
-static void resize_handler(int sig)
+static void
+resize_handler(int sig)
 {
     (void)sig;
     if (!curses.stdscr)
@@ -71,56 +67,26 @@ static void resize_handler(int sig)
     refresh();
 }
 
-static bool
-resize_buffer(char **buffer, size_t *osize, size_t nsize)
-{
-    assert(buffer);
-    assert(osize);
-
-    if (nsize == 0 || nsize <= *osize)
-        return false;
-
-    void *tmp;
-    if (!*buffer || !(tmp = realloc(*buffer, nsize))) {
-        if (!(tmp = malloc(nsize)))
-            return 0;
-
-        if (*buffer) {
-            memcpy(tmp, *buffer, *osize);
-            free(*buffer);
-        }
-    }
-
-    *buffer = tmp;
-    *osize = nsize;
-    return true;
-}
-
-#if __GNUC__
-__attribute__((format(printf, 3, 4)))
-#endif
-static void
-draw_line(int32_t pair, int32_t y, const char *format, ...)
+BM_LOG_ATTR(3, 4) static void
+draw_line(int32_t pair, int32_t y, const char *fmt, ...)
 {
     static size_t blen = 0;
     static char *buffer = NULL;
+    assert(fmt);
 
     size_t ncols;
     if ((ncols = getmaxx(curses.stdscr)) <= 0)
         return;
 
     va_list args;
-    va_start(args, format);
-    size_t nlen = vsnprintf(NULL, 0, format, args);
+    va_start(args, fmt);
+    bool ret = bm_vrprintf(&buffer, &blen, fmt, args);
     va_end(args);
 
-    if ((!buffer || nlen > blen) && !resize_buffer(&buffer, &blen, nlen + 1))
+    if (!ret)
         return;
 
-    va_start(args, format);
-    vsnprintf(buffer, blen, format, args);
-    va_end(args);
-
+    size_t nlen = strlen(buffer);
     size_t dw = 0, i = 0;
     while (dw < ncols && i < nlen) {
         if (buffer[i] == '\t') buffer[i] = ' ';
@@ -132,7 +98,7 @@ draw_line(int32_t pair, int32_t y, const char *format, ...)
     if (dw < ncols) {
         /* line is too short, widen it */
         size_t offset = i + (ncols - dw);
-        if (blen <= offset && !resize_buffer(&buffer, &blen, offset + 1))
+        if (blen <= offset && !bm_resize_buffer(&buffer, &blen, offset + 1))
              return;
 
         memset(buffer + nlen, ' ', offset - nlen);
@@ -145,7 +111,7 @@ draw_line(int32_t pair, int32_t y, const char *format, ...)
         size_t offset = i - (dw - ncols) + (ncols - cc) + 1;
         if (blen <= offset) {
             int32_t diff = offset - blen + 1;
-            if (!resize_buffer(&buffer, &blen, blen + diff))
+            if (!bm_resize_buffer(&buffer, &blen, blen + diff))
                 return;
         }
 
@@ -353,6 +319,8 @@ static bool
 constructor(struct bm_menu *menu)
 {
     (void)menu;
+    assert(!curses.stdscr && "bemenu supports only one curses instance");
+
     memset(&curses, 0, sizeof(curses));
 
     struct sigaction action;
@@ -374,6 +342,8 @@ register_renderer(struct render_api *api)
     api->get_displayed_count = get_displayed_count;
     api->poll_key = poll_key;
     api->render = render;
+    api->prioritory = BM_PRIO_TERMINAL;
+    api->version = BM_VERSION;
     return "curses";
 }
 

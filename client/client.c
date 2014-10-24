@@ -1,4 +1,4 @@
-#define _XOPEN_SOURCE 500
+#define _DEFAULT_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,19 +9,23 @@
 #include <bemenu.h>
 
 static struct {
+    enum bm_prioritory prioritory;
     enum bm_filter_mode filter_mode;
-    int wrap;
-    unsigned int lines;
+    int32_t wrap;
+    uint32_t lines;
     const char *title;
-    int selected;
-    int bottom;
-    int grab;
-    int monitor;
+    const char *renderer;
+    int32_t selected;
+    int32_t bottom;
+    int32_t grab;
+    int32_t monitor;
 } client = {
+    .prioritory = BM_PRIO_ANY,
     .filter_mode = BM_FILTER_MODE_DMENU,
     .wrap = 0,
     .lines = 0,
     .title = "bemenu",
+    .renderer = NULL,
     .selected = 0,
     .bottom = 0,
     .grab = 0,
@@ -84,10 +88,12 @@ usage(FILE *out, const char *name)
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
-          " -I, --index           select item at index automatically.\n\n"
+          " -I, --index           select item at index automatically.\n"
+          " --backend             options: curses, wayland\n"
+          " --prioritory          options: terminal, gui\n\n"
 
           "Backend specific options\n"
-          "   c = ncurses\n" // x == x11
+          "   c = ncurses, w == wayland\n"
           "   (...) At end of help indicates the backend support for option.\n\n"
 
           " -b, --bottom          appears at the bottom of the screen. ()\n"
@@ -113,17 +119,19 @@ parse_args(int *argc, char **argv[])
         { "list",        required_argument, 0, 'l' },
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
+        { "backend",     required_argument, 0, 0x100 },
+        { "prioritory",  required_argument, 0, 0x101 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
         { "monitor",     required_argument, 0, 'm' },
-        { "fn",          required_argument, 0, 0x100 },
-        { "nb",          required_argument, 0, 0x101 },
-        { "nf",          required_argument, 0, 0x102 },
-        { "sb",          required_argument, 0, 0x103 },
-        { "sf",          required_argument, 0, 0x104 },
+        { "fn",          required_argument, 0, 0x102 },
+        { "nb",          required_argument, 0, 0x103 },
+        { "nf",          required_argument, 0, 0x104 },
+        { "sb",          required_argument, 0, 0x105 },
+        { "sf",          required_argument, 0, 0x106 },
 
-        { "disco",       no_argument,       0, 0x105 },
+        { "disco",       no_argument,       0, 0x107 },
         { 0, 0, 0, 0 }
     };
 
@@ -160,6 +168,17 @@ parse_args(int *argc, char **argv[])
                 client.selected = strtol(optarg, NULL, 10);
                 break;
 
+            case 0x100:
+                client.renderer = optarg;
+                break;
+
+            case 0x101:
+                if (!strcmp(optarg, "terminal"))
+                    client.prioritory = BM_PRIO_TERMINAL;
+                else if (!strcmp(optarg, "gui"))
+                    client.prioritory = BM_PRIO_GUI;
+                break;
+
             case 'b':
                 client.bottom = 1;
                 break;
@@ -170,14 +189,14 @@ parse_args(int *argc, char **argv[])
                 client.monitor = strtol(optarg, NULL, 10);
                 break;
 
-            case 0x100:
-            case 0x101:
             case 0x102:
             case 0x103:
             case 0x104:
+            case 0x105:
+            case 0x106:
                 break;
 
-            case 0x105:
+            case 0x107:
                 disco();
                 break;
 
@@ -241,7 +260,7 @@ main(int argc, char **argv)
     parse_args(&argc, &argv);
 
     struct bm_menu *menu;
-    if (!(menu = bm_menu_new(NULL)))
+    if (!(menu = bm_menu_new(client.renderer, client.prioritory)))
         return EXIT_FAILURE;
 
     bm_menu_set_title(menu, client.title);

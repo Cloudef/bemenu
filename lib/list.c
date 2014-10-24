@@ -79,15 +79,8 @@ list_grow(struct list *list, uint32_t step)
     void *tmp;
     uint32_t nsize = sizeof(struct bm_item*) * (list->allocated + step);
 
-    if (!list->items || !(tmp = realloc(list->items, nsize))) {
-        if (!(tmp = malloc(nsize)))
-            return false;
-
-        if (list->items) {
-            memcpy(tmp, list->items, sizeof(struct bm_item*) * list->allocated);
-            free(list->items);
-        }
-    }
+    if (!(tmp = realloc(list->items, nsize)))
+        return false;
 
     list->items = tmp;
     list->allocated += step;
@@ -136,9 +129,18 @@ list_remove_item_at(struct list *list, uint32_t index)
 bool
 list_remove_item(struct list *list, const void *item)
 {
+    assert(list && item);
+
     uint32_t i;
     for (i = 0; i < list->count && list->items[i] != item; ++i);
     return list_remove_item_at(list, i);
+}
+
+void
+list_sort(struct list *list, int (*compar)(const void *a, const void *b))
+{
+    assert(list && compar);
+    qsort(list->items, list->count, sizeof(void*), compar);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

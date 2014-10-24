@@ -1,8 +1,19 @@
+#ifndef _BEMENU_INTERNAL_H_
+#define _BEMENU_INTERNAL_H_
+
 #include "bemenu.h"
+
+#if __GNUC__
+#  define BM_LOG_ATTR(x, y) __attribute__((format(printf, x, y)))
+#else
+#  define BM_LOG_ATTR(x, y)
+#endif
 
 #ifndef size_t
 #   include <stddef.h> /* for size_t */
 #endif
+
+#include <stdarg.h>
 
 /**
  * Destructor function pointer for some list calls.
@@ -59,6 +70,18 @@ struct render_api {
      * Tells underlying renderer to draw the menu.
      */
     void (*render)(const struct bm_menu *menu);
+
+    /**
+     * Version of the plugin.
+     * Should match BM_VERSION or failure.
+     */
+    const char *version;
+
+    /**
+     * Prioritory of the plugin.
+     * Terminal renderers should be first, then graphicals.
+     */
+    enum bm_prioritory prioritory;
 };
 
 /**
@@ -79,6 +102,12 @@ struct bm_renderer {
      * Open handle to the plugin file of this renderer.
      */
     void *handle;
+
+    /**
+     * Data used by the renderer internally.
+     * Nobody else should touch this.
+     */
+    void *internal;
 
     /**
      * API
@@ -117,7 +146,7 @@ struct bm_menu {
     /**
      * Underlying renderer access.
      */
-    const struct bm_renderer *renderer;
+    struct bm_renderer *renderer;
 
     /**
      * Items contained in menu instance.
@@ -202,9 +231,13 @@ bool list_add_item_at(struct list *list, void *item, uint32_t index);
 bool list_add_item(struct list *list, void *item);
 bool list_remove_item_at(struct list *list, uint32_t index);
 bool list_remove_item(struct list *list, const void *item);
+void list_sort(struct list *list, int (*compar)(const void *a, const void *b));
 
 /* util.c */
 char* bm_strdup(const char *s);
+bool bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize);
+BM_LOG_ATTR(1, 2) char* bm_dprintf(const char *fmt, ...);
+bool bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args);
 size_t bm_strip_token(char *string, const char *token, size_t *out_next);
 int bm_strupcmp(const char *hay, const char *needle);
 int bm_strnupcmp(const char *hay, const char *needle, size_t len);
@@ -216,5 +249,7 @@ size_t bm_utf8_rune_width(const char *rune, uint32_t u8len);
 size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
 size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
 size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
+
+#endif /* _BEMENU_INTERNAL_H_ */
 
 /* vim: set ts=8 sw=4 tw=0 :*/
