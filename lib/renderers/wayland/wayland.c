@@ -15,7 +15,9 @@ render(const struct bm_menu *menu)
     bm_menu_get_filtered_items(menu, &count);
     wayland->window.height = ((count < menu->lines ? count : menu->lines) + 1) * menu->font.size + 4;
     bm_wl_window_render(&wayland->window, menu);
-    wl_display_dispatch(wayland->display);
+
+    if (wl_display_dispatch(wayland->display) < 0)
+        wayland->input.sym = XKB_KEY_Escape;
 }
 
 static enum bm_key
