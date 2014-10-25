@@ -13,8 +13,11 @@ static struct {
     enum bm_filter_mode filter_mode;
     int32_t wrap;
     uint32_t lines;
+    const char *colors[BM_COLOR_LAST];
     const char *title;
     const char *renderer;
+    char *font;
+    uint32_t font_size;
     int32_t selected;
     int32_t bottom;
     int32_t grab;
@@ -24,8 +27,11 @@ static struct {
     .filter_mode = BM_FILTER_MODE_DMENU,
     .wrap = 0,
     .lines = 0,
+    .colors = {0},
     .title = "bemenu",
     .renderer = NULL,
+    .font = NULL,
+    .font_size = 0,
     .selected = 0,
     .bottom = 0,
     .grab = 0,
@@ -99,11 +105,18 @@ usage(FILE *out, const char *name)
           " -b, --bottom          appears at the bottom of the screen. ()\n"
           " -f, --grab            grabs the keyboard before reading stdin. ()\n"
           " -m, --monitor         index of monitor where menu will appear. ()\n"
-          " --fn                  defines the font to be used. ()\n"
-          " --nb                  defines the normal background color. ()\n"
-          " --nf                  defines the normal foreground color. ()\n"
-          " --sb                  defines the selected background color. ()\n"
-          " --sf                  defines the selected foreground color. ()\n", out);
+          " --fn                  defines the font to be used. (w)\n"
+          " --bg                  defines the background color. (w)\n"
+          " --tb                  defines the title background color. (w)\n"
+          " --tf                  defines the title foreground color. (w)\n"
+          " --fb                  defines the filter background color. (w)\n"
+          " --ff                  defines the filter foreground color. (w)\n"
+          " --nb                  defines the normal background color. (w)\n"
+          " --nf                  defines the normal foreground color. (w)\n"
+          " --hb                  defines the highlighted background color. (w)\n"
+          " --hf                  defines the highlighted foreground color. (w)\n"
+          " --sb                  defines the selected background color. (w)\n"
+          " --sf                  defines the selected foreground color. (w)\n", out);
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
 
@@ -126,12 +139,19 @@ parse_args(int *argc, char **argv[])
         { "grab",        no_argument,       0, 'f' },
         { "monitor",     required_argument, 0, 'm' },
         { "fn",          required_argument, 0, 0x102 },
-        { "nb",          required_argument, 0, 0x103 },
-        { "nf",          required_argument, 0, 0x104 },
-        { "sb",          required_argument, 0, 0x105 },
-        { "sf",          required_argument, 0, 0x106 },
+        { "bg",          required_argument, 0, 0x103 },
+        { "tb",          required_argument, 0, 0x104 },
+        { "tf",          required_argument, 0, 0x105 },
+        { "fb",          required_argument, 0, 0x106 },
+        { "ff",          required_argument, 0, 0x107 },
+        { "nb",          required_argument, 0, 0x108 },
+        { "nf",          required_argument, 0, 0x109 },
+        { "hb",          required_argument, 0, 0x110 },
+        { "hf",          required_argument, 0, 0x111 },
+        { "sb",          required_argument, 0, 0x112 },
+        { "sf",          required_argument, 0, 0x113 },
 
-        { "disco",       no_argument,       0, 0x107 },
+        { "disco",       no_argument,       0, 0x114 },
         { 0, 0, 0, 0 }
     };
 
@@ -190,13 +210,44 @@ parse_args(int *argc, char **argv[])
                 break;
 
             case 0x102:
+                if (sscanf(optarg, "%ms:%u", &client.font, &client.font_size) < 2)
+                    sscanf(optarg, "%ms", &client.font);
+                break;
             case 0x103:
+                client.colors[BM_COLOR_BG] = optarg;
+                break;
             case 0x104:
+                client.colors[BM_COLOR_TITLE_BG] = optarg;
+                break;
             case 0x105:
+                client.colors[BM_COLOR_TITLE_FG] = optarg;
+                break;
             case 0x106:
+                client.colors[BM_COLOR_FILTER_BG] = optarg;
+                break;
+            case 0x107:
+                client.colors[BM_COLOR_FILTER_FG] = optarg;
+                break;
+            case 0x108:
+                client.colors[BM_COLOR_ITEM_BG] = optarg;
+                break;
+            case 0x109:
+                client.colors[BM_COLOR_ITEM_FG] = optarg;
+                break;
+            case 0x110:
+                client.colors[BM_COLOR_HIGHLIGHTED_BG] = optarg;
+                break;
+            case 0x111:
+                client.colors[BM_COLOR_HIGHLIGHTED_FG] = optarg;
+                break;
+            case 0x112:
+                client.colors[BM_COLOR_SELECTED_BG] = optarg;
+                break;
+            case 0x113:
+                client.colors[BM_COLOR_SELECTED_FG] = optarg;
                 break;
 
-            case 0x107:
+            case 0x114:
                 disco();
                 break;
 
@@ -267,9 +318,14 @@ main(int argc, char **argv)
     if (!(menu = bm_menu_new(client.renderer, client.prioritory)))
         return EXIT_FAILURE;
 
+    bm_menu_set_font(menu, client.font, client.font_size);
     bm_menu_set_title(menu, client.title);
     bm_menu_set_filter_mode(menu, client.filter_mode);
+    bm_menu_set_lines(menu, client.lines);
     bm_menu_set_wrap(menu, client.wrap);
+
+    for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
+        bm_menu_set_color(menu, i, client.colors[i]);
 
     read_items_to_menu_from_stdin(menu);
 
@@ -295,6 +351,7 @@ main(int argc, char **argv)
             printf("%s\n", bm_menu_get_filter(menu));
     }
 
+    free(client.font);
     bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }

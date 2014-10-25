@@ -156,7 +156,6 @@ render(const struct bm_menu *menu)
         init_pair(2, COLOR_RED, -1);
     }
 
-    const uint32_t lines = getmaxy(curses.stdscr);
     erase();
 
     uint32_t ncols = getmaxx(curses.stdscr);
@@ -183,11 +182,14 @@ render(const struct bm_menu *menu)
     }
 
     uint32_t count, cl = 1;
-    struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
-    for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
-        bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
-        int32_t color = (highlighted ? 2 : (bm_menu_item_is_selected(menu, items[i]) ? 1 : 0));
-        draw_line(color, cl++, "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : ""));
+    const uint32_t lines = getmaxy(curses.stdscr);
+    if (lines > 1) {
+        struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
+        for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
+            bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
+            int32_t color = (highlighted ? 2 : (bm_menu_item_is_selected(menu, items[i]) ? 1 : 0));
+            draw_line(color, cl++, "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : ""));
+        }
     }
 
     move(0, title_len + (menu->curses_cursor < ccols ? menu->curses_cursor : ccols));

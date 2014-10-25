@@ -1,8 +1,31 @@
 #include "internal.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+
+/**
+ * Default font.
+ */
+static const char *default_font = "Terminus";
+
+/**
+ * Default hexadecimal colors.
+ */
+static const char *default_colors[BM_COLOR_LAST] = {
+    "#121212", // BM_COLOR_BG
+    "#121212", // BM_COLOR_TITLE_BG
+    "#D81860", // BM_COLOR_TITLE_FG
+    "#121212", // BM_COLOR_FILTER_BG
+    "#CACACA", // BM_COLOR_FILTER_FG
+    "#121212", // BM_COLOR_ITEM_BG
+    "#CACACA", // BM_COLOR_ITEM_FG
+    "#121212", // BM_COLOR_HIGHLIGHTED_BG
+    "#D81860", // BM_COLOR_HIGHLIGHTED_FG
+    "#121212", // BM_COLOR_SELECTED_BG
+    "#D81860"  // BM_COLOR_SELECTED_FG
+};
 
 /**
  * Filter function map.
@@ -51,12 +74,21 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
             break;
     }
 
-    if (!menu->renderer) {
-        bm_menu_free(menu);
-        return NULL;
-    }
+    if (!menu->renderer)
+        goto fail;
 
+    if (!bm_menu_set_font(menu, NULL, 0))
+        goto fail;
+
+    for (uint32_t i = 0; i < BM_COLOR_LAST; ++i) {
+        if (!bm_menu_set_color(menu, i, NULL))
+            goto fail;
+    }
     return menu;
+
+fail:
+    bm_menu_free(menu);
+    return NULL;
 }
 
 void
@@ -70,6 +102,11 @@ bm_menu_free(struct bm_menu *menu)
     free(menu->title);
     free(menu->filter);
     free(menu->old_filter);
+
+    free(menu->font.name);
+
+    for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
+        free(menu->colors[i].hex);
 
     bm_menu_free_items(menu);
     free(menu);
@@ -130,6 +167,20 @@ bm_menu_get_filter_mode(const struct bm_menu *menu)
 }
 
 void
+bm_menu_set_lines(struct bm_menu *menu, uint32_t lines)
+{
+    assert(menu);
+    menu->lines = lines;
+}
+
+uint32_t
+bm_menu_get_lines(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->lines;
+}
+
+void
 bm_menu_set_wrap(struct bm_menu *menu, bool wrap)
 {
     assert(menu);
@@ -162,6 +213,58 @@ bm_menu_get_title(const struct bm_menu *menu)
 {
     assert(menu);
     return menu->title;
+}
+
+bool
+bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size)
+{
+    assert(menu);
+
+    const char *nfont = (font ? font : default_font);
+
+    char *copy = NULL;
+    if (!(copy = bm_strdup(nfont)))
+        return false;
+
+    free(menu->font.name);
+    menu->font.name = copy;
+    menu->font.size = (size > 0 ? size : 12);
+    return true;
+}
+
+const char* bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size)
+{
+    assert(menu);
+    if (out_size) *out_size = menu->font.size;
+    return menu->font.name;
+}
+
+bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
+{
+    assert(menu);
+
+    const char *nhex = (hex ? hex : default_colors[color]);
+
+    int32_t r, g, b;
+    if (sscanf(nhex,"#%2x%2x%2x", &r, &b, &g) != 3)
+        return false;
+
+    char *copy = NULL;
+    if (!(copy = bm_strdup(nhex)))
+        return false;
+
+    free(menu->colors[color].hex);
+    menu->colors[color].hex = copy;
+    menu->colors[color].r = r;
+    menu->colors[color].g = g;
+    menu->colors[color].b = b;
+    return true;
+}
+
+const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
+{
+    assert(menu);
+    return menu->colors[color].hex;
 }
 
 bool

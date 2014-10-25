@@ -13,79 +13,79 @@
 static int
 set_cloexec_or_close(int fd)
 {
-   if (fd == -1)
-      return -1;
+    if (fd == -1)
+        return -1;
 
-   long flags = fcntl(fd, F_GETFD);
-   if (flags == -1)
-      goto err;
+    long flags = fcntl(fd, F_GETFD);
+    if (flags == -1)
+        goto err;
 
-   if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
-      goto err;
+    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
+        goto err;
 
-   return fd;
+    return fd;
 
 err:
-   close(fd);
-   return -1;
+    close(fd);
+    return -1;
 }
 
 static int
 create_tmpfile_cloexec(char *tmpname)
 {
-   int fd;
+    int fd;
 
 #ifdef HAVE_MKOSTEMP
-   if ((fd = mkostemp(tmpname, O_CLOEXEC)) >= 0)
-      unlink(tmpname);
+    if ((fd = mkostemp(tmpname, O_CLOEXEC)) >= 0)
+        unlink(tmpname);
 #else
-   if ((fd = mkstemp(tmpname)) >= 0) {
-      fd = set_cloexec_or_close(fd);
-      unlink(tmpname);
-   }
+    if ((fd = mkstemp(tmpname)) >= 0) {
+        fd = set_cloexec_or_close(fd);
+        unlink(tmpname);
+    }
 #endif
 
-   return fd;
+    return fd;
 }
 
 static int
 os_create_anonymous_file(off_t size)
 {
-   static const char template[] = "/bemenu-shared-XXXXXX";
-   int fd;
-   int ret;
+    static const char template[] = "/bemenu-shared-XXXXXX";
+    int fd;
+    int ret;
 
-   const char *path;
-   if (!(path = getenv("XDG_RUNTIME_DIR")) || strlen(path) <= 0) {
-      errno = ENOENT;
-      return -1;
-   }
+    const char *path;
+    if (!(path = getenv("XDG_RUNTIME_DIR")) || strlen(path) <= 0) {
+        errno = ENOENT;
+        return -1;
+    }
 
-   char *name;
-   int ts = (path[strlen(path) - 1] == '/');
-   if (!(name = bm_dprintf("%s%s%s", path, (ts ? "" : "/"), template)))
-      return -1;
+    char *name;
+    int ts = (path[strlen(path) - 1] == '/');
+    if (!(name = bm_dprintf("%s%s%s", path, (ts ? "" : "/"), template)))
+        return -1;
 
-   fd = create_tmpfile_cloexec(name);
-   free(name);
+    fd = create_tmpfile_cloexec(name);
+    free(name);
 
-   if (fd < 0)
-      return -1;
+    if (fd < 0)
+        return -1;
 
 #ifdef HAVE_POSIX_FALLOCATE
-   if ((ret = posix_fallocate(fd, 0, size)) != 0) {
-      close(fd);
-      errno = ret;
-      return -1;
-   }
+    if ((ret = posix_fallocate(fd, 0, size)) != 0) {
+        close(fd);
+        errno = ret;
+        return -1;
+    }
 #else
-   if ((ret = ftruncate(fd, size)) < 0) {
-      close(fd);
-      return -1;
-   }
+    if ((ret = ftruncate(fd, size)) < 0) {
+        close(fd);
+        return -1;
+    }
 #endif
 
-   return fd;
+    return fd;
 }
 
 static void
@@ -256,7 +256,7 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu)
         return;
 
     if (window->notify.render)
-        window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
+        window->displayed = window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
 
     wl_surface_damage(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);

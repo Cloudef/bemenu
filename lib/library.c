@@ -30,7 +30,7 @@ load(const char *file, struct bm_renderer *renderer)
     const char *error = NULL;
 
     if (!(handle = chckDlLoad(file, &error)))
-        goto fail;
+        goto load_fail;
 
     const char* (*regfun)(struct render_api*);
     if (!(regfun = chckDlLoadSymbol(handle, "register_renderer", &error)))

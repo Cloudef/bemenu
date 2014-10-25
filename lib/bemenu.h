@@ -183,6 +183,26 @@ enum bm_key {
 };
 
 /**
+ * Colorable element constants.
+ *
+ * @link ::bm_color BM_COLOR_LAST @endlink is provided for enumerating colors.
+ */
+enum bm_color {
+    BM_COLOR_BG,
+    BM_COLOR_TITLE_BG,
+    BM_COLOR_TITLE_FG,
+    BM_COLOR_FILTER_BG,
+    BM_COLOR_FILTER_FG,
+    BM_COLOR_ITEM_BG,
+    BM_COLOR_ITEM_FG,
+    BM_COLOR_HIGHLIGHTED_BG,
+    BM_COLOR_HIGHLIGHTED_FG,
+    BM_COLOR_SELECTED_BG,
+    BM_COLOR_SELECTED_FG,
+    BM_COLOR_LAST
+};
+
+/**
  * @name Menu Memory
  * @{ */
 
@@ -265,10 +285,27 @@ void bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode);
 enum bm_filter_mode bm_menu_get_filter_mode(const struct bm_menu *menu);
 
 /**
+ * Set amount of max vertical lines to be shown.
+ * Some renderers such as ncurses may ignore this when it does not make sense.
+ *
+ * @param menu bm_menu instance where to set max vertical line amount.
+ * @param lines 0 for single line layout, > 0 to show that many lines.
+ */
+void bm_menu_set_lines(struct bm_menu *menu, uint32_t lines);
+
+/**
+ * Get amount of max vertical lines to be shown.
+ *
+ * @param menu bm_menu instance where to get max vertical line amount.
+ * @return uint32_t for max amount of vertical lines to be shown.
+ */
+uint32_t bm_menu_get_lines(struct bm_menu *menu);
+
+/**
  * Set selection wrapping on/off.
  *
  * @param menu bm_menu instance where to toggle selection wrapping.
- * @param bool true/false.
+ * @param wrap true/false.
  */
 void bm_menu_set_wrap(struct bm_menu *menu, bool wrap);
 
@@ -296,6 +333,44 @@ bool bm_menu_set_title(struct bm_menu *menu, const char *title);
  * @return Pointer to null terminated C "string", can be **NULL** for empty title.
  */
 const char* bm_menu_get_title(const struct bm_menu *menu);
+
+/**
+ * Set font to bm_menu instance.
+ *
+ * @param font C "string" to set as font, can be **NULL** for default (Terminus).
+ * @param size Size for the font, may be set 0 for default.
+ * @return true if set was succesful, false if out of memory.
+ */
+bool bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size);
+
+/**
+ * Get font from bm_menu instance.
+ *
+ * @param menu bm_menu instance where to get font from.
+ * @param out_size Reference to uint32_t, will be se to size of the font. May set **NULL** for no-op.
+ * @return Pointer to null terminated C "string".
+ */
+const char* bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size);
+
+/**
+ * Set a hexadecimal color for element.
+ *
+ * @param menu bm_menu instance where to set color.
+ * @param color bm_color type.
+ * @param hex Color in hexadecimal format starting with '#'.
+ * @return true if set was succesful, false if out of memory.
+ */
+bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex);
+
+/**
+ * Get hexadecimal color for element.
+ *
+ * @param menu bm_menu instance where to get color from.
+ * @param color bm_color type.
+ * @return Pointer to null terminated C "string".
+ */
+const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
+
 
 /**  @} Properties */
 

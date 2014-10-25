@@ -11,6 +11,9 @@ static void
 render(const struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
+    uint32_t count;
+    bm_menu_get_filtered_items(menu, &count);
+    wayland->window.height = ((count < menu->lines ? count : menu->lines) + 1) * menu->font.size + 4;
     bm_wl_window_render(&wayland->window, menu);
     wl_display_dispatch(wayland->display);
 }
@@ -25,6 +28,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     if (wayland->input.sym == XKB_KEY_NoSymbol)
         return BM_KEY_UNICODE;
 
+    uint32_t mods = wayland->input.modifiers;
     *unicode = xkb_state_key_get_utf32(wayland->input.xkb.state, wayland->input.code);
 
     switch (wayland->input.sym) {
@@ -47,16 +51,16 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
             return BM_KEY_END;
 
         case XKB_KEY_SunPageUp:
-            return BM_KEY_PAGE_UP;
+            return (mods & MOD_SHIFT ? BM_KEY_SHIFT_PAGE_UP : BM_KEY_PAGE_UP);
 
         case XKB_KEY_SunPageDown:
-            return BM_KEY_PAGE_DOWN;
+            return (mods & MOD_SHIFT ? BM_KEY_SHIFT_PAGE_DOWN : BM_KEY_PAGE_DOWN);
 
         case XKB_KEY_BackSpace:
             return BM_KEY_BACKSPACE;
 
         case XKB_KEY_Delete:
-            return BM_KEY_DELETE;
+            return (mods & MOD_SHIFT ? BM_KEY_LINE_DELETE_LEFT : BM_KEY_DELETE);
 
         case XKB_KEY_Tab:
             return BM_KEY_TAB;
@@ -65,10 +69,40 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
             return BM_KEY_SHIFT_RETURN;
 
         case XKB_KEY_Return:
-            return BM_KEY_RETURN;
+            return (mods & MOD_CTRL ? BM_KEY_CONTROL_RETURN : (mods & MOD_SHIFT ? BM_KEY_SHIFT_RETURN : BM_KEY_RETURN));
 
         case XKB_KEY_Escape:
             return BM_KEY_ESCAPE;
+
+        case XKB_KEY_p:
+            return (mods & MOD_CTRL ? BM_KEY_UP : BM_KEY_UNICODE);
+
+        case XKB_KEY_n:
+            return (mods & MOD_CTRL ? BM_KEY_DOWN : BM_KEY_UNICODE);
+
+        case XKB_KEY_l:
+            return (mods & MOD_CTRL ? BM_KEY_LEFT : BM_KEY_UNICODE);
+
+        case XKB_KEY_f:
+            return (mods & MOD_CTRL ? BM_KEY_RIGHT : BM_KEY_UNICODE);
+
+        case XKB_KEY_a:
+            return (mods & MOD_CTRL ? BM_KEY_HOME : BM_KEY_UNICODE);
+
+        case XKB_KEY_e:
+            return (mods & MOD_CTRL ? BM_KEY_END : BM_KEY_UNICODE);
+
+        case XKB_KEY_h:
+            return (mods & MOD_CTRL ? BM_KEY_BACKSPACE : BM_KEY_UNICODE);
+
+        case XKB_KEY_u:
+            return (mods & MOD_CTRL ? BM_KEY_LINE_DELETE_LEFT : BM_KEY_UNICODE);
+
+        case XKB_KEY_k:
+            return (mods & MOD_CTRL ? BM_KEY_LINE_DELETE_RIGHT : BM_KEY_UNICODE);
+
+        case XKB_KEY_w:
+            return (mods & MOD_CTRL ? BM_KEY_WORD_DELETE : BM_KEY_UNICODE);
 
         default: break;
     }
@@ -81,7 +115,7 @@ get_displayed_count(const struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
-    return wayland->window.height / 12;
+    return wayland->window.displayed;
 }
 
 static void

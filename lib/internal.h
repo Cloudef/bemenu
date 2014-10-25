@@ -134,6 +134,38 @@ struct bm_item {
 };
 
 /**
+ * Internal bm_hex_color struct that is not exposed to public.
+ * Represent a color for element.
+ */
+struct bm_hex_color {
+    /**
+     * Provided hex for the color.
+     */
+    char *hex;
+
+    /**
+     * RGB values.
+     */
+    uint8_t r, g, b;
+};
+
+/**
+ * Internal bm_font struct that is not exposed to public.
+ * Represent a font for text.
+ */
+struct bm_font {
+    /**
+     * Name of the font.
+     */
+    char *name;
+
+    /**
+     * Size of font.
+     */
+    uint32_t size;
+};
+
+/**
  * Internal bm_menu struct that is not exposed to public.
  */
 struct bm_menu {
@@ -169,6 +201,16 @@ struct bm_menu {
     char *title;
 
     /**
+     * Font.
+     */
+    struct bm_font font;
+
+    /**
+     * Colors.
+     */
+    struct bm_hex_color colors[BM_COLOR_LAST];
+
+    /**
      * Text used to filter matches.
      */
     char *filter;
@@ -198,6 +240,12 @@ struct bm_menu {
      * This index is valid for the list returned by bmMenuGetFilteredItems.
      */
     uint32_t index;
+
+    /**
+     * Max number of vertical lines to be shown.
+     * Some renderers such as ncurses may ignore this when it does not make sense.
+     */
+    uint32_t lines;
 
     /**
      * Current filtering method in menu instance.

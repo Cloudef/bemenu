@@ -70,9 +70,10 @@ struct window {
     struct wl_shm *shm;
     struct buffer buffers[2];
     uint32_t width, height;
+    uint32_t displayed;
 
     struct {
-        void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, const struct bm_menu *menu);
+        uint32_t (*render)(struct cairo *cairo, uint32_t width, uint32_t height, const struct bm_menu *menu);
     } notify;
 };
 
