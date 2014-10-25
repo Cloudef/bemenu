@@ -234,10 +234,14 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
     }
     buffer[allocated - step + read - 1] = 0;
 
-    size_t pos;
     char *s = buffer;
-    while ((pos = strcspn(s, "\n")) != 0) {
-        size_t next = pos + (s[pos] != 0);
+    while ((size_t)(s - buffer) < allocated - step + read) {
+        size_t pos = strcspn(s, "\n");
+        if (pos == 0) {
+            s += 1;
+            continue;
+        }
+
         s[pos] = 0;
 
         struct bm_item *item;
@@ -245,7 +249,7 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
             break;
 
         bm_menu_add_item(menu, item);
-        s += next;
+        s += pos + 1;
     }
 
     free(buffer);
