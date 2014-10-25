@@ -260,6 +260,9 @@ bm_wl_registry_destroy(struct wayland *wayland)
 
     if (wayland->registry)
         wl_registry_destroy(wayland->registry);
+
+    xkb_keymap_unref(wayland->input.xkb.keymap);
+    xkb_state_unref(wayland->input.xkb.state);
 }
 
 bool

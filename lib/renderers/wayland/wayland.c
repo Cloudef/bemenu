@@ -131,6 +131,8 @@ destructor(struct bm_menu *menu)
     bm_wl_window_destroy(&wayland->window);
     bm_wl_registry_destroy(wayland);
 
+    xkb_context_unref(wayland->input.xkb.context);
+
     if (wayland->display) {
         wl_display_flush(wayland->display);
         wl_display_disconnect(wayland->display);
