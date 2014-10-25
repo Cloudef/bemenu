@@ -1,42 +1,12 @@
 #define _DEFAULT_SOURCE
+#include "common.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include <unistd.h>
 #include <signal.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <getopt.h>
-#include <bemenu.h>
-
-static struct {
-    enum bm_prioritory prioritory;
-    enum bm_filter_mode filter_mode;
-    int32_t wrap;
-    uint32_t lines;
-    const char *colors[BM_COLOR_LAST];
-    const char *title;
-    const char *renderer;
-    char *font;
-    uint32_t font_size;
-    int32_t selected;
-    int32_t bottom;
-    int32_t grab;
-    int32_t monitor;
-} client = {
-    .prioritory = BM_PRIO_ANY,
-    .filter_mode = BM_FILTER_MODE_DMENU,
-    .wrap = 0,
-    .lines = 0,
-    .colors = {0},
-    .title = "bemenu",
-    .renderer = NULL,
-    .font = NULL,
-    .font_size = 0,
-    .selected = 0,
-    .bottom = 0,
-    .grab = 0,
-    .monitor = 0
-};
+#include <assert.h>
 
 static void
 disco_trap(int sig)
@@ -77,6 +47,7 @@ disco(void)
 static void
 version(const char *name)
 {
+    assert(name);
     char *base = strrchr(name, '/');
     printf("%s v%s\n", (base ? base  + 1 : name), bm_version());
     exit(EXIT_SUCCESS);
@@ -85,6 +56,8 @@ version(const char *name)
 static void
 usage(FILE *out, const char *name)
 {
+    assert(out && name);
+
     char *base = strrchr(name, '/');
     fprintf(out, "usage: %s [options]\n", (base ? base + 1 : name));
     fputs("Options\n"
@@ -117,12 +90,15 @@ usage(FILE *out, const char *name)
           " --hf                  defines the highlighted foreground color. (w)\n"
           " --sb                  defines the selected background color. (w)\n"
           " --sf                  defines the selected foreground color. (w)\n", out);
+
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
 
-static void
-parse_args(int *argc, char **argv[])
+void
+parse_args(struct client *client, int *argc, char **argv[])
 {
+    assert(client && argc && argv);
+
     static const struct option opts[] = {
         { "help",        no_argument,       0, 'h' },
         { "version",     no_argument,       0, 'v' },
@@ -173,78 +149,78 @@ parse_args(int *argc, char **argv[])
                 break;
 
             case 'i':
-                client.filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
+                client->filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
                 break;
             case 'w':
-                client.wrap = 1;
+                client->wrap = 1;
                 break;
             case 'l':
-                client.lines = strtol(optarg, NULL, 10);
+                client->lines = strtol(optarg, NULL, 10);
                 break;
             case 'p':
-                client.title = optarg;
+                client->title = optarg;
                 break;
             case 'I':
-                client.selected = strtol(optarg, NULL, 10);
+                client->selected = strtol(optarg, NULL, 10);
                 break;
 
             case 0x100:
-                client.renderer = optarg;
+                client->renderer = optarg;
                 break;
 
             case 0x101:
                 if (!strcmp(optarg, "terminal"))
-                    client.prioritory = BM_PRIO_TERMINAL;
+                    client->prioritory = BM_PRIO_TERMINAL;
                 else if (!strcmp(optarg, "gui"))
-                    client.prioritory = BM_PRIO_GUI;
+                    client->prioritory = BM_PRIO_GUI;
                 break;
 
             case 'b':
-                client.bottom = 1;
+                client->bottom = 1;
                 break;
             case 'f':
-                client.grab = 1;
+                client->grab = 1;
                 break;
             case 'm':
-                client.monitor = strtol(optarg, NULL, 10);
+                client->monitor = strtol(optarg, NULL, 10);
                 break;
 
             case 0x102:
-                if (sscanf(optarg, "%ms:%u", &client.font, &client.font_size) < 2)
-                    sscanf(optarg, "%ms", &client.font);
+                if (sscanf(optarg, "%ms:%u", &client->font, &client->font_size) < 2)
+                    sscanf(optarg, "%ms", &client->font);
                 break;
             case 0x103:
-                client.colors[BM_COLOR_BG] = optarg;
+                client->colors[BM_COLOR_BG] = optarg;
                 break;
             case 0x104:
-                client.colors[BM_COLOR_TITLE_BG] = optarg;
+                client->colors[BM_COLOR_TITLE_BG] = optarg;
                 break;
             case 0x105:
-                client.colors[BM_COLOR_TITLE_FG] = optarg;
+                client->colors[BM_COLOR_TITLE_FG] = optarg;
                 break;
             case 0x106:
-                client.colors[BM_COLOR_FILTER_BG] = optarg;
+                client->colors[BM_COLOR_FILTER_BG] = optarg;
                 break;
             case 0x107:
-                client.colors[BM_COLOR_FILTER_FG] = optarg;
+                client->colors[BM_COLOR_FILTER_FG] = optarg;
                 break;
             case 0x108:
-                client.colors[BM_COLOR_ITEM_BG] = optarg;
+                client->colors[BM_COLOR_ITEM_BG] = optarg;
                 break;
             case 0x109:
-                client.colors[BM_COLOR_ITEM_FG] = optarg;
+                client->colors[BM_COLOR_ITEM_FG] = optarg;
                 break;
             case 0x110:
-                client.colors[BM_COLOR_HIGHLIGHTED_BG] = optarg;
+                client->colors[BM_COLOR_HIGHLIGHTED_BG] = optarg;
                 break;
             case 0x111:
-                client.colors[BM_COLOR_HIGHLIGHTED_FG] = optarg;
+                client->colors[BM_COLOR_HIGHLIGHTED_FG] = optarg;
                 break;
             case 0x112:
-                client.colors[BM_COLOR_SELECTED_BG] = optarg;
+                client->colors[BM_COLOR_SELECTED_BG] = optarg;
                 break;
             case 0x113:
-                client.colors[BM_COLOR_SELECTED_FG] = optarg;
+                client->colors[BM_COLOR_SELECTED_FG] = optarg;
                 break;
 
             case 0x114:
@@ -263,97 +239,36 @@ parse_args(int *argc, char **argv[])
     *argv += optind;
 }
 
-static void
-read_items_to_menu_from_stdin(struct bm_menu *menu)
+struct bm_menu*
+menu_with_options(struct client *client)
 {
-    assert(menu);
-
-    size_t step = 1024, allocated;
-    char *buffer;
-
-    if (!(buffer = malloc((allocated = step))))
-        return;
-
-    size_t read;
-    while ((read = fread(buffer + (allocated - step), 1, step, stdin)) == step) {
-        void *tmp;
-        if (!(tmp = realloc(buffer, (allocated += step)))) {
-            free(buffer);
-            return;
-        }
-        buffer = tmp;
-    }
-    buffer[allocated - step + read - 1] = 0;
-
-    char *s = buffer;
-    while ((size_t)(s - buffer) < allocated - step + read) {
-        size_t pos = strcspn(s, "\n");
-        if (pos == 0) {
-            s += 1;
-            continue;
-        }
-
-        s[pos] = 0;
-
-        struct bm_item *item;
-        if (!(item = bm_item_new(s)))
-            break;
-
-        bm_menu_add_item(menu, item);
-        s += pos + 1;
-    }
-
-    free(buffer);
-}
-
-int
-main(int argc, char **argv)
-{
-    if (!bm_init())
-        return EXIT_FAILURE;
-
-    parse_args(&argc, &argv);
-
     struct bm_menu *menu;
-    if (!(menu = bm_menu_new(client.renderer, client.prioritory)))
-        return EXIT_FAILURE;
+    if (!(menu = bm_menu_new(client->renderer, client->prioritory)))
+        return NULL;
 
-    bm_menu_set_font(menu, client.font, client.font_size);
-    bm_menu_set_title(menu, client.title);
-    bm_menu_set_filter_mode(menu, client.filter_mode);
-    bm_menu_set_lines(menu, client.lines);
-    bm_menu_set_wrap(menu, client.wrap);
+    bm_menu_set_font(menu, client->font, client->font_size);
+    bm_menu_set_title(menu, client->title);
+    bm_menu_set_filter_mode(menu, client->filter_mode);
+    bm_menu_set_lines(menu, client->lines);
+    bm_menu_set_wrap(menu, client->wrap);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
-        bm_menu_set_color(menu, i, client.colors[i]);
+        bm_menu_set_color(menu, i, client->colors[i]);
 
-    read_items_to_menu_from_stdin(menu);
+    return menu;
+}
 
-    bm_menu_set_highlighted_index(menu, client.selected);
-
-    enum bm_key key;
+enum bm_run_result
+run_menu(struct bm_menu *menu)
+{
     uint32_t unicode;
-    int32_t status = 0;
+    enum bm_key key;
+    enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
         bm_menu_render(menu);
         key = bm_menu_poll_key(menu, &unicode);
     } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
-
-    if (status == BM_RUN_RESULT_SELECTED) {
-        uint32_t i, count;
-        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-        for (i = 0; i < count; ++i) {
-            const char *text = bm_item_get_text(items[i]);
-            printf("%s\n", (text ? text : ""));
-        }
-
-        if (!count && bm_menu_get_filter(menu))
-            printf("%s\n", bm_menu_get_filter(menu));
-    }
-
-    free(client.font);
-    bm_menu_free(menu);
-    return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
+    return status;
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
