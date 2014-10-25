@@ -34,24 +34,28 @@ load(const char *file, struct bm_renderer *renderer)
 
     const char* (*regfun)(struct render_api*);
     if (!(regfun = chckDlLoadSymbol(handle, "register_renderer", &error)))
-        goto fail;
+        goto load_fail;
 
     const char *name;
     if (!(name = regfun(&renderer->api)))
         goto fail;
 
-    if (strcmp(renderer->api.version, BM_VERSION))
-        goto fail;
+    if (strcmp(renderer->api.version, BM_PLUGIN_VERSION))
+        goto mismatch_fail;
 
     renderer->handle = handle;
     renderer->name = bm_strdup(name);
     renderer->file = bm_strdup(file);
     return true;
 
+load_fail:
+    fprintf(stderr, "%s\n", error);
+    goto fail;
+mismatch_fail:
+    fprintf(stderr, "%s: version mismatch (%s != %s)\n", name, renderer->api.version, BM_PLUGIN_VERSION);
 fail:
     if (handle)
         chckDlUnload(handle);
-    fprintf(stderr, "%s\n", error);
     return false;
 }
 

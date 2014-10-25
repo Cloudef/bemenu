@@ -1,10 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(bemenu)
-INCLUDE(CTest)
 SET(BEMENU_NAME "bemenu")
 SET(BEMENU_DESCRIPTION "Dynamic menu library and client program inspired by dmenu")
 SET(BEMENU_VERSION "1.0.0")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${bemenu_SOURCE_DIR}/CMake)
+
+INCLUDE(CTest)
+INCLUDE(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 # C99
 ADD_DEFINITIONS(-std=c99)

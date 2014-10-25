@@ -73,7 +73,7 @@ struct render_api {
 
     /**
      * Version of the plugin.
-     * Should match BM_VERSION or failure.
+     * Should match BM_PLUGIN_VERSION or failure.
      */
     const char *version;
 

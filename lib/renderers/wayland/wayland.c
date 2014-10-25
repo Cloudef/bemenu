@@ -144,7 +144,7 @@ register_renderer(struct render_api *api)
     api->poll_key = poll_key;
     api->render = render;
     api->prioritory = BM_PRIO_GUI;
-    api->version = BM_VERSION;
+    api->version = BM_PLUGIN_VERSION;
     return "wayland";
 }
 
