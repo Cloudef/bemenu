@@ -26,6 +26,8 @@ static struct curses {
     struct sigaction abrt_action;
     struct sigaction segv_action;
     struct sigaction winch_action;
+    char *buffer;
+    size_t blen;
     int old_stdin;
     int old_stdout;
 } curses;
@@ -33,6 +35,12 @@ static struct curses {
 static void
 terminate(void)
 {
+    if (curses.buffer) {
+        free(curses.buffer);
+        curses.buffer = NULL;
+        curses.blen = 0;
+    }
+
     if (!curses.stdscr)
         return;
 
@@ -70,8 +78,6 @@ resize_handler(int sig)
 BM_LOG_ATTR(3, 4) static void
 draw_line(int32_t pair, int32_t y, const char *fmt, ...)
 {
-    static size_t blen = 0;
-    static char *buffer = NULL;
     assert(fmt);
 
     size_t ncols;
@@ -80,49 +86,49 @@ draw_line(int32_t pair, int32_t y, const char *fmt, ...)
 
     va_list args;
     va_start(args, fmt);
-    bool ret = bm_vrprintf(&buffer, &blen, fmt, args);
+    bool ret = bm_vrprintf(&curses.buffer, &curses.blen, fmt, args);
     va_end(args);
 
     if (!ret)
         return;
 
-    size_t nlen = strlen(buffer);
+    size_t nlen = strlen(curses.buffer);
     size_t dw = 0, i = 0;
     while (dw < ncols && i < nlen) {
-        if (buffer[i] == '\t') buffer[i] = ' ';
-        int32_t next = bm_utf8_rune_next(buffer, i);
-        dw += bm_utf8_rune_width(buffer + i, next);
+        if (curses.buffer[i] == '\t') curses.buffer[i] = ' ';
+        int32_t next = bm_utf8_rune_next(curses.buffer, i);
+        dw += bm_utf8_rune_width(curses.buffer + i, next);
         i += (next ? next : 1);
     }
 
     if (dw < ncols) {
         /* line is too short, widen it */
         size_t offset = i + (ncols - dw);
-        if (blen <= offset && !bm_resize_buffer(&buffer, &blen, offset + 1))
+        if (curses.blen <= offset && !bm_resize_buffer(&curses.buffer, &curses.blen, offset + 1))
              return;
 
-        memset(buffer + nlen, ' ', offset - nlen);
-        buffer[offset] = 0;
-    } else if (i < blen) {
+        memset(curses.buffer + nlen, ' ', offset - nlen);
+        curses.buffer[offset] = 0;
+    } else if (i < curses.blen) {
         /* line is too long, shorten it */
-        i -= bm_utf8_rune_prev(buffer, i - (dw - ncols)) - 1;
+        i -= bm_utf8_rune_prev(curses.buffer, i - (dw - ncols)) - 1;
         size_t cc = dw - (dw - ncols);
 
         size_t offset = i - (dw - ncols) + (ncols - cc) + 1;
-        if (blen <= offset) {
-            int32_t diff = offset - blen + 1;
-            if (!bm_resize_buffer(&buffer, &blen, blen + diff))
+        if (curses.blen <= offset) {
+            int32_t diff = offset - curses.blen + 1;
+            if (!bm_resize_buffer(&curses.buffer, &curses.blen, curses.blen + diff))
                 return;
         }
 
-        memset(buffer + i - (dw - ncols), ' ', (ncols - cc) + 1);
-        buffer[offset] = 0;
+        memset(curses.buffer + i - (dw - ncols), ' ', (ncols - cc) + 1);
+        curses.buffer[offset] = 0;
     }
 
     if (pair > 0)
         attron(COLOR_PAIR(pair));
 
-    mvprintw(y, 0, "%s", buffer);
+    mvprintw(y, 0, "%s", curses.buffer);
 
     if (pair > 0)
         attroff(COLOR_PAIR(pair));
