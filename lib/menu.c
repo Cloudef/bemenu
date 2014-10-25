@@ -288,10 +288,10 @@ bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index)
     if (!menu->items.items || menu->items.count <= index)
         return 0;
 
+    struct bm_item *item = ((struct bm_item**)menu->items.items)[index];
     bool ret = list_remove_item_at(&menu->items, index);
 
     if (ret) {
-        struct bm_item *item = ((struct bm_item**)menu->items.items)[index];
         list_remove_item(&menu->selection, item);
         list_remove_item(&menu->filtered, item);
     }
