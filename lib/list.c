@@ -77,14 +77,14 @@ list_grow(struct list *list, uint32_t step)
     assert(list);
 
     void *tmp;
-    uint32_t nsize = sizeof(struct bm_item*) * (list->allocated + step);
+    uint32_t nsize = sizeof(void*) * (list->allocated + step);
 
     if (!(tmp = realloc(list->items, nsize)))
         return false;
 
     list->items = tmp;
     list->allocated += step;
-    memset(&list->items[list->count], 0, sizeof(struct bm_item*) * (list->allocated - list->count));
+    memset(&list->items[list->count], 0, sizeof(void*) * (list->allocated - list->count));
     return true;
 }
 
@@ -98,7 +98,7 @@ list_add_item_at(struct list *list, void *item, uint32_t index)
 
     if (index + 1 != list->count) {
         uint32_t i = index;
-        memmove(&list->items[i + 1], &list->items[i], sizeof(struct bm_item*) * (list->count - i));
+        memmove(&list->items[i + 1], &list->items[i], sizeof(void*) * (list->count - i));
     }
 
     list->items[index] = item;
@@ -122,7 +122,8 @@ list_remove_item_at(struct list *list, uint32_t index)
     if (!list->items || list->count <= i)
         return false;
 
-    memmove(&list->items[i], &list->items[i], sizeof(void*) * (list->count - i));
+    memmove(&list->items[i], &list->items[i + 1], sizeof(void*) * (list->count - i));
+    list->count--;
     return true;
 }
 
