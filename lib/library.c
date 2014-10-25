@@ -43,9 +43,13 @@ load(const char *file, struct bm_renderer *renderer)
     if (strcmp(renderer->api.version, BM_PLUGIN_VERSION))
         goto mismatch_fail;
 
+    if (!renderer->name)
+        renderer->name = bm_strdup(name);
+
+    if (!renderer->file)
+        renderer->file = bm_strdup(file);
+
     renderer->handle = handle;
-    renderer->name = bm_strdup(name);
-    renderer->file = bm_strdup(file);
     return true;
 
 load_fail:
@@ -77,6 +81,7 @@ load_to_list(const char *file)
         goto fail;
 
     chckDlUnload(renderer->handle);
+    renderer->handle = NULL;
 
     if (!list_add_item(&renderers, renderer))
         goto fail;
@@ -114,8 +119,10 @@ fail:
 bool
 bm_init(void)
 {
-    static const char *rpath = INSTALL_PREFIX "/lib/bemenu";
+    if (renderers.count > 0)
+        return true;
 
+    static const char *rpath = INSTALL_PREFIX "/lib/bemenu";
     const char *path = getenv("BEMENU_RENDERER");
 
     if (path)
@@ -130,7 +137,6 @@ bm_init(void)
     if (tinydir_open(&dir, path) == -1)
         goto fail;
 
-    size_t registered = 0;
     while (dir.has_next) {
         tinydir_file file;
         memset(&file, 0, sizeof(file));
@@ -139,9 +145,7 @@ bm_init(void)
         if (!file.is_dir && !strncmp(file.name, "bemenu-renderer-", strlen("bemenu-renderer-"))) {
             char *fpath;
             if ((fpath = bm_dprintf("%s/%s", path, file.name))) {
-                if (load_to_list(fpath))
-                    registered++;
-
+                load_to_list(fpath);
                 free(fpath);
             }
         }
@@ -150,7 +154,7 @@ bm_init(void)
     }
 
     tinydir_close(&dir);
-    return (registered > 0 ? true : false);
+    return (renderers.count > 0 ? true : false);
 
 fail:
     return false;
