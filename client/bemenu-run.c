@@ -121,6 +121,15 @@ read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
     uint32_t count;
     struct bm_item **items = bm_menu_get_items(menu, &count);
     qsort(items, count, sizeof(struct bm_item*), compare);
+
+    bool unique = true;
+    for (uint32_t i = 0; i + 1 < count; i += unique) {
+        if (!(unique = strcmp(bm_item_get_text(items[i]), bm_item_get_text(items[i + 1])))) {
+            bm_item_free(items[i]);
+            bm_menu_remove_item_at(menu, i);
+            items = bm_menu_get_items(menu, &count);
+        }
+    }
 }
 
 static void
