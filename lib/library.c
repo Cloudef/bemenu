@@ -137,12 +137,8 @@ bm_init(void)
         tinydir_readfile(&dir, &file);
 
         if (!file.is_dir && !strncmp(file.name, "bemenu-renderer-", strlen("bemenu-renderer-"))) {
-            size_t len = snprintf(NULL, 0, "%s/%s", file.name, path);
-
             char *fpath;
-            if ((fpath = calloc(1, len + 1))) {
-                sprintf(fpath, "%s/%s", path, file.name);
-
+            if ((fpath = bm_dprintf("%s/%s", path, file.name))) {
                 if (load_to_list(fpath))
                     registered++;
 
