@@ -84,6 +84,13 @@ get_paths(const char *env, const char *default_paths, struct paths *state)
     return strip_slash(path);
 }
 
+static int
+compare(const void *a, const void *b)
+{
+    const struct bm_item *ia = *(struct bm_item**)a, *ib = *(struct bm_item**)b;
+    return strcmp(bm_item_get_text(ia), bm_item_get_text(ib));
+}
+
 static void
 read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
 {
@@ -98,7 +105,7 @@ read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
         memset(&file, 0, sizeof(file));
         tinydir_readfile(&dir, &file);
 
-        if (!file.is_dir) {
+        if (!file.is_dir && file.name) {
             struct bm_item *item;
             if (!(item = bm_item_new(file.name)))
                 break;
@@ -110,6 +117,10 @@ read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
     }
 
     tinydir_close(&dir);
+
+    uint32_t count;
+    struct bm_item **items = bm_menu_get_items(menu, &count);
+    qsort(items, count, sizeof(struct bm_item*), compare);
 }
 
 static void
