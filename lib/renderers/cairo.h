@@ -32,6 +32,15 @@ struct cairo_result {
 static size_t blen = 0;
 static char *buffer = NULL;
 
+__attribute__((unused)) static void
+bm_cairo_get_font_extents(struct cairo *cairo, const struct bm_font *font, cairo_font_extents_t *fe)
+{
+    assert(cairo && font && fe);
+    cairo_select_font_face(cairo->cr, font->name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size(cairo->cr, font->size);
+    cairo_font_extents(cairo->cr, fe);
+}
+
 __attribute__((unused)) BM_LOG_ATTR(3, 4) static bool
 bm_cairo_get_text_extents(struct cairo *cairo, struct cairo_result *result, const char *fmt, ...)
 {
@@ -100,12 +109,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
     cairo_rectangle(cairo->cr, 0, 0, width, height);
     cairo_fill(cairo->cr);
 
-    cairo_select_font_face(cairo->cr, menu->font.name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cairo->cr, menu->font.size);
-
     struct cairo_paint paint;
     memset(&paint, 0, sizeof(paint));
-    cairo_font_extents(cairo->cr, &paint.fe);
+    bm_cairo_get_font_extents(cairo, &menu->font, &paint.fe);
 
     struct cairo_result result;
     memset(&result, 0, sizeof(result));

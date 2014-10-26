@@ -92,7 +92,7 @@ struct wayland {
 
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
-void bm_wl_window_render(struct window *window, const struct bm_menu *menu);
+void bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines);
 bool bm_wl_window_create(struct window *window, struct wl_shm *shm, struct wl_shell *shell, struct xdg_shell *xdg_shell, struct wl_surface *surface);
 void bm_wl_window_destroy(struct window *window);
 

@@ -11,10 +11,11 @@ static void
 render(const struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
+
     uint32_t count;
     bm_menu_get_filtered_items(menu, &count);
-    wayland->window.height = ((count < menu->lines ? count : menu->lines) + 1) * menu->font.size + 4;
-    bm_wl_window_render(&wayland->window, menu);
+    uint32_t lines = (count < menu->lines ? count : menu->lines) + 1;
+    bm_wl_window_render(&wayland->window, menu, lines);
 
     if (wl_display_dispatch(wayland->display) < 0)
         wayland->input.sym = XKB_KEY_Escape;
