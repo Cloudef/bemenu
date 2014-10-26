@@ -119,12 +119,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
     if (menu->title) {
         bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.fg);
         bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
-        bm_cairo_draw_line(cairo, &paint, &result, 0, 0, result.te.x_advance, 4, "%s", menu->title);
+        bm_cairo_draw_line(cairo, &paint, &result, 0, 0, 4 + result.te.x_advance, 4, "%s", menu->title);
     }
 
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
-    bm_cairo_draw_line(cairo, &paint, &result, 0, width, result.te.x_advance, 4, "%s%s", (menu->title ? " " : ""), (menu->filter ? menu->filter : ""));
+    bm_cairo_draw_line(cairo, &paint, &result, 0, width, 4 + result.te.x_advance, 4, "%s%s", (menu->title ? " " : ""), (menu->filter ? menu->filter : ""));
 
     uint32_t displayed = 1;
     uint32_t lines = MAX(height / paint.fe.height, menu->lines);
@@ -152,9 +152,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
             }
 
             if (menu->prefix && highlighted) {
-                bm_cairo_draw_line(cairo, &paint, &result, 0, width, 0, 4 + paint.fe.height * cl++, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
+                bm_cairo_draw_line(cairo, &paint, &result, 0, width, 4, 4 + paint.fe.height * cl++, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
-                bm_cairo_draw_line(cairo, &paint, &result, start_x, width, start_x, 4 + paint.fe.height * cl++, "%s", (items[i]->text ? items[i]->text : ""));
+                bm_cairo_draw_line(cairo, &paint, &result, start_x, width, 4 + start_x, 4 + paint.fe.height * cl++, "%s", (items[i]->text ? items[i]->text : ""));
             }
 
             ++displayed;
