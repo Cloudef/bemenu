@@ -24,10 +24,10 @@ main(int argc, char **argv)
         for (int32_t i = 0; i < count; ++i) {
             struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]), BM_PRIO_ANY);
             if (!strcmp(bm_renderer_get_name(renderers[i]), "curses") && !isatty(STDIN_FILENO)) {
-                assert(!menu);
+                // do not test
                 continue;
             } else if (!strcmp(bm_renderer_get_name(renderers[i]), "wayland") && !getenv("WAYLAND_DISPLAY")) {
-                assert(!menu);
+                // do not test
                 continue;
             }
             assert(menu);
