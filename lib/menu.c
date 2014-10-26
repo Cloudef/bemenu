@@ -484,6 +484,26 @@ bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode)
     return key;
 }
 
+static void
+menu_next(struct bm_menu *menu, uint32_t count)
+{
+    if (menu->index < count - 1) {
+        menu->index++;
+    } else if (menu->wrap) {
+        menu->index = 0;
+    }
+}
+
+static void
+menu_prev(struct bm_menu *menu, uint32_t count)
+{
+    if (menu->index > 0) {
+        menu->index--;
+    } else if (menu->wrap) {
+        menu->index = count - 1;
+    }
+}
+
 enum bm_run_result
 bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 {
@@ -501,18 +521,22 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
     switch (key) {
         case BM_KEY_LEFT:
-            if (menu->filter) {
+            if (menu->lines > 0 && menu->filter) {
                 uint32_t oldCursor = menu->cursor;
                 menu->cursor -= bm_utf8_rune_prev(menu->filter, menu->cursor);
                 menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, oldCursor - menu->cursor);
+            } else if (menu->lines == 0) {
+                menu_prev(menu, count);
             }
             break;
 
         case BM_KEY_RIGHT:
-            if (menu->filter) {
+            if (menu->lines > 0 && menu->filter) {
                 uint32_t oldCursor = menu->cursor;
                 menu->cursor += bm_utf8_rune_next(menu->filter, menu->cursor);
                 menu->curses_cursor += bm_utf8_rune_width(menu->filter + oldCursor, menu->cursor - oldCursor);
+            } else if (menu->lines == 0) {
+                menu_next(menu, count);
             }
             break;
 
@@ -526,19 +550,11 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_UP:
-            if (menu->index > 0) {
-                menu->index--;
-            } else if (menu->wrap) {
-                menu->index = count - 1;
-            }
+            menu_prev(menu, count);
             break;
 
         case BM_KEY_DOWN:
-            if (menu->index < count - 1) {
-                menu->index++;
-            } else if (menu->wrap) {
-                menu->index = 0;
-            }
+            menu_next(menu, count);
             break;
 
         case BM_KEY_PAGE_UP:
