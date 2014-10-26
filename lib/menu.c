@@ -136,12 +136,27 @@ bm_menu_get_userdata(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_prefix(struct bm_menu *menu, const char *prefix)
+{
+    assert(menu);
+    free(menu->prefix);
+    menu->prefix = (prefix && strlen(prefix) > 0 ? bm_strdup(prefix) : NULL);
+}
+
+const char*
+bm_menu_get_prefix(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->prefix;
+}
+
+void
 bm_menu_set_filter(struct bm_menu *menu, const char *filter)
 {
     assert(menu);
 
     free(menu->filter);
-    menu->filter = (filter ? bm_strdup(filter) : NULL);
+    menu->filter = (filter && strlen(filter) > 0  ? bm_strdup(filter) : NULL);
     menu->filter_size = (filter ? strlen(filter) : 0);
 }
 

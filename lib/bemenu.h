@@ -253,10 +253,27 @@ void bm_menu_set_userdata(struct bm_menu *menu, void *userdata);
 void* bm_menu_get_userdata(struct bm_menu *menu);
 
 /**
+ * Set highlight prefix.
+ * This is shown on vertical list mode only.
+ *
+ * @param menu bm_menu instance where to set highlight prefix.
+ * @param prefix Null terminated C "string" to act as prefix for highlighted item. May be set **NULL** for none.
+ */
+void bm_menu_set_prefix(struct bm_menu *menu, const char *prefix);
+
+/**
+ * Get highlight prefix.
+ *
+ * @param menu bm_menu instance where to get highlight prefix.
+ * @param Const pointer to current highlight prefix, may be **NULL** if empty.
+ */
+const char* bm_menu_get_prefix(struct bm_menu *menu);
+
+/**
  * Set filter text to bm_menu instance.
  *
  * @param menu bm_menu instance where to set filter.
- * @param filter Null terminated C "string" to act as filter.
+ * @param filter Null terminated C "string" to act as filter. May be set **NULL** for none.
  */
 void bm_menu_set_filter(struct bm_menu *menu, const char *filter);
 

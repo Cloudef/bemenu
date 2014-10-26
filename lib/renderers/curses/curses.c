@@ -194,7 +194,15 @@ render(const struct bm_menu *menu)
         for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
             int32_t color = (highlighted ? 2 : (bm_menu_item_is_selected(menu, items[i]) ? 1 : 0));
-            draw_line(color, cl++, "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : ""));
+
+            if (menu->prefix && highlighted) {
+                draw_line(color, cl++, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
+            } else if (menu->prefix) {
+                int32_t offset = (menu->prefix ? bm_utf8_string_screen_width(menu->prefix) : 0);
+                draw_line(color, cl++, "%*s %s", offset, "", (items[i]->text ? items[i]->text : ""));
+            } else {
+                draw_line(color, cl++, "%s", (items[i]->text ? items[i]->text : ""));
+            }
         }
     }
 

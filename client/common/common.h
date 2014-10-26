@@ -10,6 +10,7 @@ struct client {
     uint32_t lines;
     const char *colors[BM_COLOR_LAST];
     const char *title;
+    const char *prefix;
     const char *renderer;
     char *font;
     uint32_t font_size;

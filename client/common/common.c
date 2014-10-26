@@ -67,6 +67,7 @@ usage(FILE *out, const char *name)
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
+          " -P, --prefix          text to shown before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
           " --backend             options: curses, wayland\n"
           " --prioritory          options: terminal, gui\n\n"
@@ -108,6 +109,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "list",        required_argument, 0, 'l' },
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
+        { "prefix",      required_argument, 0, 'P' },
         { "backend",     required_argument, 0, 0x100 },
         { "prioritory",  required_argument, 0, 0x101 },
 
@@ -136,7 +138,7 @@ parse_args(struct client *client, int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:I:bfm:", opts, NULL);
+        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:", opts, NULL);
         if (opt < 0)
             break;
 
@@ -159,6 +161,9 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
             case 'p':
                 client->title = optarg;
+                break;
+            case 'P':
+                client->prefix = optarg;
                 break;
             case 'I':
                 client->selected = strtol(optarg, NULL, 10);
@@ -248,6 +253,7 @@ menu_with_options(struct client *client)
 
     bm_menu_set_font(menu, client->font, client->font_size);
     bm_menu_set_title(menu, client->title);
+    bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);
     bm_menu_set_lines(menu, client->lines);
     bm_menu_set_wrap(menu, client->wrap);

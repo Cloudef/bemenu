@@ -211,6 +211,12 @@ struct bm_menu {
     struct bm_hex_color colors[BM_COLOR_LAST];
 
     /**
+     * Prefix shown for highlighted item.
+     * Vertical mode only.
+     */
+    char *prefix;
+
+    /**
      * Text used to filter matches.
      */
     char *filter;

@@ -129,6 +129,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
     uint32_t displayed = 1;
     uint32_t lines = MAX(height / paint.fe.height, menu->lines);
     if (lines > 1) {
+        uint32_t start_x = 0;
+        if (menu->prefix) {
+            bm_cairo_get_text_extents(cairo, &result, "%s ", menu->prefix);
+            start_x = result.te.x_advance;
+        }
+
         uint32_t count, cl = 1;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
         for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
@@ -145,8 +151,11 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             }
 
-            bm_cairo_draw_line(cairo, &paint, &result, 0, width, 0, 4 + paint.fe.height * cl++,
-                    "%s%s", (highlighted ? ">> " : "   "), (items[i]->text ? items[i]->text : ""));
+            if (menu->prefix && highlighted) {
+                bm_cairo_draw_line(cairo, &paint, &result, 0, width, 0, 4 + paint.fe.height * cl++, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
+            } else {
+                bm_cairo_draw_line(cairo, &paint, &result, start_x, width, start_x, 4 + paint.fe.height * cl++, "%s", (items[i]->text ? items[i]->text : ""));
+            }
 
             ++displayed;
         }

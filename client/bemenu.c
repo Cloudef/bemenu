@@ -11,6 +11,7 @@ static struct client client = {
     .lines = 0,
     .colors = {0},
     .title = "bemenu",
+    .prefix = NULL,
     .renderer = NULL,
     .font = NULL,
     .font_size = 0,
