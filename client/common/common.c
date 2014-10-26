@@ -79,7 +79,7 @@ usage(FILE *out, const char *name)
           " -b, --bottom          appears at the bottom of the screen. ()\n"
           " -f, --grab            grabs the keyboard before reading stdin. ()\n"
           " -m, --monitor         index of monitor where menu will appear. ()\n"
-          " --fn                  defines the font to be used. (w)\n"
+          " --fn                  defines the font to be used ('name [size]'). (w)\n"
           " --bg                  defines the background color. (w)\n"
           " --tb                  defines the title background color. (w)\n"
           " --tf                  defines the title foreground color. (w)\n"
@@ -191,7 +191,7 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
 
             case 0x102:
-                if (sscanf(optarg, "%ms:%u", &client->font, &client->font_size) < 2)
+                if (sscanf(optarg, "%ms %u", &client->font, &client->font_size) < 2)
                     sscanf(optarg, "%ms", &client->font);
                 break;
             case 0x103:
