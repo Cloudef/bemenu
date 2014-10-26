@@ -257,7 +257,7 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
 
     cairo_font_extents_t fe;
     bm_cairo_get_font_extents(&buffer->cairo, &menu->font, &fe);
-    window->height = lines * fe.height + 4;
+    window->height = lines * (fe.height + 4);
 
     if (window->height != buffer->height && !(buffer = next_buffer(window)))
         return;
