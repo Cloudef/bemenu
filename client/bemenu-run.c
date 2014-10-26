@@ -144,6 +144,38 @@ read_items_to_menu_from_path(struct bm_menu *menu)
         read_items_to_menu_from_dir(menu, path);
 }
 
+static bool
+tokenize_args(const char *buf, char **out_copy, char ***out_list)
+{
+    assert(buf && out_copy && out_list);
+    *out_copy = NULL;
+    *out_list = NULL;
+
+    char *copy;
+    if (!(copy = c_strdup(buf)))
+        return false;
+
+    size_t pos, count = 0;
+    for (const char *s = copy; *s && (pos = strcspn(s, " ")) != 0; s += pos + 1)
+        ++count;
+
+    char **list;
+    if (!(list = calloc(count + 1, sizeof(char*)))) {
+        free(copy);
+        return false;
+    }
+
+    count = 0;
+    for (char *s = copy; *s && (pos = strcspn(s, " ")) != 0; s += pos + 1, ++count) {
+        s[pos] = 0;
+        list[count] = s;
+    }
+
+    *out_copy = copy;
+    *out_list = list;
+    return true;
+}
+
 static void
 launch(const char *bin)
 {
@@ -154,7 +186,14 @@ launch(const char *bin)
         setsid();
         freopen("/dev/null", "w", stdout);
         freopen("/dev/null", "w", stderr);
-        execlp(bin, bin, NULL);
+
+        char *first, **args;
+        if (!tokenize_args(bin, &first, &args))
+            _exit(EXIT_FAILURE);
+
+        execvp(first, args);
+        free(first);
+        free(args);
         _exit(EXIT_SUCCESS);
     }
 }
