@@ -12,8 +12,8 @@ static void
 disco_trap(int sig)
 {
     (void)sig;
-    printf("\e[?25h\n");
-    fflush(stdout);
+    fprintf(stderr, "\e[?25h");
+    fflush(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -29,18 +29,18 @@ disco(void)
     sigaction(SIGINT, &action, NULL);
 
     uint32_t cc, c = 80;
-    printf("\e[?25l");
+    fprintf(stderr, "\e[?25l");
     while (1) {
         for (uint32_t i = 1; i < c - 1; ++i) {
-            printf("\r    %*s%s %s %s ", (i > c / 2 ? c - i : i), " ", ((i % 2) ? "<o/" : "\\o>"), ((i % 4) ? "DISCO" : "     "), ((i %2) ? "\\o>" : "<o/"));
-            for (cc = 0; cc < (i < c / 2 ? c / 2 - i : i - c / 2); ++cc) printf(((i % 2) ? "^" : "'"));
-            printf("%s %s \r %s %s", ((i % 2) ? "*" : "•"), ((i % 3) ? "\\o" : "<o"), ((i % 3) ? "o/" : "o>"), ((i % 2) ? "*" : "•"));
-            for (cc = 2; cc < (i > c / 2 ? c - i : i); ++cc) printf(((i % 2) ? "^" : "'"));
-            fflush(stdout);
+            fprintf(stderr, "\r    %*s%s %s %s ", (i > c / 2 ? c - i : i), " ", ((i % 2) ? "<o/" : "\\o>"), ((i % 4) ? "DISCO" : "     "), ((i %2) ? "\\o>" : "<o/"));
+            for (cc = 0; cc < (i < c / 2 ? c / 2 - i : i - c / 2); ++cc) fprintf(stderr, ((i % 2) ? "^" : "'"));
+            fprintf(stderr, "%s %s \r %s %s", ((i % 2) ? "*" : "•"), ((i % 3) ? "\\o" : "<o"), ((i % 3) ? "o/" : "o>"), ((i % 2) ? "*" : "•"));
+            for (cc = 2; cc < (i > c / 2 ? c - i : i); ++cc) fprintf(stderr, ((i % 2) ? "^" : "'"));
+            fflush(stderr);
             usleep(140 * 1000);
         }
     }
-    printf("\e[?25h");
+    fprintf(stderr, "\e[?25h");
     exit(EXIT_SUCCESS);
 }
 
