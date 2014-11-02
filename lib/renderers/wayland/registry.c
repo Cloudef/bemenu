@@ -236,8 +236,45 @@ seat_handle_name(void *data, struct wl_seat *seat, const char *name)
 }
 
 static const struct wl_seat_listener seat_listener = {
-    seat_handle_capabilities,
-    seat_handle_name
+    .capabilities = seat_handle_capabilities,
+    .name = seat_handle_name
+};
+
+static void
+display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
+{
+    (void)data, (void)wl_output, (void)x, (void)y, (void)physical_width, (void)physical_height, (void)subpixel, (void)make, (void)model, (void)transform;
+}
+
+static void
+display_handle_done(void *data, struct wl_output *wl_output)
+{
+    (void)data, (void)wl_output;
+}
+
+static void
+display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
+{
+    (void)data, (void)wl_output, (void)scale;
+}
+
+static void
+display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int width, int height, int refresh)
+{
+    (void)wl_output, (void)refresh, (void)height;
+    struct wayland *wayland = data;
+
+    if (flags & WL_OUTPUT_MODE_CURRENT) {
+        wayland->window.width = width;
+        wayland->window.max_height = height;
+    }
+}
+
+static const struct wl_output_listener output_listener = {
+    .geometry = display_handle_geometry,
+    .mode = display_handle_mode,
+    .done = display_handle_done,
+    .scale = display_handle_scale
 };
 
 static void
@@ -260,6 +297,9 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
     } else if (strcmp(interface, "wl_shm") == 0) {
         wayland->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
         wl_shm_add_listener(wayland->shm, &shm_listener, data);
+    } else if (strcmp(interface, "wl_output") == 0) {
+        wayland->output = wl_registry_bind(registry, id, &wl_output_interface, 2);
+        wl_output_add_listener(wayland->output, &output_listener, wayland);
     }
 }
 

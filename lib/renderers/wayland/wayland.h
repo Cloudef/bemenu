@@ -80,7 +80,7 @@ struct window {
     struct xdg_surface *xdg_surface;
     struct wl_shm *shm;
     struct buffer buffers[2];
-    uint32_t width, height;
+    uint32_t width, height, max_height;
     uint32_t displayed;
 
     struct {
@@ -97,6 +97,7 @@ struct wayland {
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
+    struct wl_output *output;
     struct wl_seat *seat;
     struct xdg_shell *xdg_shell;
     struct wl_shell *shell;

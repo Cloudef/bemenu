@@ -183,6 +183,9 @@ constructor(struct bm_menu *menu)
     if (!(menu->renderer->internal = wayland = calloc(1, sizeof(struct wayland))))
         goto fail;
 
+    wayland->window.width = 800;
+    wayland->window.height = 14;
+
     if (!(wayland->display = wl_display_connect(NULL)))
         goto fail;
 

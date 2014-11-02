@@ -195,24 +195,16 @@ next_buffer(struct window *window)
 }
 
 static void
-resize(struct window *window, uint32_t width, uint32_t height)
-{
-    window->width = width;
-    window->height = height;
-}
-
-static void
 shell_surface_ping(void *data, struct wl_shell_surface *surface, uint32_t serial)
 {
-    (void)data;
+   (void)data;
    wl_shell_surface_pong(surface, serial);
 }
 
 static void
 shell_surface_configure(void *data, struct wl_shell_surface *surface, uint32_t edges, int32_t width, int32_t height)
 {
-    (void)surface, (void)edges;
-    resize(data, width, height);
+    (void)data, (void)surface, (void)edges, (void)width, (void)height;
 }
 
 static void
@@ -230,8 +222,7 @@ static const struct wl_shell_surface_listener shell_surface_listener = {
 static void
 xdg_surface_configure(void *data, struct xdg_surface *surface, int32_t width, int32_t height, struct wl_array *states, uint32_t serial)
 {
-    (void)states;
-    resize(data, width, height);
+    (void)data, (void)states, (void)width, (void)height, (void)states, (void)serial;
     xdg_surface_ack_configure(surface, serial);
 }
 
@@ -273,7 +264,7 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
 
     cairo_font_extents_t fe;
     bm_cairo_get_font_extents(&buffer->cairo, &menu->font, &fe);
-    window->height = lines * (fe.height + 4);
+    window->height = MIN(lines * (fe.height + 4), window->max_height);
 
     if (window->height != buffer->height && !(buffer = next_buffer(window)))
         return;
@@ -324,9 +315,6 @@ bm_wl_window_create(struct window *window, struct wl_shm *shm, struct wl_shell *
     } else {
         return false;
     }
-
-    window->width = 800;
-    window->height = 240;
 
     window->shm = shm;
     window->surface = surface;

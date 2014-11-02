@@ -10,6 +10,10 @@
 #  define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
+#ifndef MIN
+#  define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+
 struct cairo {
     cairo_t *cr;
     cairo_surface_t *surface;
@@ -145,7 +149,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
     bm_cairo_draw_line(cairo, &paint, &result, "%s", (menu->filter ? menu->filter : ""));
 
     uint32_t displayed = 1;
-    uint32_t lines = MAX(height / (paint.fe.height + 4), menu->lines);
+    uint32_t lines = MAX(height / (paint.fe.height + 4), 1);
     if (lines > 1) {
         uint32_t start_x = 0;
         if (menu->prefix) {
