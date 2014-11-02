@@ -246,10 +246,26 @@ static const struct xdg_surface_listener xdg_surface_listener = {
     .close = xdg_surface_close,
 };
 
+static void
+frame_callback(void *data, struct wl_callback *callback, uint32_t time)
+{
+    (void)time;
+    struct window *window = data;
+    wl_callback_destroy(callback);
+    window->frame_cb = NULL;
+}
+
+static const struct wl_callback_listener listener = {
+    frame_callback
+};
+
 void
 bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines)
 {
     assert(window && menu);
+
+    if (window->frame_cb)
+        return;
 
     struct buffer *buffer;
     if (!(buffer = next_buffer(window)))
@@ -264,6 +280,9 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
 
     if (window->notify.render)
         window->displayed = window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
+
+    window->frame_cb = wl_surface_frame(window->surface);
+    wl_callback_add_listener(window->frame_cb, &listener, window);
 
     wl_surface_damage(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);

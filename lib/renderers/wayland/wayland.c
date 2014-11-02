@@ -1,3 +1,4 @@
+#define _DEFAULT_SOURCE
 #include "internal.h"
 #include "version.h"
 #include "wayland.h"
@@ -6,19 +7,41 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <sys/epoll.h>
+#include <sys/timerfd.h>
+
+static int efd;
 
 static void
 render(const struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
+    wl_display_dispatch_pending(wayland->display);
+
+    if (wl_display_flush(wayland->display) < 0 && errno != EAGAIN) {
+        wayland->input.sym = XKB_KEY_Escape;
+        return;
+    }
+
+    struct epoll_event ep[16];
+    uint32_t num = epoll_wait(efd, ep, 16, -1);
+    for (uint32_t i = 0; i < num; ++i) {
+        if (ep[i].data.ptr == &wayland->fds.display) {
+            if (ep[i].events & EPOLLERR || ep[i].events & EPOLLHUP ||
+               ((ep[i].events & EPOLLIN) && wl_display_dispatch(wayland->display) < 0))
+                wayland->input.sym = XKB_KEY_Escape;
+        } else if (ep[i].data.ptr == &wayland->fds.repeat) {
+            bm_wl_repeat(wayland);
+        }
+    }
 
     uint32_t count;
     bm_menu_get_filtered_items(menu, &count);
     uint32_t lines = (count < menu->lines ? count : menu->lines) + 1;
     bm_wl_window_render(&wayland->window, menu, lines);
-
-    if (wl_display_dispatch(wayland->display) < 0)
-        wayland->input.sym = XKB_KEY_Escape;
 }
 
 static enum bm_key
@@ -31,13 +54,17 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     if (wayland->input.sym == XKB_KEY_NoSymbol)
         return BM_KEY_UNICODE;
 
+    xkb_keysym_t sym = wayland->input.sym;
     uint32_t mods = wayland->input.modifiers;
     *unicode = xkb_state_key_get_utf32(wayland->input.xkb.state, wayland->input.code);
 
     if (!*unicode && wayland->input.code == 23 && (mods & MOD_SHIFT))
         return BM_KEY_SHIFT_TAB;
 
-    switch (wayland->input.sym) {
+    wayland->input.sym = XKB_KEY_NoSymbol;
+    wayland->input.code = 0;
+
+    switch (sym) {
         case XKB_KEY_Up:
             return BM_KEY_UP;
 
@@ -138,6 +165,9 @@ destructor(struct bm_menu *menu)
     xkb_context_unref(wayland->input.xkb.context);
 
     if (wayland->display) {
+        epoll_ctl(efd, EPOLL_CTL_DEL, wayland->fds.repeat, NULL);
+        epoll_ctl(efd, EPOLL_CTL_DEL, wayland->fds.display, NULL);
+        close(wayland->fds.repeat);
         wl_display_flush(wayland->display);
         wl_display_disconnect(wayland->display);
     }
@@ -169,7 +199,24 @@ constructor(struct bm_menu *menu)
     if (!bm_wl_window_create(&wayland->window, wayland->shm, wayland->shell, wayland->xdg_shell, surface))
         goto fail;
 
+    if (!efd && (efd = epoll_create(EPOLL_CLOEXEC)) < 0)
+        goto fail;
+
+    wayland->fds.display = wl_display_get_fd(wayland->display);
+    wayland->fds.repeat = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+
+    struct epoll_event ep;
+    ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
+    ep.data.ptr = &wayland->fds.display;
+    epoll_ctl(efd, EPOLL_CTL_ADD, wayland->fds.display, &ep);
+
+    struct epoll_event ep2;
+    ep2.events = EPOLLIN;
+    ep2.data.ptr = &wayland->fds.repeat;
+    epoll_ctl(efd, EPOLL_CTL_ADD, wayland->fds.repeat, &ep2);
+
     wayland->window.notify.render = bm_cairo_paint;
+    wayland->input.repeat_fd = &wayland->fds.repeat;
     return true;
 
 fail:

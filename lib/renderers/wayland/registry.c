@@ -1,7 +1,9 @@
+#define _DEFAULT_SOURCE
 #include "wayland.h"
 
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/timerfd.h>
 
 const char *BM_XKB_MASK_NAMES[MASK_LAST] = {
     XKB_MOD_NAME_SHIFT,
@@ -104,7 +106,24 @@ keyboard_handle_enter(void *data, struct wl_keyboard *keyboard, uint32_t serial,
 static void
 keyboard_handle_leave(void *data, struct wl_keyboard *keyboard, uint32_t serial, struct wl_surface *surface)
 {
-    (void)data, (void)keyboard, (void)serial, (void)surface;
+    (void)keyboard, (void)serial, (void)surface;
+    struct input *input = data;
+    struct itimerspec its;
+    its.it_interval.tv_sec = 0;
+    its.it_interval.tv_nsec = 0;
+    its.it_value.tv_sec = 0;
+    its.it_value.tv_nsec = 0;
+    timerfd_settime(*input->repeat_fd, 0, &its, NULL);
+}
+
+static void
+press(struct input *input, xkb_keysym_t sym, uint32_t key, enum wl_keyboard_key_state state)
+{
+    input->sym = (state == WL_KEYBOARD_KEY_STATE_PRESSED ? sym : XKB_KEY_NoSymbol);
+    input->code = (state == WL_KEYBOARD_KEY_STATE_PRESSED ? key + 8 : 0);
+
+    if (input->notify.key)
+        input->notify.key(state, sym, key);
 }
 
 static void
@@ -117,35 +136,26 @@ keyboard_handle_key(void *data, struct wl_keyboard *keyboard, uint32_t serial, u
     if (!input->xkb.state)
         return;
 
-    uint32_t code = key + 8;
-    xkb_keysym_t sym = xkb_state_key_get_one_sym(input->xkb.state, code);
+    xkb_keysym_t sym = xkb_state_key_get_one_sym(input->xkb.state, key + 8);
+    press(input, sym, key, state);
 
-    input->sym = (state == WL_KEYBOARD_KEY_STATE_PRESSED ? sym : XKB_KEY_NoSymbol);
-    input->code = (state == WL_KEYBOARD_KEY_STATE_PRESSED ? code : 0);
-
-    if (input->notify.key)
-        input->notify.key(state, sym, code);
-
-#if 0
-    if (state == WL_KEYBOARD_KEY_STATE_RELEASED &&
-            key == input->repeat_key) {
-        its.it_interval.tv_sec = 0;
-        its.it_interval.tv_nsec = 0;
-        its.it_value.tv_sec = 0;
-        its.it_value.tv_nsec = 0;
-        timerfd_settime(input->repeat_timer_fd, 0, &its, NULL);
-    } else if (state == WL_KEYBOARD_KEY_STATE_PRESSED &&
-            xkb_keymap_key_repeats(input->xkb.keymap, code)) {
+    if (state == WL_KEYBOARD_KEY_STATE_PRESSED && xkb_keymap_key_repeats(input->xkb.keymap, input->code)) {
+        struct itimerspec its;
         input->repeat_sym = sym;
         input->repeat_key = key;
-        input->repeat_time = time;
         its.it_interval.tv_sec = input->repeat_rate_sec;
         its.it_interval.tv_nsec = input->repeat_rate_nsec;
         its.it_value.tv_sec = input->repeat_delay_sec;
         its.it_value.tv_nsec = input->repeat_delay_nsec;
-        timerfd_settime(input->repeat_timer_fd, 0, &its, NULL);
+        timerfd_settime(*input->repeat_fd, 0, &its, NULL);
+    } else if (state == WL_KEYBOARD_KEY_STATE_RELEASED && key == input->repeat_key) {
+        struct itimerspec its;
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 0;
+        its.it_value.tv_sec = 0;
+        its.it_value.tv_nsec = 0;
+        timerfd_settime(*input->repeat_fd, 0, &its, NULL);
     }
-#endif
 }
 
 static void
@@ -168,9 +178,32 @@ keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard, uint32_t ser
 }
 
 static void
+set_repeat_info(struct input *input, int32_t rate, int32_t delay)
+{
+    assert(input);
+
+    input->repeat_rate_sec = input->repeat_rate_nsec = 0;
+    input->repeat_delay_sec = input->repeat_delay_nsec = 0;
+
+    /* a rate of zero disables any repeating, regardless of the delay's value */
+    if (rate == 0)
+        return;
+
+    if (rate == 1)
+        input->repeat_rate_sec = 1;
+    else
+        input->repeat_rate_nsec = 1000000000 / rate;
+
+    input->repeat_delay_sec = delay / 1000;
+    delay -= (input->repeat_delay_sec * 1000);
+    input->repeat_delay_nsec = delay * 1000 * 1000;
+}
+
+static void
 keyboard_handle_repeat_info(void *data, struct wl_keyboard *keyboard, int32_t rate, int32_t delay)
 {
-    (void)data, (void)keyboard, (void)rate, (void)delay;
+    (void)keyboard;
+    set_repeat_info(data, rate, delay);
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -242,6 +275,19 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 void
+bm_wl_repeat(struct wayland *wayland)
+{
+    uint64_t exp;
+    if (read(wayland->fds.repeat, &exp, sizeof(exp)) != sizeof(exp))
+        return;
+
+    if (wayland->input.notify.key)
+        wayland->input.notify.key(WL_KEYBOARD_KEY_STATE_PRESSED, wayland->input.repeat_sym, wayland->input.repeat_key + 8);
+
+    press(&wayland->input, wayland->input.repeat_sym, wayland->input.repeat_key, WL_KEYBOARD_KEY_STATE_PRESSED);
+}
+
+void
 bm_wl_registry_destroy(struct wayland *wayland)
 {
     assert(wayland);
@@ -282,6 +328,7 @@ bm_wl_registry_register(struct wayland *wayland)
     if (!wayland->input.keyboard || !(wayland->formats & (1 << WL_SHM_FORMAT_ARGB8888)))
         return false;
 
+    set_repeat_info(&wayland->input, 40, 400);
     return true;
 }
 

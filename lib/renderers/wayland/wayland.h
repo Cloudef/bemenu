@@ -44,12 +44,22 @@ struct xkb {
 };
 
 struct input {
+    int *repeat_fd;
+
     struct wl_keyboard *keyboard;
     struct xkb xkb;
 
     xkb_keysym_t sym;
     uint32_t code;
     uint32_t modifiers;
+
+    xkb_keysym_t repeat_sym;
+    uint32_t repeat_key;
+
+    int32_t repeat_rate_sec;
+    int32_t repeat_rate_nsec;
+    int32_t repeat_delay_sec;
+    int32_t repeat_delay_nsec;
 
     struct {
         void (*key)(enum wl_keyboard_key_state state, xkb_keysym_t sym, uint32_t code);
@@ -66,6 +76,7 @@ struct buffer {
 struct window {
     struct wl_surface *surface;
     struct wl_shell_surface *shell_surface;
+    struct wl_callback *frame_cb;
     struct xdg_surface *xdg_surface;
     struct wl_shm *shm;
     struct buffer buffers[2];
@@ -78,6 +89,11 @@ struct window {
 };
 
 struct wayland {
+    struct {
+        int32_t display;
+        int32_t repeat;
+    } fds;
+
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
@@ -90,6 +106,7 @@ struct wayland {
     uint32_t formats;
 };
 
+void bm_wl_repeat(struct wayland *wayland);
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines);
