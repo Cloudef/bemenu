@@ -369,6 +369,7 @@ bm_wl_registry_register(struct wayland *wayland)
         return false;
 
     set_repeat_info(&wayland->input, 40, 400);
+    wayland->input.last_code = 0xDEADBEEF;
     return true;
 }
 

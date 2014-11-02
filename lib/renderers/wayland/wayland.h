@@ -51,6 +51,7 @@ struct input {
 
     xkb_keysym_t sym;
     uint32_t code;
+    uint32_t last_code;
     uint32_t modifiers;
 
     xkb_keysym_t repeat_sym;
