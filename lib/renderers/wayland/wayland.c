@@ -34,6 +34,9 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     uint32_t mods = wayland->input.modifiers;
     *unicode = xkb_state_key_get_utf32(wayland->input.xkb.state, wayland->input.code);
 
+    if (!*unicode && wayland->input.code == 23 && (mods & MOD_SHIFT))
+        return BM_KEY_SHIFT_TAB;
+
     switch (wayland->input.sym) {
         case XKB_KEY_Up:
             return BM_KEY_UP;
@@ -66,7 +69,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
             return (mods & MOD_SHIFT ? BM_KEY_LINE_DELETE_LEFT : BM_KEY_DELETE);
 
         case XKB_KEY_Tab:
-            return BM_KEY_TAB;
+            return (mods & MOD_SHIFT ? BM_KEY_SHIFT_TAB : BM_KEY_TAB);
 
         case XKB_KEY_Insert:
             return BM_KEY_SHIFT_RETURN;

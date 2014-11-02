@@ -92,7 +92,7 @@ keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard, uint32_t format
     input->xkb.state = state;
 
     for (uint32_t i = 0; i < MASK_LAST; ++i)
-        input->xkb.masks[i] = xkb_keymap_mod_get_index(input->xkb.keymap, BM_XKB_MASK_NAMES[i]);
+        input->xkb.masks[i] = 1 << xkb_keymap_mod_get_index(input->xkb.keymap, BM_XKB_MASK_NAMES[i]);
 }
 
 static void

@@ -297,6 +297,9 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
         case 9: /* Tab */
             return BM_KEY_TAB;
 
+        case 353: /* S-Tab */
+            return BM_KEY_SHIFT_TAB;
+
         case 18: /* C-r */
             return BM_KEY_CONTROL_RETURN;
 

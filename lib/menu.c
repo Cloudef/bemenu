@@ -485,21 +485,21 @@ bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode)
 }
 
 static void
-menu_next(struct bm_menu *menu, uint32_t count)
+menu_next(struct bm_menu *menu, uint32_t count, bool wrap)
 {
     if (menu->index < count - 1) {
         menu->index++;
-    } else if (menu->wrap) {
+    } else if (wrap) {
         menu->index = 0;
     }
 }
 
 static void
-menu_prev(struct bm_menu *menu, uint32_t count)
+menu_prev(struct bm_menu *menu, uint32_t count, bool wrap)
 {
     if (menu->index > 0) {
         menu->index--;
-    } else if (menu->wrap) {
+    } else if (wrap) {
         menu->index = count - 1;
     }
 }
@@ -526,7 +526,7 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
                 menu->cursor -= bm_utf8_rune_prev(menu->filter, menu->cursor);
                 menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, oldCursor - menu->cursor);
             } else if (menu->lines == 0) {
-                menu_prev(menu, count);
+                menu_prev(menu, count, menu->wrap);
             }
             break;
 
@@ -536,7 +536,7 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
                 menu->cursor += bm_utf8_rune_next(menu->filter, menu->cursor);
                 menu->curses_cursor += bm_utf8_rune_width(menu->filter + oldCursor, menu->cursor - oldCursor);
             } else if (menu->lines == 0) {
-                menu_next(menu, count);
+                menu_next(menu, count, menu->wrap);
             }
             break;
 
@@ -550,11 +550,11 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_UP:
-            menu_prev(menu, count);
+            menu_prev(menu, count, menu->wrap);
             break;
 
         case BM_KEY_DOWN:
-            menu_next(menu, count);
+            menu_next(menu, count, menu->wrap);
             break;
 
         case BM_KEY_PAGE_UP:
@@ -630,6 +630,12 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_TAB:
+            {
+                menu_next(menu, count, true);
+            }
+            break;
+
+        case BM_KEY_SHIFT_TAB:
             {
                 const char *text;
                 struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
