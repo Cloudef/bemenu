@@ -170,12 +170,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
             }
 
             if (menu->prefix && highlighted) {
-                paint.pos = (struct pos){ 4, 2 + (paint.fe.height + 4) * cl++ };
+                paint.pos = (struct pos){ 0, 2 + (paint.fe.height + 4) * cl++ };
                 paint.box = (struct box){ 4, 0, 2, 2, width - paint.pos.x, 0 };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
-                paint.pos = (struct pos){ 4 + start_x, 2 + (paint.fe.height + 4) * cl++ };
-                paint.box = (struct box){ 4, 0, 2, 2, width - paint.pos.x, 0 };
+                paint.pos = (struct pos){ 0, 2 + (paint.fe.height + 4) * cl++ };
+                paint.box = (struct box){ 4 + start_x, 0, 2, 2, width - paint.pos.x, 0 };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
             }
 
