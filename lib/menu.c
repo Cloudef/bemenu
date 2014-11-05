@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <unistd.h>
 #include <assert.h>
 
 /**
@@ -66,7 +67,7 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
 
         if (renderers[i]->api.prioritory == BM_PRIO_TERMINAL) {
             const char *term = getenv("TERM");
-            if (!term || !strlen(term))
+            if (!term || !strlen(term) || getppid() == 1)
                 continue;
         }
 
