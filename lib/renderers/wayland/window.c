@@ -259,15 +259,19 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
         return;
 
     struct buffer *buffer;
-    if (!(buffer = next_buffer(window)))
-        return;
+    if (!(buffer = next_buffer(window))) {
+        fprintf(stderr, "could not get next buffer");
+        exit(EXIT_FAILURE);
+    }
 
     cairo_font_extents_t fe;
     bm_cairo_get_font_extents(&buffer->cairo, &menu->font, &fe);
     window->height = MIN(lines * (fe.height + 4), window->max_height);
 
-    if (window->height != buffer->height && !(buffer = next_buffer(window)))
-        return;
+    if (window->height != buffer->height && !(buffer = next_buffer(window))) {
+        fprintf(stderr, "could not get next buffer");
+        exit(EXIT_FAILURE);
+    }
 
     if (window->notify.render)
         window->displayed = window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
