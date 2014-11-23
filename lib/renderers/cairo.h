@@ -5,6 +5,7 @@
 #include <string.h>
 #include <assert.h>
 #include <cairo/cairo.h>
+#include <pango/pangocairo.h>
 
 #ifndef MAX
 #  define MAX(a,b) (((a)>(b))?(a):(b))
@@ -17,6 +18,7 @@
 struct cairo {
     cairo_t *cr;
     cairo_surface_t *surface;
+    PangoContext *pango;
 };
 
 struct cairo_color {
@@ -45,6 +47,34 @@ struct cairo_result {
 
 static size_t blen = 0;
 static char *buffer = NULL;
+
+__attribute__((unused)) static bool
+bm_cairo_create_for_surface(struct cairo *cairo, cairo_surface_t *surface)
+{
+    assert(cairo && surface);
+    if (!(cairo->cr = cairo_create(surface)))
+        goto fail;
+
+    if (!(cairo->pango = pango_cairo_create_context(cairo->cr)))
+        goto fail;
+
+    cairo->surface = surface;
+    return true;
+
+fail:
+    if (cairo->cr)
+      cairo_destroy(cairo->cr);
+    return false;
+}
+
+__attribute__((unused)) static void
+bm_cairo_destroy(struct cairo *cairo)
+{
+    if (cairo->cr)
+        cairo_destroy(cairo->cr);
+    if (cairo->surface)
+        cairo_surface_destroy(cairo->surface);
+}
 
 __attribute__((unused)) static void
 bm_cairo_get_font_extents(struct cairo *cairo, const struct bm_font *font, cairo_font_extents_t *fe)
@@ -87,21 +117,32 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     if (!ret)
         return false;
 
-    cairo_text_extents_t te;
-    cairo_text_extents(cairo->cr, buffer, &te);
+    PangoLayout *layout = pango_cairo_create_layout(cairo->cr);
+    pango_layout_set_text(layout, buffer, -1);
+    PangoFontDescription *desc = pango_font_description_from_string("Terminus 12");
+    pango_layout_set_font_description(layout, desc);
+    pango_font_description_free(desc);
+    pango_cairo_update_layout(cairo->cr, layout);
+
+    int width, height;
+    pango_layout_get_size(layout, &width, &height);
 
     cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
     cairo_rectangle(cairo->cr,
             paint->pos.x - paint->box.lx, paint->pos.y - paint->box.ty,
-            (paint->box.w > 0 ? paint->box.w : te.width) + paint->box.rx + paint->box.lx,
+            (paint->box.w > 0 ? paint->box.w : width / PANGO_SCALE) + paint->box.rx + paint->box.lx,
             (paint->box.h > 0 ? paint->box.h : paint->fe.height) + paint->box.by + paint->box.ty);
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
-    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y + paint->fe.descent + paint->fe.height * 0.5 + paint->box.ty);
-    cairo_show_text(cairo->cr, buffer);
+    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - ((height * 0.25) / PANGO_SCALE) + paint->box.ty);
+    pango_cairo_show_layout(cairo->cr, layout);
+    g_object_unref(layout);
 
-    te.x_advance += paint->box.rx;
+    cairo_text_extents_t te;
+    cairo_text_extents(cairo->cr, buffer, &te);
+
+    te.x_advance = width / PANGO_SCALE + paint->box.rx;
     memcpy(&result->te, &te, sizeof(te));
     return true;
 }

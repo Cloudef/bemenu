@@ -105,11 +105,7 @@ destroy_buffer(struct buffer *buffer)
 {
     if (buffer->buffer)
         wl_buffer_destroy(buffer->buffer);
-    if (buffer->cairo.cr)
-        cairo_destroy(buffer->cairo.cr);
-    if (buffer->cairo.surface)
-        cairo_surface_destroy(buffer->cairo.surface);
-
+    bm_cairo_destroy(&buffer->cairo);
     memset(buffer, 0, sizeof(struct buffer));
 }
 
@@ -149,10 +145,11 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
 
     wl_buffer_add_listener(buffer->buffer, &buffer_listener, buffer);
 
-    if (!(buffer->cairo.surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
+    cairo_surface_t *surf;
+    if (!(surf = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
         goto fail;
 
-    if (!(buffer->cairo.cr = cairo_create(buffer->cairo.surface)))
+    if (!bm_cairo_create_for_surface(&buffer->cairo, surf))
         goto fail;
 
     buffer->width = width;
