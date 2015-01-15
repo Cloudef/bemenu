@@ -4,6 +4,7 @@
 #include "internal.h"
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 #include <cairo/cairo.h>
 #include <pango/pangocairo.h>
 
@@ -161,7 +162,7 @@ bm_cairo_color_from_menu_color(const struct bm_menu *menu, enum bm_color color, 
 }
 
 __attribute__((unused)) static void
-bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struct bm_menu *menu, struct cairo_paint_result *out_result)
+bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *out_result)
 {
     assert(cairo && menu && out_result);
 
@@ -207,6 +208,14 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
 
     if (lines > 1) {
         /* vertical mode */
+
+        uint32_t spacing = 0; // 0 == variable width spacing
+        if (lines > max_height / result.height) {
+            /* there is more lines than screen can fit, enter fixed spacing mode */
+            lines = max_height / result.height - 1;
+            spacing = result.height;
+        }
+
         uint32_t start_x = 0;
         if (menu->prefix) {
             bm_pango_get_text_extents(cairo, &paint, &result, "%s ", menu->prefix);
@@ -214,7 +223,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
         }
 
         uint32_t posy = out_result->height;
-        for (uint32_t l = 0, i = (menu->index / lines) * lines; l < lines && i < count; ++i, ++l) {
+        for (uint32_t l = 0, i = (menu->index / lines) * lines; l < lines && i < count && posy < max_height; ++i, ++l) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
 
             if (highlighted) {
@@ -238,7 +247,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, const struc
                 bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
             }
 
-            posy += result.height;
+            posy += (spacing ? spacing : result.height);
             out_result->height = posy + 2;
             out_result->displayed++;
         }

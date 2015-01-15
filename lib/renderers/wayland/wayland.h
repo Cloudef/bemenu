@@ -85,7 +85,7 @@ struct window {
     uint32_t displayed;
 
     struct {
-        void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, const struct bm_menu *menu, struct cairo_paint_result *result);
+        void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
     } notify;
 };
 
