@@ -72,6 +72,21 @@ struct render_api {
     void (*render)(const struct bm_menu *menu);
 
     /**
+     * Set menu to appear from bottom of the screen.
+     */
+    void (*set_bottom)(const struct bm_menu *menu, bool bottom);
+
+    /**
+     * Set monitor indeax where menu will appear
+     */
+    void (*set_monitor)(const struct bm_menu *menu, uint32_t monitor);
+
+    /**
+     * Grab/Ungrab keyboard
+     */
+    void (*grab_keyboard)(const struct bm_menu *menu, bool grab);
+
+    /**
      * Version of the plugin.
      * Should match BM_PLUGIN_VERSION or failure.
      */
@@ -254,6 +269,11 @@ struct bm_menu {
     uint32_t lines;
 
     /**
+     * Current monitor.
+     */
+    uint32_t monitor;
+
+    /**
      * Current filtering method in menu instance.
      */
     enum bm_filter_mode filter_mode;
@@ -262,6 +282,16 @@ struct bm_menu {
      * Should selection be wrapped?
      */
     bool wrap;
+
+    /**
+     * Is menu shown from bottom?
+     */
+    bool bottom;
+
+    /**
+     * Is menu grabbed?
+     */
+    bool grabbed;
 };
 
 /* library.c */

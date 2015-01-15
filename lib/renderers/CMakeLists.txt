@@ -1,6 +1,7 @@
 SET(RENDERERS
     "curses"
     "wayland"
+    "x11"
 )
 
 ADD_DEFINITIONS(-DPANGO_DISABLE_DEPRECATED)
