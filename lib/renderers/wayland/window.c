@@ -248,7 +248,7 @@ static const struct wl_callback_listener listener = {
 };
 
 void
-bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines)
+bm_wl_window_render(struct window *window, const struct bm_menu *menu)
 {
     assert(window && menu);
 
@@ -256,22 +256,25 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
         return;
 
     struct buffer *buffer;
-    if (!(buffer = next_buffer(window))) {
-        fprintf(stderr, "could not get next buffer");
-        exit(EXIT_FAILURE);
+    for (int tries = 0; tries < 2; ++tries) {
+        if (!(buffer = next_buffer(window))) {
+            fprintf(stderr, "could not get next buffer");
+            exit(EXIT_FAILURE);
+        }
+
+        if (!window->notify.render)
+            break;
+
+        struct cairo_paint_result result;
+        window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu, &result);
+        window->displayed = result.displayed;
+
+        if (window->height == result.height)
+            break;
+
+        window->height = result.height;
+        destroy_buffer(buffer);
     }
-
-    cairo_font_extents_t fe;
-    bm_cairo_get_font_extents(&buffer->cairo, &menu->font, &fe);
-    window->height = MIN(lines * (fe.height + 4), window->max_height);
-
-    if (window->height != buffer->height && !(buffer = next_buffer(window))) {
-        fprintf(stderr, "could not get next buffer");
-        exit(EXIT_FAILURE);
-    }
-
-    if (window->notify.render)
-        window->displayed = window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
 
     window->frame_cb = wl_surface_frame(window->surface);
     wl_callback_add_listener(window->frame_cb, &listener, window);

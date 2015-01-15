@@ -39,10 +39,7 @@ render(const struct bm_menu *menu)
     }
 
     if (wayland->input.code != wayland->input.last_code) {
-        uint32_t count;
-        bm_menu_get_filtered_items(menu, &count);
-        uint32_t lines = (count < menu->lines ? count : menu->lines) + 1;
-        bm_wl_window_render(&wayland->window, menu, lines);
+        bm_wl_window_render(&wayland->window, menu);
         wayland->input.last_code = wayland->input.code;
     }
 }
