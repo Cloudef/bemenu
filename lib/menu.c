@@ -248,14 +248,16 @@ bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size)
     return true;
 }
 
-const char* bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size)
+const char*
+bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size)
 {
     assert(menu);
     if (out_size) *out_size = menu->font.size;
     return menu->font.name;
 }
 
-bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
+bool
+bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
 {
     assert(menu);
 
@@ -277,10 +279,73 @@ bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *he
     return true;
 }
 
-const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
+const
+char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
 {
     assert(menu);
     return menu->colors[color].hex;
+}
+
+void
+bm_menu_set_bottom(struct bm_menu *menu, bool bottom)
+{
+    assert(menu);
+
+    if (menu->bottom == bottom)
+        return;
+
+    menu->bottom = bottom;
+
+    if (menu->renderer->api.set_bottom)
+        menu->renderer->api.set_bottom(menu, bottom);
+}
+
+bool
+bm_menu_get_bottom(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->bottom;
+}
+
+void
+bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor)
+{
+    assert(menu);
+
+    if (menu->monitor == monitor)
+        return;
+
+    menu->monitor = monitor;
+
+    if (menu->renderer->api.set_monitor)
+        menu->renderer->api.set_monitor(menu, monitor);
+}
+
+uint32_t
+bm_menu_get_monitor(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->monitor;
+}
+
+void
+bm_menu_grab_keyboard(struct bm_menu *menu, bool grab)
+{
+    assert(menu);
+
+    if (menu->grabbed == grab)
+        return;
+
+    menu->grabbed = grab;
+
+    if (menu->renderer->api.grab_keyboard)
+        menu->renderer->api.grab_keyboard(menu, grab);
+}
+
+bool
+bm_menu_is_keyboard_grabbed(struct bm_menu *menu)
+{
+    return menu->grabbed;
 }
 
 bool

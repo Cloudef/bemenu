@@ -389,6 +389,57 @@ bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *he
  */
 const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
 
+/**
+ * Display menu at bottom of the screen.
+ * This may be no-op on some renderers (curses, wayland)
+ *
+ * @param menu bm_menu instance to set bottom mode for.
+ * @param bottom true for bottom mode, false for top mode.
+ */
+void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
+
+/**
+ * Is menu being displayed at bottom of the screen?
+ *
+ * @param menu bm_menu instance where to get bottom mode from.
+ * @return true if bottom mode, false otherwise.
+ */
+bool bm_menu_get_bottom(struct bm_menu *menu);
+
+/**
+ * Display menu at monitor index.
+ * Indices start from 1, pass 0 for active monitor (default).
+ * If index is more than amount of monitors, the monitor with highest index will be selected.
+ *
+ * @param menu bm_menu instance to set monitor for.
+ * @param monitor Monitor index starting from 1.
+ */
+void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
+
+/**
+ * Return index for current monitor.
+ *
+ * @param menu bm_menu instance where to get current monitor from.
+ * @return Monitor index starting from 1.
+ */
+uint32_t bm_menu_get_monitor(struct bm_menu *menu);
+
+/**
+ * Tell renderer to grab keyboard.
+ * This only works with x11 renderer.
+ *
+ * @param menu bm_menu instance to set grab for.
+ * @param grab true for grab, false for ungrab.
+ */
+void bm_menu_grab_keyboard(struct bm_menu *menu, bool grab);
+
+/**
+ * Is keyboard grabbed for bm_menu?
+ *
+ * @param menu bm_menu instance where to check grab status from.
+ * @return true if grabbed, false if not.
+ */
+bool bm_menu_is_keyboard_grabbed(struct bm_menu *menu);
 
 /**  @} Properties */
 
@@ -530,6 +581,8 @@ struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t
 
 /**
  * Render bm_menu instance using chosen renderer.
+ *
+ * This function may block on **wayland** and **x11** renderer.
  *
  * @param menu bm_menu instance to be rendered.
  */

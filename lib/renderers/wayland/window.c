@@ -105,11 +105,7 @@ destroy_buffer(struct buffer *buffer)
 {
     if (buffer->buffer)
         wl_buffer_destroy(buffer->buffer);
-    if (buffer->cairo.cr)
-        cairo_destroy(buffer->cairo.cr);
-    if (buffer->cairo.surface)
-        cairo_surface_destroy(buffer->cairo.surface);
-
+    bm_cairo_destroy(&buffer->cairo);
     memset(buffer, 0, sizeof(struct buffer));
 }
 
@@ -149,11 +145,14 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
 
     wl_buffer_add_listener(buffer->buffer, &buffer_listener, buffer);
 
-    if (!(buffer->cairo.surface = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
+    cairo_surface_t *surf;
+    if (!(surf = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
         goto fail;
 
-    if (!(buffer->cairo.cr = cairo_create(buffer->cairo.surface)))
+    if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
+        cairo_surface_destroy(surf);
         goto fail;
+    }
 
     buffer->width = width;
     buffer->height = height;
@@ -251,7 +250,7 @@ static const struct wl_callback_listener listener = {
 };
 
 void
-bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines)
+bm_wl_window_render(struct window *window, const struct bm_menu *menu)
 {
     assert(window && menu);
 
@@ -259,22 +258,25 @@ bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t 
         return;
 
     struct buffer *buffer;
-    if (!(buffer = next_buffer(window))) {
-        fprintf(stderr, "could not get next buffer");
-        exit(EXIT_FAILURE);
+    for (int tries = 0; tries < 2; ++tries) {
+        if (!(buffer = next_buffer(window))) {
+            fprintf(stderr, "could not get next buffer");
+            exit(EXIT_FAILURE);
+        }
+
+        if (!window->notify.render)
+            break;
+
+        struct cairo_paint_result result;
+        window->notify.render(&buffer->cairo, buffer->width, fmin(buffer->height, window->max_height), window->max_height, menu, &result);
+        window->displayed = result.displayed;
+
+        if (window->height == result.height)
+            break;
+
+        window->height = result.height;
+        destroy_buffer(buffer);
     }
-
-    cairo_font_extents_t fe;
-    bm_cairo_get_font_extents(&buffer->cairo, &menu->font, &fe);
-    window->height = MIN(lines * (fe.height + 4), window->max_height);
-
-    if (window->height != buffer->height && !(buffer = next_buffer(window))) {
-        fprintf(stderr, "could not get next buffer");
-        exit(EXIT_FAILURE);
-    }
-
-    if (window->notify.render)
-        window->displayed = window->notify.render(&buffer->cairo, buffer->width, buffer->height, menu);
 
     window->frame_cb = wl_surface_frame(window->surface);
     wl_callback_add_listener(window->frame_cb, &listener, window);

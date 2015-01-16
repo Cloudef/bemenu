@@ -85,7 +85,7 @@ struct window {
     uint32_t displayed;
 
     struct {
-        uint32_t (*render)(struct cairo *cairo, uint32_t width, uint32_t height, const struct bm_menu *menu);
+        void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
     } notify;
 };
 
@@ -111,7 +111,7 @@ struct wayland {
 void bm_wl_repeat(struct wayland *wayland);
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
-void bm_wl_window_render(struct window *window, const struct bm_menu *menu, uint32_t lines);
+void bm_wl_window_render(struct window *window, const struct bm_menu *menu);
 bool bm_wl_window_create(struct window *window, struct wl_shm *shm, struct wl_shell *shell, struct xdg_shell *xdg_shell, struct wl_surface *surface);
 void bm_wl_window_destroy(struct window *window);
 

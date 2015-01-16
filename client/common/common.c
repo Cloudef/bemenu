@@ -73,24 +73,24 @@ usage(FILE *out, const char *name)
           " --prioritory          options: terminal, gui\n\n"
 
           "Backend specific options\n"
-          "   c = ncurses, w == wayland\n"
+          "   c = ncurses, w == wayland, x == x11\n"
           "   (...) At end of help indicates the backend support for option.\n\n"
 
-          " -b, --bottom          appears at the bottom of the screen. ()\n"
-          " -f, --grab            grabs the keyboard before reading stdin. ()\n"
-          " -m, --monitor         index of monitor where menu will appear. ()\n"
-          " --fn                  defines the font to be used ('name [size]'). (w)\n"
-          " --bg                  defines the background color. (w)\n"
-          " --tb                  defines the title background color. (w)\n"
-          " --tf                  defines the title foreground color. (w)\n"
-          " --fb                  defines the filter background color. (w)\n"
-          " --ff                  defines the filter foreground color. (w)\n"
-          " --nb                  defines the normal background color. (w)\n"
-          " --nf                  defines the normal foreground color. (w)\n"
-          " --hb                  defines the highlighted background color. (w)\n"
-          " --hf                  defines the highlighted foreground color. (w)\n"
-          " --sb                  defines the selected background color. (w)\n"
-          " --sf                  defines the selected foreground color. (w)\n", out);
+          " -b, --bottom          appears at the bottom of the screen. (x)\n"
+          " -f, --grab            grabs the keyboard before reading stdin. (x)\n"
+          " -m, --monitor         index of monitor where menu will appear. (x)\n"
+          " --fn                  defines the font to be used ('name [size]'). (wx)\n"
+          " --bg                  defines the background color. (wx)\n"
+          " --tb                  defines the title background color. (wx)\n"
+          " --tf                  defines the title foreground color. (wx)\n"
+          " --fb                  defines the filter background color. (wx)\n"
+          " --ff                  defines the filter foreground color. (wx)\n"
+          " --nb                  defines the normal background color. (wx)\n"
+          " --nf                  defines the normal foreground color. (wx)\n"
+          " --hb                  defines the highlighted background color. (wx)\n"
+          " --hf                  defines the highlighted foreground color. (wx)\n"
+          " --sb                  defines the selected background color. (wx)\n"
+          " --sf                  defines the selected foreground color. (wx)\n", out);
 
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
@@ -257,9 +257,14 @@ menu_with_options(struct client *client)
     bm_menu_set_filter_mode(menu, client->filter_mode);
     bm_menu_set_lines(menu, client->lines);
     bm_menu_set_wrap(menu, client->wrap);
+    bm_menu_set_bottom(menu, client->bottom);
+    bm_menu_set_monitor(menu, client->monitor);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);
+
+    if (client->grab)
+        bm_menu_grab_keyboard(menu, true);
 
     return menu;
 }
@@ -267,6 +272,8 @@ menu_with_options(struct client *client)
 enum bm_run_result
 run_menu(struct bm_menu *menu)
 {
+    bm_menu_grab_keyboard(menu, true);
+
     uint32_t unicode;
     enum bm_key key;
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
