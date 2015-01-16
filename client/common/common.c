@@ -69,7 +69,7 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to shown before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
-          " --backend             options: curses, wayland\n"
+          " --backend             options: curses, wayland, x11\n"
           " --prioritory          options: terminal, gui\n\n"
 
           "Backend specific options\n"
