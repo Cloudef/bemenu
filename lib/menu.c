@@ -49,7 +49,7 @@ bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
 }
 
 struct bm_menu*
-bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
+bm_menu_new(const char *renderer, enum bm_priority priority)
 {
     struct bm_menu *menu;
     if (!(menu = calloc(1, sizeof(struct bm_menu))))
@@ -59,13 +59,13 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
     const struct bm_renderer **renderers = bm_get_renderers(&count);
 
     for (uint32_t i = 0; i < count; ++i) {
-        if (prioritory != BM_PRIO_ANY && renderers[i]->api.prioritory != prioritory)
+        if (priority != BM_PRIO_ANY && renderers[i]->api.priority != priority)
             continue;
 
         if (renderer && strcmp(renderer, renderers[i]->name))
             continue;
 
-        if (renderers[i]->api.prioritory == BM_PRIO_TERMINAL) {
+        if (renderers[i]->api.priority == BM_PRIO_TERMINAL) {
             const char *term = getenv("TERM");
             if (!term || !strlen(term) || getppid() == 1)
                 continue;

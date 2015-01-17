@@ -85,7 +85,7 @@ const char* bm_version(void);
 /**
  * Prioritories for renderer plugins.
  */
-enum bm_prioritory {
+enum bm_priority {
     /**
      * Do not use this in renderers.
      * This flag is for bm_menu_new, if any renderer is fine.
@@ -112,12 +112,12 @@ enum bm_prioritory {
 const char* bm_renderer_get_name(const struct bm_renderer *renderer);
 
 /**
- * Get prioritory of the renderer.
+ * Get priority of the renderer.
  *
  * @param renderer bm_renderer instance.
- * @return bm_prioritory enum value.
+ * @return bm_priority enum value.
  */
-enum bm_prioritory bm_renderer_get_prioritory(const struct bm_renderer *renderer);
+enum bm_priority bm_renderer_get_priority(const struct bm_renderer *renderer);
 
 /**
  * @} Renderer */
@@ -211,10 +211,10 @@ enum bm_color {
  * Create new bm_menu instance.
  *
  * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
- * @param prioritory @link ::bm_prioritory @endlink enum for which kind of renderer is wanted. Pass BM_PRIO_ANY, for anything.
+ * @param priority @link ::bm_priority @endlink enum for which kind of renderer is wanted. Pass BM_PRIO_ANY, for anything.
  * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-struct bm_menu* bm_menu_new(const char *renderer, enum bm_prioritory prioritory);
+struct bm_menu* bm_menu_new(const char *renderer, enum bm_priority priority);
 
 /**
  * Release bm_menu instance.

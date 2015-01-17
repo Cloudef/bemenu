@@ -4,7 +4,7 @@
 #include <bemenu.h>
 
 struct client {
-    enum bm_prioritory prioritory;
+    enum bm_priority priority;
     enum bm_filter_mode filter_mode;
     int32_t wrap;
     uint32_t lines;
