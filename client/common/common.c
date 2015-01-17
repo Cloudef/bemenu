@@ -95,7 +95,9 @@ usage(FILE *out, const char *name)
           " --hb                  defines the highlighted background color. (wx)\n"
           " --hf                  defines the highlighted foreground color. (wx)\n"
           " --sb                  defines the selected background color. (wx)\n"
-          " --sf                  defines the selected foreground color. (wx)\n", out);
+          " --sf                  defines the selected foreground color. (wx)\n"
+          " --scb                 defines the scrollbar background color. (wx)\n"
+          " --scf                 defines the scrollbar foreground color. (wx)\n", out);
 
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
@@ -132,6 +134,8 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "hf",          required_argument, 0, 0x109 },
         { "sb",          required_argument, 0, 0x110 },
         { "sf",          required_argument, 0, 0x111 },
+        { "scb",         required_argument, 0, 0x114 },
+        { "scf",         required_argument, 0, 0x115 },
 
         { "disco",       no_argument,       0, 0x112 },
         { 0, 0, 0, 0 }
@@ -221,6 +225,12 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
             case 0x111:
                 client->colors[BM_COLOR_SELECTED_FG] = optarg;
+                break;
+            case 0x114:
+                client->colors[BM_COLOR_SCROLLBAR_BG] = optarg;
+                break;
+            case 0x115:
+                client->colors[BM_COLOR_SCROLLBAR_FG] = optarg;
                 break;
 
             case 0x112:

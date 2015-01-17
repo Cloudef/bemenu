@@ -207,8 +207,7 @@ render(const struct bm_menu *menu)
         if (menu->scrollbar) {
             attron(COLOR_PAIR(1));
             uint32_t percent = (menu->index / (float)(count - 1)) * (displayed - 1);
-            for (uint32_t i = 0; i < displayed; ++i)
-                mvprintw(1 + i, 0, (i == percent ? "█" : "▒"));
+            mvprintw(1 + percent, 0, "▒");
             attroff(COLOR_PAIR(1));
         }
     }

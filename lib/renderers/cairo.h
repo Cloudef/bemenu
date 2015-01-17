@@ -252,16 +252,17 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
         }
 
         if (menu->scrollbar && count > 0) {
+            bm_cairo_color_from_menu_color(menu, BM_COLOR_SCROLLBAR_BG, &paint.bg);
+            bm_cairo_color_from_menu_color(menu, BM_COLOR_SCROLLBAR_FG, &paint.fg);
+
             uint32_t sheight = out_result->height - titleh;
-            bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.bg);
             cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
             cairo_rectangle(cairo->cr, 0, titleh, 2, sheight);
             cairo_fill(cairo->cr);
 
             uint32_t size = sheight / lines;
             uint32_t percent = (menu->index / (float)(count - 1)) * (sheight - size);
-            bm_cairo_color_from_menu_color(menu, BM_COLOR_BG, &paint.bg);
-            cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
+            cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
             cairo_rectangle(cairo->cr, 0, titleh + percent, 2, size);
             cairo_fill(cairo->cr);
         }
