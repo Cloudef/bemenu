@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include "internal.h"
 #include "wayland.h"
 

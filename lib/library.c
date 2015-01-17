@@ -123,12 +123,12 @@ bm_init(void)
         return true;
 
     static const char *rpath = INSTALL_PREFIX "/lib/bemenu";
-    const char *path = getenv("BEMENU_RENDERER");
+    const char *path = secure_getenv("BEMENU_RENDERER");
 
     if (path)
         return load_to_list(path);
 
-    path = getenv("BEMENU_RENDERERS");
+    path = secure_getenv("BEMENU_RENDERERS");
 
     if (!path || access(path, R_OK) == -1)
         path = rpath;

@@ -1,6 +1,3 @@
-#define _DEFAULT_SOURCE
-#define _XOPEN_SOURCE_EXTENDED
-
 #include "internal.h"
 #include "version.h"
 

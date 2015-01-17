@@ -9,8 +9,8 @@ INCLUDE(CTest)
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
-# C99
-ADD_DEFINITIONS(-std=c99)
+# C99 and _GNU_SOURCE for secure_getenv
+ADD_DEFINITIONS(-std=c99 -D_GNU_SOURCE)
 
 # Compile library
 ADD_SUBDIRECTORY(lib)

@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include "wayland.h"
 
 #include <unistd.h>

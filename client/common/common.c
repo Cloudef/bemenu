@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include "common.h"
 #include <stdlib.h>
 #include <string.h>

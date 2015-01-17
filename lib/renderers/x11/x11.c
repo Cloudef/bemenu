@@ -1,4 +1,3 @@
-#define _DEFAULT_SOURCE
 #include "internal.h"
 #include "version.h"
 #include "x11.h"
