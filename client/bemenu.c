@@ -6,16 +6,16 @@
 
 static struct client client = {
     .filter_mode = BM_FILTER_MODE_DMENU,
-    .wrap = 0,
-    .lines = 0,
     .colors = {0},
     .title = "bemenu",
     .prefix = NULL,
     .font = NULL,
+    .lines = 0,
     .selected = 0,
-    .bottom = 0,
-    .grab = 0,
-    .monitor = 0
+    .monitor = 0,
+    .bottom = false,
+    .grab = false,
+    .wrap = false,
 };
 
 static void

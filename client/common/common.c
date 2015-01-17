@@ -156,7 +156,7 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
                 break;
             case 'w':
-                client->wrap = 1;
+                client->wrap = true;
                 break;
             case 'l':
                 client->lines = strtol(optarg, NULL, 10);
@@ -172,10 +172,10 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
 
             case 'b':
-                client->bottom = 1;
+                client->bottom = true;
                 break;
             case 'f':
-                client->grab = 1;
+                client->grab = true;
                 break;
             case 'm':
                 client->monitor = strtol(optarg, NULL, 10);

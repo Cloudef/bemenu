@@ -5,16 +5,16 @@
 
 struct client {
     enum bm_filter_mode filter_mode;
-    int32_t wrap;
-    uint32_t lines;
     const char *colors[BM_COLOR_LAST];
     const char *title;
     const char *prefix;
     const char *font;
-    int32_t selected;
-    int32_t bottom;
-    int32_t grab;
-    int32_t monitor;
+    uint32_t lines;
+    uint32_t selected;
+    uint32_t monitor;
+    bool bottom;
+    bool grab;
+    bool wrap;
 };
 
 void parse_args(struct client *client, int *argc, char **argv[]);
