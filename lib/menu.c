@@ -296,6 +296,18 @@ char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
 }
 
 void
+bm_menu_set_scrollbar(struct bm_menu *menu, bool scrollbar)
+{
+    menu->scrollbar = scrollbar;
+}
+
+bool
+bm_menu_get_scrollbar(struct bm_menu *menu)
+{
+    return menu->scrollbar;
+}
+
+void
 bm_menu_set_bottom(struct bm_menu *menu, bool bottom)
 {
     assert(menu);

@@ -67,7 +67,8 @@ usage(FILE *out, const char *name)
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to shown before highlighted item.\n"
-          " -I, --index           select item at index automatically.\n\n"
+          " -I, --index           select item at index automatically.\n"
+          " --scrollbar           display scrollbar.\n\n"
 
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
@@ -114,6 +115,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
+        { "scrollbar",   no_argument,       0, 0x113 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
@@ -169,6 +171,9 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
             case 'I':
                 client->selected = strtol(optarg, NULL, 10);
+                break;
+            case 0x113:
+                client->scrollbar = true;
                 break;
 
             case 'b':
@@ -249,6 +254,7 @@ menu_with_options(struct client *client)
     bm_menu_set_wrap(menu, client->wrap);
     bm_menu_set_bottom(menu, client->bottom);
     bm_menu_set_monitor(menu, client->monitor);
+    bm_menu_set_scrollbar(menu, client->scrollbar);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);

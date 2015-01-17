@@ -287,6 +287,11 @@ struct bm_menu {
      * Is menu grabbed?
      */
     bool grabbed;
+
+    /**
+     * Scrollbar enabled?
+     */
+    bool scrollbar;
 };
 
 /* library.c */

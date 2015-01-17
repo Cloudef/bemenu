@@ -19,6 +19,7 @@ static struct client client = {
     .bottom = false,
     .grab = false,
     .wrap = false,
+    .scrollbar = false,
 };
 
 struct paths {

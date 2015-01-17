@@ -387,6 +387,22 @@ bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *he
 const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
 
 /**
+ * Display scrollbar at left side of the menu.
+ *
+ * @param menu bm_menu instance to set scrollbar for.
+ * @param scrollbar true for scrollbar, false for no scrollbar.
+ */
+void bm_menu_set_scrollbar(struct bm_menu *menu, bool scrollbar);
+
+/**
+ * Is scrollbar being displayed on the menu?
+ *
+ * @param menu bm_menu instance where to get scrollbar display state from.
+ * @return true if scrollbar displayed, false otherwise.
+ */
+bool bm_menu_get_scrollbar(struct bm_menu *menu);
+
+/**
  * Display menu at bottom of the screen.
  * This may be no-op on some renderers (curses, wayland)
  *

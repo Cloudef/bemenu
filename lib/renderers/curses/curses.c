@@ -186,20 +186,30 @@ render(const struct bm_menu *menu)
 
     uint32_t count, cl = 1;
     const uint32_t lines = getmaxy(curses.stdscr);
+    const int32_t prefix_x = (menu->prefix ? bm_utf8_string_screen_width(menu->prefix) : 0);
+    const int32_t offset_x = (menu->scrollbar ? 2 : 0);
     if (lines > 1) {
+        uint32_t displayed = 0;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
         for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
             int32_t color = (highlighted ? 2 : (bm_menu_item_is_selected(menu, items[i]) ? 1 : 0));
 
             if (menu->prefix && highlighted) {
-                draw_line(color, cl++, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
-            } else if (menu->prefix) {
-                int32_t offset = (menu->prefix ? bm_utf8_string_screen_width(menu->prefix) : 0);
-                draw_line(color, cl++, "%*s %s", offset, "", (items[i]->text ? items[i]->text : ""));
+                draw_line(color, cl++, "%*s%s %s", offset_x, "", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
-                draw_line(color, cl++, "%s", (items[i]->text ? items[i]->text : ""));
+                draw_line(color, cl++, "%*s%s%s", offset_x + prefix_x, "", (menu->prefix ? " " : ""), (items[i]->text ? items[i]->text : ""));
             }
+
+            ++displayed;
+        }
+
+        if (menu->scrollbar) {
+            attron(COLOR_PAIR(1));
+            uint32_t percent = (menu->index / (float)(count - 1)) * (displayed - 1);
+            for (uint32_t i = 0; i < displayed; ++i)
+                mvprintw(1 + i, 0, (i == percent ? "█" : "▒"));
+            attroff(COLOR_PAIR(1));
         }
     }
 
