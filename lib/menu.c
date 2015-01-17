@@ -85,6 +85,7 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
         if (!bm_menu_set_color(menu, i, NULL))
             goto fail;
     }
+
     return menu;
 
 fail:
