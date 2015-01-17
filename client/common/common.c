@@ -67,9 +67,14 @@ usage(FILE *out, const char *name)
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to shown before highlighted item.\n"
-          " -I, --index           select item at index automatically.\n"
-          " --backend             options: curses, wayland, x11\n"
-          " --prioritory          options: terminal, gui\n\n"
+          " -I, --index           select item at index automatically.\n\n"
+
+          "Use BEMENU_BACKEND env variable to force backend:\n"
+          " curses               ncurses based terminal backend\n"
+          " wayland              wayland backend\n"
+          " x11                  x11 backend\n\n"
+
+          "If BEMENU_BACKEND is empty, one of the GUI backends is selected automatically.\n\n"
 
           "Backend specific options\n"
           "   c = ncurses, w == wayland, x == x11\n"
@@ -109,26 +114,24 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
-        { "backend",     required_argument, 0, 0x100 },
-        { "prioritory",  required_argument, 0, 0x101 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
         { "monitor",     required_argument, 0, 'm' },
-        { "fn",          required_argument, 0, 0x102 },
-        { "bg",          required_argument, 0, 0x103 },
-        { "tb",          required_argument, 0, 0x104 },
-        { "tf",          required_argument, 0, 0x105 },
-        { "fb",          required_argument, 0, 0x106 },
-        { "ff",          required_argument, 0, 0x107 },
-        { "nb",          required_argument, 0, 0x108 },
-        { "nf",          required_argument, 0, 0x109 },
-        { "hb",          required_argument, 0, 0x110 },
-        { "hf",          required_argument, 0, 0x111 },
-        { "sb",          required_argument, 0, 0x112 },
-        { "sf",          required_argument, 0, 0x113 },
+        { "fn",          required_argument, 0, 0x100 },
+        { "bg",          required_argument, 0, 0x101 },
+        { "tb",          required_argument, 0, 0x102 },
+        { "tf",          required_argument, 0, 0x103 },
+        { "fb",          required_argument, 0, 0x104 },
+        { "ff",          required_argument, 0, 0x105 },
+        { "nb",          required_argument, 0, 0x106 },
+        { "nf",          required_argument, 0, 0x107 },
+        { "hb",          required_argument, 0, 0x108 },
+        { "hf",          required_argument, 0, 0x109 },
+        { "sb",          required_argument, 0, 0x110 },
+        { "sf",          required_argument, 0, 0x111 },
 
-        { "disco",       no_argument,       0, 0x114 },
+        { "disco",       no_argument,       0, 0x112 },
         { 0, 0, 0, 0 }
     };
 
@@ -170,13 +173,6 @@ parse_args(struct client *client, int *argc, char **argv[])
 
             case 0x100:
                 client->renderer = optarg;
-                break;
-
-            case 0x101:
-                if (!strcmp(optarg, "terminal"))
-                    client->prioritory = BM_PRIO_TERMINAL;
-                else if (!strcmp(optarg, "gui"))
-                    client->prioritory = BM_PRIO_GUI;
                 break;
 
             case 'b':
@@ -246,7 +242,7 @@ struct bm_menu*
 menu_with_options(struct client *client)
 {
     struct bm_menu *menu;
-    if (!(menu = bm_menu_new(client->renderer, client->prioritory)))
+    if (!(menu = bm_menu_new(NULL)))
         return NULL;
 
     bm_menu_set_font(menu, client->font);

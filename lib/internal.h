@@ -93,10 +93,10 @@ struct render_api {
     const char *version;
 
     /**
-     * Prioritory of the plugin.
+     * Priorty of the plugin.
      * Terminal renderers should be first, then graphicals.
      */
-    enum bm_prioritory prioritory;
+    enum bm_priorty priorty;
 };
 
 /**

@@ -44,8 +44,10 @@ struct bm_item;
  * @{ */
 
 /**
- * Init bemenu.
- * Loads up the renderers.
+ * Init bemenu, loads up the renderers.
+ *
+ * You can force single renderer with BEMENU_RENDERER env variable,
+ * and directory containing renderers with BEMENU_RENDERERS env variable.
  *
  * @return true on success, false on failure.
  */
@@ -85,13 +87,7 @@ const char* bm_version(void);
 /**
  * Prioritories for renderer plugins.
  */
-enum bm_prioritory {
-    /**
-     * Do not use this in renderers.
-     * This flag is for bm_menu_new, if any renderer is fine.
-     */
-    BM_PRIO_ANY,
-
+enum bm_priorty {
     /**
      * Renderer runs in terminal.
      */
@@ -112,12 +108,12 @@ enum bm_prioritory {
 const char* bm_renderer_get_name(const struct bm_renderer *renderer);
 
 /**
- * Get prioritory of the renderer.
+ * Get priorty of the renderer.
  *
  * @param renderer bm_renderer instance.
- * @return bm_prioritory enum value.
+ * @return bm_priorty enum value.
  */
-enum bm_prioritory bm_renderer_get_prioritory(const struct bm_renderer *renderer);
+enum bm_priorty bm_renderer_get_priorty(const struct bm_renderer *renderer);
 
 /**
  * @} Renderer */
@@ -210,11 +206,13 @@ enum bm_color {
 /**
  * Create new bm_menu instance.
  *
+ * If **NULL** is used as renderer, auto-detection will be used or the renderer with the name pointed by BEMENU_BACKEND env variable.
+ * It's good idea to use NULL, if you want user to have control over the renderer with this env variable.
+ *
  * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
- * @param prioritory @link ::bm_prioritory @endlink enum for which kind of renderer is wanted. Pass BM_PRIO_ANY, for anything.
  * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-struct bm_menu* bm_menu_new(const char *renderer, enum bm_prioritory prioritory);
+struct bm_menu* bm_menu_new(const char *renderer);
 
 /**
  * Release bm_menu instance.

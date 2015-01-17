@@ -21,7 +21,7 @@ main(int argc, char **argv)
         uint32_t count;
         const struct bm_renderer **renderers = bm_get_renderers(&count);
         for (int32_t i = 0; i < count; ++i) {
-            struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]), BM_PRIO_ANY);
+            struct bm_menu *menu = bm_menu_new(bm_renderer_get_name(renderers[i]));
             if (!strcmp(bm_renderer_get_name(renderers[i]), "curses") && !isatty(STDIN_FILENO)) {
                 // do not test
                 continue;

@@ -49,7 +49,7 @@ bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
 }
 
 struct bm_menu*
-bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
+bm_menu_new(const char *renderer)
 {
     struct bm_menu *menu;
     if (!(menu = calloc(1, sizeof(struct bm_menu))))
@@ -58,14 +58,24 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
     uint32_t count;
     const struct bm_renderer **renderers = bm_get_renderers(&count);
 
+    const char *name = secure_getenv("BEMENU_BACKEND");
+    name = (name && strlen(name) > 0 ? name : NULL);
+
     for (uint32_t i = 0; i < count; ++i) {
-        if (prioritory != BM_PRIO_ANY && renderers[i]->api.prioritory != prioritory)
+        if (!name && !renderer && renderers[i]->api.priorty != BM_PRIO_GUI)
             continue;
 
-        if (renderer && strcmp(renderer, renderers[i]->name))
+        if ((renderer && strcmp(renderer, renderers[i]->name)) || (name && strcmp(name, renderers[i]->name)))
             continue;
 
-        if (renderers[i]->api.prioritory == BM_PRIO_TERMINAL) {
+        if (renderers[i]->api.priorty == BM_PRIO_TERMINAL) {
+            /**
+             * Some sanity checks that we are in terminal.
+             * These however are not reliable, thus we don't auto-detect terminal based renderers.
+             * These will be only used when explicitly requested.
+             *
+             * Launching terminal based menu instance at background is not a good idea.
+             */
             const char *term = getenv("TERM");
             if (!term || !strlen(term) || getppid() == 1)
                 continue;

@@ -8,7 +8,6 @@
 #include "../lib/3rdparty/tinydir.h"
 
 static struct client client = {
-    .prioritory = BM_PRIO_ANY,
     .filter_mode = BM_FILTER_MODE_DMENU,
     .wrap = 0,
     .lines = 0,

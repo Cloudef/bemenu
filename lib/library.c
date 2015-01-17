@@ -67,7 +67,7 @@ static int
 compare(const void *a, const void *b)
 {
     const struct bm_renderer *ra = *(struct bm_renderer**)a, *rb = *(struct bm_renderer**)b;
-    return (ra->api.prioritory > rb->api.prioritory);
+    return (ra->api.priorty > rb->api.priorty);
 }
 
 static bool
@@ -180,11 +180,11 @@ bm_renderer_get_name(const struct bm_renderer *renderer)
     return renderer->name;
 }
 
-enum bm_prioritory
-bm_renderer_get_prioritory(const struct bm_renderer *renderer)
+enum bm_priorty
+bm_renderer_get_priorty(const struct bm_renderer *renderer)
 {
     assert(renderer);
-    return renderer->api.prioritory;
+    return renderer->api.priorty;
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
