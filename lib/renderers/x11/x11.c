@@ -227,7 +227,7 @@ register_renderer(struct render_api *api)
     api->set_bottom = set_bottom;
     api->set_monitor = set_monitor;
     api->grab_keyboard = grab_keyboard;
-    api->prioritory = BM_PRIO_GUI;
+    api->priority = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "x11";
 }

@@ -70,7 +70,7 @@ usage(FILE *out, const char *name)
           " -P, --prefix          text to shown before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
           " --backend             options: curses, wayland, x11\n"
-          " --prioritory          options: terminal, gui\n\n"
+          " --priority          options: terminal, gui\n\n"
 
           "Backend specific options\n"
           "   c = ncurses, w == wayland, x == x11\n"
@@ -111,7 +111,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
         { "backend",     required_argument, 0, 0x100 },
-        { "prioritory",  required_argument, 0, 0x101 },
+        { "priority",  required_argument, 0, 0x101 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
@@ -175,9 +175,9 @@ parse_args(struct client *client, int *argc, char **argv[])
 
             case 0x101:
                 if (!strcmp(optarg, "terminal"))
-                    client->prioritory = BM_PRIO_TERMINAL;
+                    client->priority = BM_PRIO_TERMINAL;
                 else if (!strcmp(optarg, "gui"))
-                    client->prioritory = BM_PRIO_GUI;
+                    client->priority = BM_PRIO_GUI;
                 break;
 
             case 'b':
@@ -247,7 +247,7 @@ struct bm_menu*
 menu_with_options(struct client *client)
 {
     struct bm_menu *menu;
-    if (!(menu = bm_menu_new(client->renderer, client->prioritory)))
+    if (!(menu = bm_menu_new(client->renderer, client->priority)))
         return NULL;
 
     bm_menu_set_font(menu, client->font);
