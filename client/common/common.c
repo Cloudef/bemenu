@@ -171,10 +171,6 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->selected = strtol(optarg, NULL, 10);
                 break;
 
-            case 0x100:
-                client->renderer = optarg;
-                break;
-
             case 'b':
                 client->bottom = 1;
                 break;
@@ -185,44 +181,44 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->monitor = strtol(optarg, NULL, 10);
                 break;
 
-            case 0x102:
+            case 0x100:
                 client->font = optarg;
                 break;
-            case 0x103:
+            case 0x101:
                 client->colors[BM_COLOR_BG] = optarg;
                 break;
-            case 0x104:
+            case 0x102:
                 client->colors[BM_COLOR_TITLE_BG] = optarg;
                 break;
-            case 0x105:
+            case 0x103:
                 client->colors[BM_COLOR_TITLE_FG] = optarg;
                 break;
-            case 0x106:
+            case 0x104:
                 client->colors[BM_COLOR_FILTER_BG] = optarg;
                 break;
-            case 0x107:
+            case 0x105:
                 client->colors[BM_COLOR_FILTER_FG] = optarg;
                 break;
-            case 0x108:
+            case 0x106:
                 client->colors[BM_COLOR_ITEM_BG] = optarg;
                 break;
-            case 0x109:
+            case 0x107:
                 client->colors[BM_COLOR_ITEM_FG] = optarg;
                 break;
-            case 0x110:
+            case 0x108:
                 client->colors[BM_COLOR_HIGHLIGHTED_BG] = optarg;
                 break;
-            case 0x111:
+            case 0x109:
                 client->colors[BM_COLOR_HIGHLIGHTED_FG] = optarg;
                 break;
-            case 0x112:
+            case 0x110:
                 client->colors[BM_COLOR_SELECTED_BG] = optarg;
                 break;
-            case 0x113:
+            case 0x111:
                 client->colors[BM_COLOR_SELECTED_FG] = optarg;
                 break;
 
-            case 0x114:
+            case 0x112:
                 disco();
                 break;
 

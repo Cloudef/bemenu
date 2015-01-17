@@ -10,7 +10,6 @@ struct client {
     const char *colors[BM_COLOR_LAST];
     const char *title;
     const char *prefix;
-    const char *renderer;
     const char *font;
     int32_t selected;
     int32_t bottom;
