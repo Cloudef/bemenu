@@ -12,8 +12,7 @@ struct client {
     const char *title;
     const char *prefix;
     const char *renderer;
-    char *font;
-    uint32_t font_size;
+    const char *font;
     int32_t selected;
     int32_t bottom;
     int32_t grab;

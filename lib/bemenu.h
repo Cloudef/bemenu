@@ -353,22 +353,21 @@ bool bm_menu_set_title(struct bm_menu *menu, const char *title);
 const char* bm_menu_get_title(const struct bm_menu *menu);
 
 /**
- * Set font to bm_menu instance.
+ * Set font description to bm_menu instance.
  *
- * @param font C "string" to set as font, can be **NULL** for default (Terminus).
- * @param size Size for the font, may be set 0 for default.
+ * @param menu bm_menu instance where to set font.
+ * @param font C "string" for a **pango style font description**, can be **NULL** for default (Terminus 9).
  * @return true if set was succesful, false if out of memory.
  */
-bool bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size);
+bool bm_menu_set_font(struct bm_menu *menu, const char *font);
 
 /**
- * Get font from bm_menu instance.
+ * Get font description from bm_menu instance.
  *
- * @param menu bm_menu instance where to get font from.
- * @param out_size Reference to uint32_t, will be se to size of the font. May set **NULL** for no-op.
+ * @param menu bm_menu instance where to get font description from.
  * @return Pointer to null terminated C "string".
  */
-const char* bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size);
+const char* bm_menu_get_font(const struct bm_menu *menu);
 
 /**
  * Set a hexadecimal color for element.

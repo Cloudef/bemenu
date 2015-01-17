@@ -169,9 +169,6 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     memset(out_result, 0, sizeof(struct cairo_paint_result));
     out_result->displayed = 1;
 
-    char font[128];
-    snprintf(font, sizeof(font), "%s %d", menu->font.name, menu->font.size);
-
     struct cairo_color c;
     bm_cairo_color_from_menu_color(menu, BM_COLOR_BG, &c);
     cairo_set_source_rgb(cairo->cr, c.r, c.g, c.b);
@@ -180,7 +177,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
 
     struct cairo_paint paint;
     memset(&paint, 0, sizeof(paint));
-    paint.font = font;
+    paint.font = menu->font.name;
 
     struct cairo_result result;
     memset(&result, 0, sizeof(result));

@@ -18,7 +18,6 @@ static struct client client = {
     .prefix = NULL,
     .renderer = NULL,
     .font = NULL,
-    .font_size = 0,
     .selected = 0,
     .bottom = 0,
     .grab = 0,
@@ -236,7 +235,6 @@ main(int argc, char **argv)
             launch(bm_menu_get_filter(menu));
     }
 
-    free(client.font);
     bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }

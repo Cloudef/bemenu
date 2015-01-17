@@ -9,7 +9,7 @@
 /**
  * Default font.
  */
-static const char *default_font = "Terminus";
+static const char *default_font = "Terminus 9";
 
 /**
  * Default hexadecimal colors.
@@ -78,7 +78,7 @@ bm_menu_new(const char *renderer, enum bm_prioritory prioritory)
     if (!menu->renderer)
         goto fail;
 
-    if (!bm_menu_set_font(menu, NULL, 0))
+    if (!bm_menu_set_font(menu, NULL))
         goto fail;
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i) {
@@ -232,7 +232,7 @@ bm_menu_get_title(const struct bm_menu *menu)
 }
 
 bool
-bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size)
+bm_menu_set_font(struct bm_menu *menu, const char *font)
 {
     assert(menu);
 
@@ -244,15 +244,13 @@ bm_menu_set_font(struct bm_menu *menu, const char *font, uint32_t size)
 
     free(menu->font.name);
     menu->font.name = copy;
-    menu->font.size = (size > 0 ? size : 12);
     return true;
 }
 
 const char*
-bm_menu_get_font(const struct bm_menu *menu, uint32_t *out_size)
+bm_menu_get_font(const struct bm_menu *menu)
 {
     assert(menu);
-    if (out_size) *out_size = menu->font.size;
     return menu->font.name;
 }
 

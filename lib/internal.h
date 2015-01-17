@@ -173,11 +173,6 @@ struct bm_font {
      * Name of the font.
      */
     char *name;
-
-    /**
-     * Size of font.
-     */
-    uint32_t size;
 };
 
 /**

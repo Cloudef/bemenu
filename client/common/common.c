@@ -191,8 +191,7 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
 
             case 0x102:
-                if (sscanf(optarg, "%ms %u", &client->font, &client->font_size) < 2)
-                    sscanf(optarg, "%ms", &client->font);
+                client->font = optarg;
                 break;
             case 0x103:
                 client->colors[BM_COLOR_BG] = optarg;
@@ -251,7 +250,7 @@ menu_with_options(struct client *client)
     if (!(menu = bm_menu_new(client->renderer, client->prioritory)))
         return NULL;
 
-    bm_menu_set_font(menu, client->font, client->font_size);
+    bm_menu_set_font(menu, client->font);
     bm_menu_set_title(menu, client->title);
     bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);
