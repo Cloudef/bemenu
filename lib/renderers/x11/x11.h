@@ -9,6 +9,7 @@
 enum mod_bit {
     MOD_SHIFT = 1<<0,
     MOD_CTRL = 1<<1,
+    MOD_ALT = 1<<2,
 };
 
 struct buffer {

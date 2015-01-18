@@ -105,6 +105,7 @@ bm_x11_window_key_press(struct window *window, XKeyEvent *ev)
     window->mods = 0;
     if (ev->state & ControlMask) window->mods |= MOD_CTRL;
     if (ev->state & ShiftMask) window->mods |= MOD_SHIFT;
+    if (ev->state & Mod1Mask) window->mods |= MOD_ALT;
     window->keysym = keysym;
 }
 
