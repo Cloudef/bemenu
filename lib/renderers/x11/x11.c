@@ -120,13 +120,13 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
             return (mods & MOD_CTRL ? BM_KEY_LINE_DELETE_LEFT : (mods & MOD_ALT ? BM_KEY_PAGE_UP : BM_KEY_UNICODE));
 
         case XK_k:
-            return (mods & MOD_CTRL ? BM_KEY_LINE_DELETE_RIGHT : (mods & MOD_ALT ? BM_KEY_DOWN : BM_KEY_UNICODE));
+            return (mods & MOD_CTRL ? BM_KEY_LINE_DELETE_RIGHT : (mods & MOD_ALT ? BM_KEY_UP : BM_KEY_UNICODE));
 
         case XK_w:
             return (mods & MOD_CTRL ? BM_KEY_WORD_DELETE : BM_KEY_UNICODE);
 
         case XK_j:
-            return (mods & MOD_ALT ? BM_KEY_UP : BM_KEY_UNICODE);
+            return (mods & MOD_ALT ? BM_KEY_DOWN : BM_KEY_UNICODE);
 
         case XK_d:
             return (mods & MOD_ALT ? BM_KEY_PAGE_DOWN : BM_KEY_UNICODE);
