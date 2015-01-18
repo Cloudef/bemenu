@@ -223,7 +223,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
         }
 
         uint32_t posy = titleh;
-        for (uint32_t l = 0, i = (menu->index / lines) * lines; l < lines && i < count && posy < max_height; ++i, ++l) {
+        const uint32_t page = (menu->index / lines) * lines;
+        for (uint32_t l = 0, i = page; l < lines && i < count && posy < max_height; ++i, ++l) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
 
             if (highlighted) {
@@ -261,10 +262,11 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
             cairo_rectangle(cairo->cr, 0, titleh, 2, sheight);
             cairo_fill(cairo->cr);
 
-            const uint32_t size = sheight / lines;
-            const uint32_t percent = (menu->index / (float)(count - 1)) * (sheight - size);
+            const float percent = fmin(((float)page / (count - lines)), 1.0f);
+            const uint32_t size = fmax(sheight * ((float)lines / count), 2.0f);
+            const uint32_t posy = percent * (sheight - size);
             cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
-            cairo_rectangle(cairo->cr, 0, titleh + percent, 2, size);
+            cairo_rectangle(cairo->cr, 0, titleh + posy, 2, size);
             cairo_fill(cairo->cr);
         }
     } else {

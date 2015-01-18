@@ -9,6 +9,7 @@
 #include <locale.h>
 #include <dlfcn.h>
 #include <assert.h>
+#include <math.h>
 
 #include <ncurses.h>
 
@@ -184,22 +185,24 @@ render(const struct bm_menu *menu)
         attroff(COLOR_PAIR(1));
     }
 
-    uint32_t count, cl = 1;
-    const uint32_t lines = getmaxy(curses.stdscr);
+    uint32_t count, cl = 0;
+    const uint32_t lines = fmax(getmaxy(curses.stdscr), 1) - 1;
     if (lines > 1) {
         uint32_t displayed = 0;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
         const int32_t offset_x = (scrollbar ? 2 : 0);
         const int32_t prefix_x = (menu->prefix ? bm_utf8_string_screen_width(menu->prefix) : 0);
-        for (uint32_t i = (menu->index / (lines - 1)) * (lines - 1); i < count && cl < lines; ++i) {
+
+        const uint32_t page = menu->index / lines * lines;
+        for (uint32_t i = page; i < count && cl < lines; ++i) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
             int32_t color = (highlighted ? 2 : (bm_menu_item_is_selected(menu, items[i]) ? 1 : 0));
 
             if (menu->prefix && highlighted) {
-                draw_line(color, cl++, "%*s%s %s", offset_x, "", menu->prefix, (items[i]->text ? items[i]->text : ""));
+                draw_line(color, 1 + cl++, "%*s%s %s", offset_x, "", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
-                draw_line(color, cl++, "%*s%s%s", offset_x + prefix_x, "", (menu->prefix ? " " : ""), (items[i]->text ? items[i]->text : ""));
+                draw_line(color, 1 + cl++, "%*s%s%s", offset_x + prefix_x, "", (menu->prefix ? " " : ""), (items[i]->text ? items[i]->text : ""));
             }
 
             ++displayed;
@@ -207,8 +210,11 @@ render(const struct bm_menu *menu)
 
         if (scrollbar) {
             attron(COLOR_PAIR(1));
-            uint32_t percent = (menu->index / (float)(count - 1)) * (displayed - 1);
-            mvprintw(1 + percent, 0, "▒");
+            const float percent = fmin(((float)page / (count - lines)), 1.0f);
+            const uint32_t size = fmax(lines * ((float)lines / count), 1.0f);
+            const uint32_t posy = percent * (lines - size);
+            for (uint32_t i = 0; i < size; ++i)
+                mvprintw(1 + posy + i, 0, "▒");
             attroff(COLOR_PAIR(1));
         }
     }
