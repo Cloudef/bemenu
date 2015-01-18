@@ -68,7 +68,7 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to shown before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
-          " --scrollbar           display scrollbar.\n\n"
+          " --scrollbar           display scrollbar. (always, autohide)\n\n"
 
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
@@ -117,7 +117,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
-        { "scrollbar",   no_argument,       0, 0x113 },
+        { "scrollbar",   required_argument, 0, 0x113 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
@@ -177,7 +177,7 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->selected = strtol(optarg, NULL, 10);
                 break;
             case 0x113:
-                client->scrollbar = true;
+                client->scrollbar = (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE));
                 break;
 
             case 'b':

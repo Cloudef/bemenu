@@ -197,17 +197,18 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance, 2 };
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, 2, 2, width - paint.pos.x, 0 };
     bm_cairo_draw_line(cairo, &paint, &result, "%s", (menu->filter ? menu->filter : ""));
+    const uint32_t titleh = result.height;
+    out_result->height = titleh;
 
     uint32_t count;
     struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
     uint32_t lines = (menu->lines > 0 ? menu->lines : 1);
-    uint32_t titleh = result.height;
-    out_result->height = titleh;
 
     if (lines > 1) {
         /* vertical mode */
 
-        uint32_t spacing_x = (menu->scrollbar ? 4 : 0);
+        const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
+        const uint32_t spacing_x = (scrollbar ? 4 : 0);
         uint32_t spacing_y = 0; // 0 == variable width spacing
         if (lines > max_height / titleh) {
             /* there is more lines than screen can fit, enter fixed spacing mode */
@@ -251,17 +252,17 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
             out_result->displayed++;
         }
 
-        if (menu->scrollbar && count > 0) {
+        if (scrollbar && count > 0) {
             bm_cairo_color_from_menu_color(menu, BM_COLOR_SCROLLBAR_BG, &paint.bg);
             bm_cairo_color_from_menu_color(menu, BM_COLOR_SCROLLBAR_FG, &paint.fg);
 
-            uint32_t sheight = out_result->height - titleh;
+            const uint32_t sheight = out_result->height - titleh;
             cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
             cairo_rectangle(cairo->cr, 0, titleh, 2, sheight);
             cairo_fill(cairo->cr);
 
-            uint32_t size = sheight / lines;
-            uint32_t percent = (menu->index / (float)(count - 1)) * (sheight - size);
+            const uint32_t size = sheight / lines;
+            const uint32_t percent = (menu->index / (float)(count - 1)) * (sheight - size);
             cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
             cairo_rectangle(cairo->cr, 0, titleh + percent, 2, size);
             cairo_fill(cairo->cr);

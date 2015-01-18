@@ -298,12 +298,12 @@ char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
 }
 
 void
-bm_menu_set_scrollbar(struct bm_menu *menu, bool scrollbar)
+bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode)
 {
-    menu->scrollbar = scrollbar;
+    menu->scrollbar = (mode == BM_SCROLLBAR_LAST ? BM_SCROLLBAR_NONE : mode);
 }
 
-bool
+enum bm_scrollbar_mode
 bm_menu_get_scrollbar(struct bm_menu *menu)
 {
     return menu->scrollbar;

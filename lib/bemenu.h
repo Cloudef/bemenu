@@ -135,6 +135,23 @@ enum bm_filter_mode {
 };
 
 /**
+ * Scrollbar display mode constants for bm_menu instance scrollbar.
+ *
+ * - @link ::bm_run_result BM_SCROLLBAR_ALWAYS @endlink means that scrollbar is not displayed.
+ * - @link ::bm_run_result BM_SCROLLBAR_ALWAYS @endlink means that scrollbar is displayed always.
+ * - @link ::bm_run_result BM_SCROLLBAR_AUTOHIDE @endlink means that scrollbar is only displayed when there are more items than lines.
+ *
+ * @link ::bm_scrollbar_mode BM_SCROLLBAR_LAST @endlink is provided for enumerating scrollbar modes.
+ * Using it as scrollbar mode however provides exactly same functionality as BM_SCROLLBAR_NONE.
+ */
+enum bm_scrollbar_mode {
+    BM_SCROLLBAR_NONE,
+    BM_SCROLLBAR_ALWAYS,
+    BM_SCROLLBAR_AUTOHIDE,
+    BM_SCROLLBAR_LAST,
+};
+
+/**
  * Result constants from bm_menu_run_with_key function.
  *
  * - @link ::bm_run_result BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
@@ -389,20 +406,20 @@ bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *he
 const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
 
 /**
- * Display scrollbar at left side of the menu.
+ * Set scrollbar display mode.
  *
  * @param menu bm_menu instance to set scrollbar for.
- * @param scrollbar true for scrollbar, false for no scrollbar.
+ * @param mode bm_scrollbar_mode constant.
  */
-void bm_menu_set_scrollbar(struct bm_menu *menu, bool scrollbar);
+void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode);
 
 /**
- * Is scrollbar being displayed on the menu?
+ * Return current scrollbar display mode.
  *
  * @param menu bm_menu instance where to get scrollbar display state from.
- * @return true if scrollbar displayed, false otherwise.
+ * @return bm_scrollbar_mode constant.
  */
-bool bm_menu_get_scrollbar(struct bm_menu *menu);
+enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
 
 /**
  * Display menu at bottom of the screen.

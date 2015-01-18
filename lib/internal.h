@@ -274,6 +274,11 @@ struct bm_menu {
     enum bm_filter_mode filter_mode;
 
     /**
+     * Current Scrollbar display mode.
+     */
+    enum bm_scrollbar_mode scrollbar;
+
+    /**
      * Should selection be wrapped?
      */
     bool wrap;
@@ -287,11 +292,6 @@ struct bm_menu {
      * Is menu grabbed?
      */
     bool grabbed;
-
-    /**
-     * Scrollbar enabled?
-     */
-    bool scrollbar;
 };
 
 /* library.c */

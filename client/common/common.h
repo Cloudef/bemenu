@@ -5,6 +5,7 @@
 
 struct client {
     enum bm_filter_mode filter_mode;
+    enum bm_scrollbar_mode scrollbar;
     const char *colors[BM_COLOR_LAST];
     const char *title;
     const char *prefix;
@@ -15,7 +16,6 @@ struct client {
     bool bottom;
     bool grab;
     bool wrap;
-    bool scrollbar;
 };
 
 void parse_args(struct client *client, int *argc, char **argv[]);
