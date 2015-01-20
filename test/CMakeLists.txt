@@ -1,5 +1,4 @@
 SET(TESTS
-    "bm_menu_new"
     )
 
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../lib")
