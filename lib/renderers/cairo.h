@@ -169,9 +169,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     memset(out_result, 0, sizeof(struct cairo_paint_result));
     out_result->displayed = 1;
 
-    struct cairo_color c;
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_BG, &c);
-    cairo_set_source_rgb(cairo->cr, c.r, c.g, c.b);
+    cairo_set_source_rgb(cairo->cr, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
     cairo_fill(cairo->cr);
 

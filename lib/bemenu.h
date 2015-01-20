@@ -202,7 +202,6 @@ enum bm_key {
  * @link ::bm_color BM_COLOR_LAST @endlink is provided for enumerating colors.
  */
 enum bm_color {
-    BM_COLOR_BG,
     BM_COLOR_TITLE_BG,
     BM_COLOR_TITLE_FG,
     BM_COLOR_FILTER_BG,

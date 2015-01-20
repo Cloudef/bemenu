@@ -85,7 +85,6 @@ usage(FILE *out, const char *name)
           " -f, --grab            grabs the keyboard before reading stdin. (x)\n"
           " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
-          " --bg                  defines the background color. (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
           " --tf                  defines the title foreground color. (wx)\n"
           " --fb                  defines the filter background color. (wx)\n"
@@ -117,13 +116,12 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
-        { "scrollbar",   required_argument, 0, 0x113 },
+        { "scrollbar",   required_argument, 0, 0x100 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
         { "monitor",     required_argument, 0, 'm' },
-        { "fn",          required_argument, 0, 0x100 },
-        { "bg",          required_argument, 0, 0x101 },
+        { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
         { "tf",          required_argument, 0, 0x103 },
         { "fb",          required_argument, 0, 0x104 },
@@ -134,10 +132,10 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "hf",          required_argument, 0, 0x109 },
         { "sb",          required_argument, 0, 0x110 },
         { "sf",          required_argument, 0, 0x111 },
-        { "scb",         required_argument, 0, 0x114 },
-        { "scf",         required_argument, 0, 0x115 },
+        { "scb",         required_argument, 0, 0x112 },
+        { "scf",         required_argument, 0, 0x113 },
 
-        { "disco",       no_argument,       0, 0x112 },
+        { "disco",       no_argument,       0, 0x114 },
         { 0, 0, 0, 0 }
     };
 
@@ -176,7 +174,7 @@ parse_args(struct client *client, int *argc, char **argv[])
             case 'I':
                 client->selected = strtol(optarg, NULL, 10);
                 break;
-            case 0x113:
+            case 0x100:
                 client->scrollbar = (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE));
                 break;
 
@@ -190,11 +188,8 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->monitor = strtol(optarg, NULL, 10);
                 break;
 
-            case 0x100:
-                client->font = optarg;
-                break;
             case 0x101:
-                client->colors[BM_COLOR_BG] = optarg;
+                client->font = optarg;
                 break;
             case 0x102:
                 client->colors[BM_COLOR_TITLE_BG] = optarg;
@@ -226,14 +221,14 @@ parse_args(struct client *client, int *argc, char **argv[])
             case 0x111:
                 client->colors[BM_COLOR_SELECTED_FG] = optarg;
                 break;
-            case 0x114:
+            case 0x112:
                 client->colors[BM_COLOR_SCROLLBAR_BG] = optarg;
                 break;
-            case 0x115:
+            case 0x113:
                 client->colors[BM_COLOR_SCROLLBAR_FG] = optarg;
                 break;
 
-            case 0x112:
+            case 0x114:
                 disco();
                 break;
 

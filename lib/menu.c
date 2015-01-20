@@ -15,7 +15,6 @@ static const char *default_font = "Terminus 9";
  * Default hexadecimal colors.
  */
 static const char *default_colors[BM_COLOR_LAST] = {
-    "#121212", // BM_COLOR_BG
     "#121212", // BM_COLOR_TITLE_BG
     "#D81860", // BM_COLOR_TITLE_FG
     "#121212", // BM_COLOR_FILTER_BG
