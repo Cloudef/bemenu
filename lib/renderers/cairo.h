@@ -202,7 +202,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
     uint32_t lines = (menu->lines > 0 ? menu->lines : 1);
 
-    if (lines > 1) {
+    if (menu->lines > 0) {
         /* vertical mode */
 
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
