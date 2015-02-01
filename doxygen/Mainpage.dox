@@ -13,9 +13,11 @@ Features:
    - Different filtering algorithms:
       - Vanilla dmenu filtering
    - Rendering backends (UI toolkits are loaded dynamically, not depended):
+      - Wayland (cairo + pango)
+      - X11 (cairo + pango)
       - Curses
 
-bemenu also provides 'bemenu' executable that is compatible with dmenu interface.
+bemenu also provides 'bemenu' and 'bemenu-run' executables that are compatible with dmenu interface.
 
 Get started on the <a href="modules.html">Modules</a> page.
 */
