@@ -9,6 +9,10 @@
 #  define BM_LOG_ATTR(x, y)
 #endif
 
+#ifndef __GLIBC__
+#   define secure_getenv getenv
+#endif
+
 #ifndef size_t
 #   include <stddef.h> /* for size_t */
 #endif
