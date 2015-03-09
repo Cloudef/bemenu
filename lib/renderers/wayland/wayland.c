@@ -184,6 +184,9 @@ destructor(struct bm_menu *menu)
 static bool
 constructor(struct bm_menu *menu)
 {
+    if (!getenv("WAYLAND_DISPLAY") && !getenv("WAYLAND_SOCKET"))
+        return false;
+
     struct wayland *wayland;
     if (!(menu->renderer->internal = wayland = calloc(1, sizeof(struct wayland))))
         goto fail;
