@@ -277,6 +277,7 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
         case KEY_PPAGE: /* Page up */
             return BM_KEY_PAGE_UP;
 
+        case 22: /* C-v */
         case KEY_NPAGE: /* Page down */
             return BM_KEY_PAGE_DOWN;
 

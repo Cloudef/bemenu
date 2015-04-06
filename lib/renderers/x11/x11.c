@@ -71,8 +71,17 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XK_Page_Up:
             return (mods & MOD_SHIFT ? BM_KEY_SHIFT_PAGE_UP : BM_KEY_PAGE_UP);
 
+        case XK_less:
+            return (mods & MOD_ALT ? BM_KEY_SHIFT_PAGE_UP : BM_KEY_UNICODE);
+
         case XK_Page_Down:
             return (mods & MOD_SHIFT ? BM_KEY_SHIFT_PAGE_DOWN : BM_KEY_PAGE_DOWN);
+
+        case XK_greater:
+            return (mods & MOD_ALT ? BM_KEY_SHIFT_PAGE_DOWN : BM_KEY_UNICODE);
+
+        case XK_v:
+            return (mods & MOD_CTRL ? BM_KEY_PAGE_DOWN : (mods & MOD_ALT ? BM_KEY_PAGE_UP : BM_KEY_UNICODE));
 
         case XK_BackSpace:
             return BM_KEY_BACKSPACE;
