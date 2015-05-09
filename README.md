@@ -1,8 +1,8 @@
 bemenu
 ======
 
-![Linux](http://build.cloudef.pw/platform/linux.png) [![buildhck status](http://build.cloudef.pw/build/bemenu/master/linux%20x86_64/current/build-status.png)](http://build.cloudef.pw/build/bemenu/master/linux%20x86_64)
-![Darwin](http://build.cloudef.pw/platform/darwin.png) [![buildhck status](http://build.cloudef.pw/build/bemenu/master/darwin%20x86_64/current/build-status.png)](http://build.cloudef.pw/build/bemenu/master/darwin%20x86_64)
+![Linux](http://build.cloudef.pw/platform/linux.svg) [![buildhck status](http://build.cloudef.pw/build/bemenu/master/linux%20x86_64/current/status.svg)](http://build.cloudef.pw/build/bemenu/master/linux%20x86_64)
+![Darwin](http://build.cloudef.pw/platform/darwin.svg) [![buildhck status](http://build.cloudef.pw/build/bemenu/master/darwin%20x86_64/current/status.svg)](http://build.cloudef.pw/build/bemenu/master/darwin%20x86_64)
 
 Dynamic menu library and client program inspired by dmenu
 
