@@ -122,7 +122,7 @@ bm_init(void)
     if (renderers.count > 0)
         return true;
 
-    static const char *rpath = INSTALL_PREFIX "/lib/bemenu";
+    static const char *rpath = INSTALL_LIBDIR "/bemenu";
     const char *path = secure_getenv("BEMENU_RENDERER");
 
     if (path)
