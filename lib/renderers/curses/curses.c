@@ -19,6 +19,10 @@ static const char *TTY = "CON";
 static const char *TTY = "/dev/tty";
 #endif
 
+#if NCURSES_EXT_FUNCS < 20150808
+#   define set_escdelay(x) ESCDELAY = (x)
+#endif
+
 static struct curses {
     WINDOW *stdscr;
     struct sigaction abrt_action;
@@ -147,7 +151,7 @@ render(const struct bm_menu *menu)
         if ((curses.stdscr = initscr()) == NULL)
             return;
 
-        ESCDELAY = 25;
+        set_escdelay(25);
         flushinp();
         keypad(curses.stdscr, true);
         curs_set(1);
