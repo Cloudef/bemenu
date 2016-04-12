@@ -286,12 +286,12 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
     } else if (strcmp(interface, "xdg_shell") == 0) {
         wayland->xdg_shell = wl_registry_bind(registry, id, &xdg_shell_interface, 1);
-        xdg_shell_use_unstable_version(wayland->xdg_shell, 4);
+        xdg_shell_use_unstable_version(wayland->xdg_shell, XDG_SHELL_VERSION_CURRENT);
         xdg_shell_add_listener(wayland->xdg_shell, &xdg_shell_listener, data);
     } else if (strcmp(interface, "wl_shell") == 0) {
         wayland->shell = wl_registry_bind(registry, id, &wl_shell_interface, 1);
     } else if (strcmp(interface, "wl_seat") == 0) {
-        wayland->seat = wl_registry_bind(registry, id, &wl_seat_interface, XDG_SHELL_VERSION_CURRENT);
+        wayland->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
         wl_seat_add_listener(wayland->seat, &seat_listener, &wayland->input);
     } else if (strcmp(interface, "wl_shm") == 0) {
         wayland->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
