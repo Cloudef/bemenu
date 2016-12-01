@@ -50,7 +50,7 @@ create_tmpfile_cloexec(char *tmpname)
 static int
 os_create_anonymous_file(off_t size)
 {
-    static const char template[] = "/bemenu-shared-XXXXXX";
+    static const char template[] = "bemenu-shared-XXXXXX";
     int fd;
     int ret;
 
