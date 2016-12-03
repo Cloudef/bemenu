@@ -327,6 +327,7 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
             return BM_KEY_SHIFT_RETURN;
 
         case 10: /* Return */
+        case 13: /* C-m */
             terminate();
             return BM_KEY_RETURN;
 
