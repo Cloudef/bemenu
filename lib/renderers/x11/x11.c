@@ -140,6 +140,9 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XK_d:
             return (mods & MOD_ALT ? BM_KEY_PAGE_DOWN : BM_KEY_UNICODE);
 
+        case XK_m:
+            return (mods & MOD_CTRL ? BM_KEY_RETURN : BM_KEY_UNICODE);
+
         default: break;
     }
 
