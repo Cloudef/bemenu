@@ -9,7 +9,7 @@
 
 static struct client client = {
     .filter_mode = BM_FILTER_MODE_DMENU,
-    .title = "bemenu",
+    .title = "bemenu-run",
 };
 
 struct paths {
