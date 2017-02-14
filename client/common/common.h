@@ -20,7 +20,7 @@ struct client {
 
 void parse_args(struct client *client, int *argc, char **argv[]);
 struct bm_menu* menu_with_options(const struct client *client);
-enum bm_run_result run_menu(struct bm_menu *menu);
+enum bm_run_result run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(struct bm_item *item, const char *text));
 
 #endif /* _BM_COMMON_H_ */
 

@@ -251,6 +251,13 @@ launch(const char *bin)
     }
 }
 
+static void
+item_cb(struct bm_item *item, const char *text)
+{
+    (void)item; // may be null
+    launch(text);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -272,22 +279,7 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
 
     read_items_to_menu_from_path(menu);
-    bm_menu_set_highlighted_index(menu, client.selected);
-
-    enum bm_run_result status = run_menu(menu);
-
-    if (status == BM_RUN_RESULT_SELECTED) {
-        uint32_t i, count;
-        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-        for (i = 0; i < count; ++i) {
-            const char *text = bm_item_get_text(items[i]);
-            launch(text);
-        }
-
-        if (!count && bm_menu_get_filter(menu))
-            launch(bm_menu_get_filter(menu));
-    }
-
+    const enum bm_run_result status = run_menu(&client, menu, item_cb);
     bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }

@@ -57,6 +57,13 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
     free(buffer);
 }
 
+static void
+item_cb(struct bm_item *item, const char *text)
+{
+    (void)item; // may be null
+    printf("%s\n", (text ? text : ""));
+}
+
 int
 main(int argc, char **argv)
 {
@@ -70,22 +77,7 @@ main(int argc, char **argv)
         return EXIT_FAILURE;
 
     read_items_to_menu_from_stdin(menu);
-    bm_menu_set_highlighted_index(menu, client.selected);
-
-    enum bm_run_result status = run_menu(menu);
-
-    if (status == BM_RUN_RESULT_SELECTED) {
-        uint32_t i, count;
-        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-        for (i = 0; i < count; ++i) {
-            const char *text = bm_item_get_text(items[i]);
-            printf("%s\n", (text ? text : ""));
-        }
-
-        if (!count && bm_menu_get_filter(menu))
-            printf("%s\n", bm_menu_get_filter(menu));
-    }
-
+    const enum bm_run_result status = run_menu(&client, menu, item_cb);
     bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }

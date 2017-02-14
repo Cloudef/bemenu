@@ -275,8 +275,9 @@ menu_with_options(const struct client *client)
 }
 
 enum bm_run_result
-run_menu(struct bm_menu *menu)
+run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(struct bm_item *item, const char *text))
 {
+    bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
 
     uint32_t unicode;
@@ -286,6 +287,19 @@ run_menu(struct bm_menu *menu)
         bm_menu_render(menu);
         key = bm_menu_poll_key(menu, &unicode);
     } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
+
+    if (status == BM_RUN_RESULT_SELECTED) {
+        uint32_t i, count;
+        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
+        for (i = 0; i < count; ++i) {
+            const char *text = bm_item_get_text(items[i]);
+            item_cb(items[i], text);
+        }
+
+        if (!count && bm_menu_get_filter(menu))
+            item_cb(NULL, bm_menu_get_filter(menu));
+    }
+
     return status;
 }
 
