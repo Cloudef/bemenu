@@ -32,7 +32,51 @@ static struct curses {
     size_t blen;
     int old_stdin;
     int old_stdout;
+    bool polled_once;
+    bool should_terminate;
 } curses;
+
+static void
+reopen_stdin(void)
+{
+    freopen(TTY, "r", stdin);
+}
+
+static void
+reopen_stdin_stdout(void)
+{
+    reopen_stdin();
+    freopen(TTY, "w", stdout);
+}
+
+static void
+store_stdin_stdout(void)
+{
+    curses.old_stdin = dup(STDIN_FILENO);
+    curses.old_stdout = dup(STDOUT_FILENO);
+}
+
+static void
+restore_stdin(void)
+{
+    if (curses.old_stdin != -1) {
+        dup2(curses.old_stdin, STDIN_FILENO);
+        close(curses.old_stdin);
+        curses.old_stdin = -1;
+    }
+}
+
+static void
+restore_stdin_stdout(void)
+{
+    restore_stdin();
+
+    if (curses.old_stdout != -1) {
+        dup2(curses.old_stdout, STDOUT_FILENO);
+        close(curses.old_stdout);
+        curses.old_stdout = -1;
+    }
+}
 
 static void
 terminate(void)
@@ -46,16 +90,10 @@ terminate(void)
     if (!curses.stdscr)
         return;
 
-    freopen(TTY, "w", stdout);
-
+    reopen_stdin_stdout();
     refresh();
     endwin();
-
-    dup2(curses.old_stdin, STDIN_FILENO);
-    dup2(curses.old_stdout, STDOUT_FILENO);
-    close(curses.old_stdin);
-    close(curses.old_stdout);
-
+    restore_stdin_stdout();
     curses.stdscr = NULL;
 }
 
@@ -139,13 +177,14 @@ draw_line(int32_t pair, int32_t y, const char *fmt, ...)
 static void
 render(const struct bm_menu *menu)
 {
+    if (curses.should_terminate) {
+        terminate();
+        curses.should_terminate = false;
+    }
+
     if (!curses.stdscr) {
-        curses.old_stdin = dup(STDIN_FILENO);
-        curses.old_stdout = dup(STDOUT_FILENO);
-
-        freopen(TTY, "w", stdout);
-        freopen(TTY, "r", stdin);
-
+        store_stdin_stdout();
+        reopen_stdin_stdout();
         setlocale(LC_CTYPE, "");
 
         if ((curses.stdscr = initscr()) == NULL)
@@ -225,6 +264,15 @@ render(const struct bm_menu *menu)
 
     move(0, title_len + (menu->curses_cursor < ccols ? menu->curses_cursor : ccols));
     refresh();
+
+    // Make it possible to read stdin even after rendering
+    // Only make it impossible to read original stdin after poll_key is called once
+    // This is mainly to make -f work even on curses backend
+    if (!curses.polled_once) {
+        reopen_stdin();
+        restore_stdin();
+        curses.should_terminate = true;
+    }
 }
 
 static uint32_t
@@ -240,8 +288,9 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
     (void)menu;
     assert(unicode);
     *unicode = 0;
+    curses.polled_once = true;
 
-    if (!curses.stdscr)
+    if (!curses.stdscr || curses.should_terminate)
         return BM_KEY_NONE;
 
     get_wch((wint_t*)unicode);
@@ -360,6 +409,8 @@ constructor(struct bm_menu *menu)
     assert(!curses.stdscr && "bemenu supports only one curses instance");
 
     memset(&curses, 0, sizeof(curses));
+    curses.old_stdin = -1;
+    curses.old_stdout = -1;
 
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));

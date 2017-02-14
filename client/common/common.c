@@ -82,7 +82,7 @@ usage(FILE *out, const char *name)
           "   (...) At end of help indicates the backend support for option.\n\n"
 
           " -b, --bottom          appears at the bottom of the screen. (x)\n"
-          " -f, --grab            grabs the keyboard before reading stdin. (x)\n"
+          " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
@@ -264,8 +264,12 @@ menu_with_options(struct client *client)
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);
 
-    if (client->grab)
+    if (client->grab) {
+        bm_menu_set_filter(menu, "Loading...");
         bm_menu_grab_keyboard(menu, true);
+        bm_menu_render(menu);
+        bm_menu_set_filter(menu, NULL);
+    }
 
     return menu;
 }
