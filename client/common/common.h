@@ -19,7 +19,7 @@ struct client {
 };
 
 void parse_args(struct client *client, int *argc, char **argv[]);
-struct bm_menu* menu_with_options(struct client *client);
+struct bm_menu* menu_with_options(const struct client *client);
 enum bm_run_result run_menu(struct bm_menu *menu);
 
 #endif /* _BM_COMMON_H_ */

@@ -245,7 +245,7 @@ parse_args(struct client *client, int *argc, char **argv[])
 }
 
 struct bm_menu*
-menu_with_options(struct client *client)
+menu_with_options(const struct client *client)
 {
     struct bm_menu *menu;
     if (!(menu = bm_menu_new(NULL)))
