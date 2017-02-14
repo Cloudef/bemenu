@@ -73,8 +73,8 @@ resize_handler(int sig)
     if (!curses.stdscr)
         return;
 
-    endwin();
     refresh();
+    endwin();
 }
 
 BM_LOG_ATTR(3, 4) static void
