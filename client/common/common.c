@@ -68,7 +68,8 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to shown before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
-          " --scrollbar           display scrollbar. (always, autohide)\n\n"
+          " --scrollbar           display scrollbar. (always, autohide)\n"
+          " --ifne                only display menu if there are items.\n\n"
 
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
@@ -117,6 +118,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
         { "scrollbar",   required_argument, 0, 0x100 },
+        { "ifne",        no_argument,       0, 0x115 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
@@ -176,6 +178,9 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
             case 0x100:
                 client->scrollbar = (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE));
+                break;
+            case 0x115:
+                client->ifne = true;
                 break;
 
             case 'b':
@@ -279,6 +284,9 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(stru
 {
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
+
+    if (client->ifne && !bm_menu_get_items(menu, NULL))
+        return BM_RUN_RESULT_CANCEL;
 
     uint32_t unicode;
     enum bm_key key;
