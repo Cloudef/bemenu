@@ -385,16 +385,16 @@ bm_unicode_insert(char **in_out_string, size_t *in_out_buf_size, size_t start, u
 {
     assert(in_out_string && in_out_buf_size);
 
-    char u8len = ((unicode < 0x80) ? 1 : ((unicode < 0x800) ? 2 : ((unicode < 0x10000) ? 3 : 4)));
+    uint8_t u8len = ((unicode < 0x80) ? 1 : ((unicode < 0x800) ? 2 : ((unicode < 0x10000) ? 3 : 4)));
     char mb[5] = { 0, 0, 0, 0 };
 
     if (u8len == 1) {
         mb[0] = unicode;
     } else {
-        size_t i, j;
-        for (i = j = u8len; j > 1; --j) mb[j - 1] = 0x80 | (0x3F & (unicode >> ((i - j) * 6)));
-        mb[0] = (~0) << (8 - i);
-        mb[0] |= (unicode >> (i * 6 - 6));
+        size_t j;
+        for (j = u8len; j > 1; --j) mb[j - 1] = 0x80 | (0x3F & (unicode >> ((u8len - j) * 6)));
+        mb[0] = (uint8_t)(~0) << (8 - u8len);
+        mb[0] |= (unicode >> (u8len * 6 - 6));
     }
 
     return bm_utf8_rune_insert(in_out_string, in_out_buf_size, start, mb, u8len, out_rune_width);
