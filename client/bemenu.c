@@ -42,13 +42,8 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
     buffer[allocated - step + read - 1] = 0;
 
     char *s = buffer;
-    while ((size_t)(s - buffer) < allocated - step + read) {
+    while ((size_t)(s - buffer) < allocated - step + read && *s != 0) {
         size_t pos = strcspn(s, "\n");
-        if (pos == 0) {
-            s += 1;
-            continue;
-        }
-
         s[pos] = 0;
 
         struct bm_item *item;
