@@ -9,7 +9,7 @@
 /**
  * Default font.
  */
-static const char *default_font = "Terminus 9";
+static const char *default_font = "Fixed 9";
 
 /**
  * Default hexadecimal colors.
