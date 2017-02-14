@@ -9,17 +9,7 @@
 
 static struct client client = {
     .filter_mode = BM_FILTER_MODE_DMENU,
-    .colors = {0},
     .title = "bemenu",
-    .prefix = NULL,
-    .font = NULL,
-    .lines = 0,
-    .selected = 0,
-    .monitor = 0,
-    .bottom = false,
-    .grab = false,
-    .wrap = false,
-    .scrollbar = false,
 };
 
 struct paths {
