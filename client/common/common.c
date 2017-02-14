@@ -266,7 +266,7 @@ menu_with_options(struct client *client)
 
     if (client->grab) {
         bm_menu_set_filter(menu, "Loading...");
-        bm_menu_grab_keyboard(menu, true);
+        // bm_menu_grab_keyboard(menu, true);
         bm_menu_render(menu);
         bm_menu_set_filter(menu, NULL);
     }
