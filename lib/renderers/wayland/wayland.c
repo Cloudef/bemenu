@@ -38,7 +38,10 @@ render(const struct bm_menu *menu)
     }
 
     if (wayland->input.code != wayland->input.last_code) {
-        bm_wl_window_render(&wayland->window, menu);
+        struct window *window;
+            wl_list_for_each(window, &wayland->windows, link) {
+            bm_wl_window_render(window, menu);
+        }
         wayland->input.last_code = wayland->input.code;
     }
 }
@@ -165,7 +168,13 @@ get_displayed_count(const struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
-    return wayland->window.displayed;
+    uint32_t max = 0;
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        if (window->displayed > max)
+            max = window->displayed;
+    }
+    return max;
 }
 
 static void
@@ -176,7 +185,10 @@ destructor(struct bm_menu *menu)
     if (!wayland)
         return;
 
-    bm_wl_window_destroy(&wayland->window);
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_destroy(window);
+    }
     bm_wl_registry_destroy(wayland);
 
     xkb_context_unref(wayland->input.xkb.context);
@@ -203,9 +215,6 @@ constructor(struct bm_menu *menu)
     if (!(menu->renderer->internal = wayland = calloc(1, sizeof(struct wayland))))
         goto fail;
 
-    wayland->window.width = 800;
-    wayland->window.height = 1;
-
     if (!(wayland->display = wl_display_connect(NULL)))
         goto fail;
 
@@ -215,18 +224,25 @@ constructor(struct bm_menu *menu)
     if (!bm_wl_registry_register(wayland))
         goto fail;
 
-    struct wl_surface *surface;
-    if (!(surface = wl_compositor_create_surface(wayland->compositor)))
-        goto fail;
+    wayland->fds.display = wl_display_get_fd(wayland->display);
+    wayland->fds.repeat = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
+    wayland->input.repeat_fd = &wayland->fds.repeat;
 
-    if (!bm_wl_window_create(&wayland->window, wayland->shm, wayland->shell, wayland->xdg_shell, surface))
-        goto fail;
+    struct output *output;
+    wl_list_for_each(output, &wayland->outputs, link) {
+	struct wl_surface *surface;
+	if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+	    goto fail;
+	struct window *window = calloc(1, sizeof(struct window));
+	if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
+	    goto fail;
+	window->notify.render = bm_cairo_paint;
+	window->max_height = output->height;
+	wl_list_insert(&wayland->windows, &window->link);
+    }
 
     if (!efd && (efd = epoll_create(EPOLL_CLOEXEC)) < 0)
         goto fail;
-
-    wayland->fds.display = wl_display_get_fd(wayland->display);
-    wayland->fds.repeat = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
 
     struct epoll_event ep;
     ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
@@ -237,9 +253,6 @@ constructor(struct bm_menu *menu)
     ep2.events = EPOLLIN;
     ep2.data.ptr = &wayland->fds.repeat;
     epoll_ctl(efd, EPOLL_CTL_ADD, wayland->fds.repeat, &ep2);
-
-    wayland->window.notify.render = bm_cairo_paint;
-    wayland->input.repeat_fd = &wayland->fds.repeat;
     return true;
 
 fail:

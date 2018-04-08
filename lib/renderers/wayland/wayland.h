@@ -4,7 +4,7 @@
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 
-#include "wayland-xdg-shell-client-protocol.h"
+#include "wayland-layer-shell-client-protocol.h"
 
 #include "renderers/cairo.h"
 
@@ -76,17 +76,23 @@ struct buffer {
 
 struct window {
     struct wl_surface *surface;
-    struct wl_shell_surface *shell_surface;
     struct wl_callback *frame_cb;
-    struct xdg_surface *xdg_surface;
+    struct zwlr_layer_surface_v1 *layer_surface;
     struct wl_shm *shm;
     struct buffer buffers[2];
     uint32_t width, height, max_height;
     uint32_t displayed;
+    struct wl_list link;
 
     struct {
         void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
     } notify;
+};
+
+struct output {
+    struct wl_output *output;
+    struct wl_list link;
+    int height;
 };
 
 struct wayland {
@@ -98,13 +104,12 @@ struct wayland {
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
-    struct wl_output *output;
+    struct wl_list outputs;
     struct wl_seat *seat;
-    struct xdg_shell *xdg_shell;
-    struct wl_shell *shell;
+    struct zwlr_layer_shell_v1 *layer_shell;
     struct wl_shm *shm;
     struct input input;
-    struct window window;
+    struct wl_list windows;
     uint32_t formats;
 };
 
@@ -112,7 +117,7 @@ void bm_wl_repeat(struct wayland *wayland);
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_render(struct window *window, const struct bm_menu *menu);
-bool bm_wl_window_create(struct window *window, struct wl_shm *shm, struct wl_shell *shell, struct xdg_shell *xdg_shell, struct wl_surface *surface);
+bool bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface);
 void bm_wl_window_destroy(struct window *window);
 
 #endif /* _BM_WAYLAND_H_ */

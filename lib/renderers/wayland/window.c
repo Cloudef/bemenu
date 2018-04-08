@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 
-#define USE_XDG_SHELL false
-
 static int
 set_cloexec_or_close(int fd)
 {
@@ -193,49 +191,6 @@ next_buffer(struct window *window)
 }
 
 static void
-shell_surface_ping(void *data, struct wl_shell_surface *surface, uint32_t serial)
-{
-   (void)data;
-   wl_shell_surface_pong(surface, serial);
-}
-
-static void
-shell_surface_configure(void *data, struct wl_shell_surface *surface, uint32_t edges, int32_t width, int32_t height)
-{
-    (void)data, (void)surface, (void)edges, (void)width, (void)height;
-}
-
-static void
-shell_surface_popup_done(void *data, struct wl_shell_surface *surface)
-{
-    (void)data, (void)surface;
-}
-
-static const struct wl_shell_surface_listener shell_surface_listener = {
-    .ping = shell_surface_ping,
-    .configure = shell_surface_configure,
-    .popup_done = shell_surface_popup_done,
-};
-
-static void
-xdg_surface_configure(void *data, struct xdg_surface *surface, int32_t width, int32_t height, struct wl_array *states, uint32_t serial)
-{
-    (void)data, (void)states, (void)width, (void)height, (void)states, (void)serial;
-    xdg_surface_ack_configure(surface, serial);
-}
-
-static void
-xdg_surface_close(void *data, struct xdg_surface *surface)
-{
-    (void)data, (void)surface;
-}
-
-static const struct xdg_surface_listener xdg_surface_listener = {
-    .configure = xdg_surface_configure,
-    .close = xdg_surface_close,
-};
-
-static void
 frame_callback(void *data, struct wl_callback *callback, uint32_t time)
 {
     (void)time;
@@ -294,29 +249,48 @@ bm_wl_window_destroy(struct window *window)
     for (int32_t i = 0; i < 2; ++i)
         destroy_buffer(&window->buffers[i]);
 
-    if (window->xdg_surface)
-        xdg_surface_destroy(window->xdg_surface);
-
-    if (window->shell_surface)
-        wl_shell_surface_destroy(window->shell_surface);
+    if (window->layer_surface)
+        zwlr_layer_surface_v1_destroy(window->layer_surface);
 
     if (window->surface)
         wl_surface_destroy(window->surface);
 }
 
+static void
+layer_surface_configure(void *data, struct zwlr_layer_surface_v1 *layer_surface, uint32_t serial, uint32_t width, uint32_t height)
+{
+    struct window *window = data;
+    window->width = width;
+    window->height = height;
+    zwlr_layer_surface_v1_ack_configure(layer_surface, serial);
+}
+
+static void
+layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *layer_surface)
+{
+    struct window *window = data;
+    zwlr_layer_surface_v1_destroy(layer_surface);
+    wl_surface_destroy(window->surface);
+    exit(1);
+}
+
+static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
+    .configure = layer_surface_configure,
+    .closed = layer_surface_closed,
+};
+
 bool
-bm_wl_window_create(struct window *window, struct wl_shm *shm, struct wl_shell *shell, struct xdg_shell *xdg_shell, struct wl_surface *surface)
+bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface)
 {
     assert(window);
 
-    if (USE_XDG_SHELL && xdg_shell && (window->xdg_surface = xdg_shell_get_xdg_surface(xdg_shell, surface))) {
-        xdg_surface_add_listener(window->xdg_surface, &xdg_surface_listener, window);
-        xdg_surface_set_title(window->xdg_surface, "bemenu");
-    } else if (shell && (window->shell_surface = wl_shell_get_shell_surface(shell, surface))) {
-        wl_shell_surface_add_listener(window->shell_surface, &shell_surface_listener, window);
-        wl_shell_surface_set_title(window->shell_surface, "bemenu");
-        wl_shell_surface_set_class(window->shell_surface, "bemenu");
-        wl_shell_surface_set_toplevel(window->shell_surface);
+    if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "menu"))) {
+        zwlr_layer_surface_v1_add_listener(window->layer_surface, &layer_surface_listener, window);
+        zwlr_layer_surface_v1_set_anchor(window->layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP | ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+        zwlr_layer_surface_v1_set_size(window->layer_surface, 0, 32);
+        zwlr_layer_surface_v1_set_keyboard_interactivity(window->layer_surface, true);
+        wl_surface_commit(surface);
+        wl_display_roundtrip(display);
     } else {
         return false;
     }
