@@ -27,17 +27,6 @@ const enum mod_bit BM_XKB_MODS[MASK_LAST] = {
 };
 
 static void
-xdg_shell_ping(void *data, struct xdg_shell *shell, uint32_t serial)
-{
-    (void)data;
-    xdg_shell_pong(shell, serial);
-}
-
-static const struct xdg_shell_listener xdg_shell_listener = {
-    .ping = xdg_shell_ping,
-};
-
-static void
 shm_format(void *data, struct wl_shm *wl_shm, uint32_t format)
 {
     (void)wl_shm;
@@ -260,12 +249,11 @@ display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
 static void
 display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int width, int height, int refresh)
 {
-    (void)wl_output, (void)refresh, (void)height;
-    struct wayland *wayland = data;
+    (void)wl_output, (void)refresh, (void)height, (void)width;
+    struct output *output = data;
 
     if (flags & WL_OUTPUT_MODE_CURRENT) {
-        wayland->window.width = width;
-        wayland->window.max_height = height;
+        output->height = height;
     }
 }
 
@@ -284,12 +272,8 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
 
     if (strcmp(interface, "wl_compositor") == 0) {
         wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
-    } else if (strcmp(interface, "xdg_shell") == 0) {
-        wayland->xdg_shell = wl_registry_bind(registry, id, &xdg_shell_interface, 1);
-        xdg_shell_use_unstable_version(wayland->xdg_shell, XDG_SHELL_VERSION_CURRENT);
-        xdg_shell_add_listener(wayland->xdg_shell, &xdg_shell_listener, data);
-    } else if (strcmp(interface, "wl_shell") == 0) {
-        wayland->shell = wl_registry_bind(registry, id, &wl_shell_interface, 1);
+    } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
+        wayland->layer_shell = wl_registry_bind(registry, id, &zwlr_layer_shell_v1_interface, 1);
     } else if (strcmp(interface, "wl_seat") == 0) {
         wayland->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
         wl_seat_add_listener(wayland->seat, &seat_listener, &wayland->input);
@@ -297,8 +281,11 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         wayland->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
         wl_shm_add_listener(wayland->shm, &shm_listener, data);
     } else if (strcmp(interface, "wl_output") == 0) {
-        wayland->output = wl_registry_bind(registry, id, &wl_output_interface, 2);
-        wl_output_add_listener(wayland->output, &output_listener, wayland);
+        struct wl_output *wl_output = wl_registry_bind(registry, id, &wl_output_interface, 2);
+        struct output *output = calloc(1, sizeof(struct output));
+        output->output = wl_output;
+        wl_list_insert(&wayland->outputs, &output->link);
+        wl_output_add_listener(wl_output, &output_listener, output);
     }
 }
 
@@ -334,11 +321,8 @@ bm_wl_registry_destroy(struct wayland *wayland)
     if (wayland->shm)
         wl_shm_destroy(wayland->shm);
 
-    if (wayland->shell)
-        wl_shell_destroy(wayland->shell);
-
-    if (wayland->xdg_shell)
-        xdg_shell_destroy(wayland->xdg_shell);
+    if (wayland->layer_shell)
+        zwlr_layer_shell_v1_destroy(wayland->layer_shell);
 
     if (wayland->compositor)
         wl_compositor_destroy(wayland->compositor);
@@ -358,9 +342,11 @@ bm_wl_registry_register(struct wayland *wayland)
     if (!(wayland->registry = wl_display_get_registry(wayland->display)))
         return false;
 
+    wl_list_init(&wayland->outputs);
+    wl_list_init(&wayland->windows);
     wl_registry_add_listener(wayland->registry, &registry_listener, wayland);
     wl_display_roundtrip(wayland->display); // trip 1, registry globals
-    if (!wayland->compositor || !wayland->seat || !wayland->shm || !(wayland->shell || wayland->xdg_shell))
+    if (!wayland->compositor || !wayland->seat || !wayland->shm || !wayland->layer_shell)
         return false;
 
     wl_display_roundtrip(wayland->display); // trip 2, global listeners
