@@ -178,6 +178,18 @@ get_displayed_count(const struct bm_menu *menu)
 }
 
 static void
+set_bottom(const struct bm_menu *menu, bool bottom)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_set_bottom(window, wayland->display, bottom);
+    }
+}
+
+static void
 destructor(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -234,6 +246,7 @@ constructor(struct bm_menu *menu)
 	if (!(surface = wl_compositor_create_surface(wayland->compositor)))
 	    goto fail;
 	struct window *window = calloc(1, sizeof(struct window));
+	window->bottom = menu->bottom;
 	if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
 	    goto fail;
 	window->notify.render = bm_cairo_paint;
@@ -268,6 +281,7 @@ register_renderer(struct render_api *api)
     api->get_displayed_count = get_displayed_count;
     api->poll_key = poll_key;
     api->render = render;
+    api->set_bottom = set_bottom;
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";
