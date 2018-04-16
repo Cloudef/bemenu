@@ -242,16 +242,16 @@ constructor(struct bm_menu *menu)
 
     struct output *output;
     wl_list_for_each(output, &wayland->outputs, link) {
-	struct wl_surface *surface;
-	if (!(surface = wl_compositor_create_surface(wayland->compositor)))
-	    goto fail;
-	struct window *window = calloc(1, sizeof(struct window));
-	window->bottom = menu->bottom;
-	if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
-	    goto fail;
-	window->notify.render = bm_cairo_paint;
-	window->max_height = output->height;
-	wl_list_insert(&wayland->windows, &window->link);
+        struct wl_surface *surface;
+        if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+            goto fail;
+        struct window *window = calloc(1, sizeof(struct window));
+        window->bottom = menu->bottom;
+        if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
+            goto fail;
+        window->notify.render = bm_cairo_paint;
+        window->max_height = output->height;
+        wl_list_insert(&wayland->windows, &window->link);
     }
 
     if (!efd && (efd = epoll_create(EPOLL_CLOEXEC)) < 0)
