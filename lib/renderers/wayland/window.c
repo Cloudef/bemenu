@@ -321,7 +321,6 @@ bm_wl_window_create(struct window *window, struct wl_display *display, struct wl
 
     window->shm = shm;
     window->surface = surface;
-    wl_surface_damage(surface, 0, 0, window->width, window->height);
     return true;
 }
 
