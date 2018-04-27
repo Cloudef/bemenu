@@ -40,7 +40,7 @@ render(const struct bm_menu *menu)
     if (wayland->input.code != wayland->input.last_code) {
         struct window *window;
             wl_list_for_each(window, &wayland->windows, link) {
-            bm_wl_window_render(window, menu);
+            bm_wl_window_render(window, wayland->display, menu);
         }
         wayland->input.last_code = wayland->input.code;
     }
