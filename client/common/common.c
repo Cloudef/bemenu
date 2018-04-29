@@ -82,7 +82,7 @@ usage(FILE *out, const char *name)
           "   c = ncurses, w == wayland, x == x11\n"
           "   (...) At end of help indicates the backend support for option.\n\n"
 
-          " -b, --bottom          appears at the bottom of the screen. (x)\n"
+          " -b, --bottom          appears at the bottom of the screen. (wx)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
