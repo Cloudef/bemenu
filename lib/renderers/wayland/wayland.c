@@ -40,7 +40,7 @@ render(const struct bm_menu *menu)
     if (wayland->input.code != wayland->input.last_code) {
         struct window *window;
             wl_list_for_each(window, &wayland->windows, link) {
-            bm_wl_window_render(window, menu);
+            bm_wl_window_render(window, wayland->display, menu);
         }
         wayland->input.last_code = wayland->input.code;
     }
@@ -190,6 +190,18 @@ set_bottom(const struct bm_menu *menu, bool bottom)
 }
 
 static void
+grab_keyboard(const struct bm_menu *menu, bool grab)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_grab_keyboard(window, wayland->display, grab);
+    }
+}
+
+static void
 destructor(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -282,6 +294,7 @@ register_renderer(struct render_api *api)
     api->poll_key = poll_key;
     api->render = render;
     api->set_bottom = set_bottom;
+    api->grab_keyboard = grab_keyboard;
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";
