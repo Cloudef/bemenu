@@ -131,7 +131,6 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     int width, height;
     pango_layout_get_pixel_size(layout, &width, &height);
     int base =  pango_layout_get_baseline(layout) / PANGO_SCALE;
-    int yoff = height - base;
 
     cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
     cairo_rectangle(cairo->cr,
@@ -141,7 +140,7 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
-    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - yoff + paint->box.ty);
+    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y + paint->box.ty);
     pango_cairo_show_layout(cairo->cr, layout);
 
     g_object_unref(layout);
