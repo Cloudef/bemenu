@@ -140,13 +140,13 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
-    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y + paint->box.ty);
+    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y);
     pango_cairo_show_layout(cairo->cr, layout);
 
     g_object_unref(layout);
 
     result->x_advance = width + paint->box.rx;
-    result->height = height + paint->box.by;
+    result->height = height + paint->box.by + paint->box.ty;
     return true;
 }
 
