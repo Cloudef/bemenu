@@ -246,7 +246,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
             }
 
             posy += (spacing_y ? spacing_y : result.height);
-            out_result->height = posy + 2;
+            out_result->height = posy;
             out_result->displayed++;
         }
 
