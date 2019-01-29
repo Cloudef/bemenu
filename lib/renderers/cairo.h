@@ -22,6 +22,7 @@ struct cairo_paint {
     struct cairo_color fg;
     struct cairo_color bg;
     const char *font;
+    int32_t baseline;
 
     struct box {
         int32_t lx, rx; // left/right offset (pos.x - lx, box.w + rx)
@@ -37,6 +38,7 @@ struct cairo_paint {
 struct cairo_result {
     uint32_t x_advance;
     uint32_t height;
+    uint32_t baseline;
 };
 
 struct cairo_paint_result {
@@ -103,11 +105,13 @@ bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct
 
     PangoRectangle rect;
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
-    pango_layout_get_pixel_extents(layout, &rect, NULL);
+    pango_layout_get_pixel_extents(layout, NULL, &rect);
+    int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
     g_object_unref(layout);
 
     result->x_advance = rect.x + rect.width;
     result->height = rect.height;
+    result->baseline = baseline;
     return true;
 }
 
@@ -130,23 +134,24 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
 
     int width, height;
     pango_layout_get_pixel_size(layout, &width, &height);
-    int base =  pango_layout_get_baseline(layout) / PANGO_SCALE;
+    height = paint->box.h > 0 ? paint->box.h : height;
+    int base = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
     cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
     cairo_rectangle(cairo->cr,
             paint->pos.x - paint->box.lx, paint->pos.y - paint->box.ty,
             (paint->box.w > 0 ? paint->box.w : width) + paint->box.rx + paint->box.lx,
-            (paint->box.h > 0 ? paint->box.h : height) + paint->box.by + paint->box.ty);
+            height + paint->box.by + paint->box.ty);
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
-    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y + paint->box.ty);
+    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - base + paint->baseline);
     pango_cairo_show_layout(cairo->cr, layout);
 
     g_object_unref(layout);
 
     result->x_advance = width + paint->box.rx;
-    result->height = height + paint->box.by;
+    result->height = height + paint->box.by + paint->box.ty;
     return true;
 }
 
@@ -178,13 +183,19 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
 
     struct cairo_result result;
     memset(&result, 0, sizeof(result));
+    int ascii_height;
+    bm_pango_get_text_extents(cairo, &paint, &result, "!\"#$%%&'()*+,-./0123456789:;<=>?@ABCD"
+                              "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+    ascii_height = result.height;
+    paint.baseline = result.baseline;
 
+    memset(&result, 0, sizeof(result));
     uint32_t title_x = 0;
     if (menu->title) {
         bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.fg);
         bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
         paint.pos = (struct pos){ result.x_advance, 2 };
-        paint.box = (struct box){ 4, 8, 2, 2, 0, 0 };
+        paint.box = (struct box){ 4, 8, 2, 2, 0, ascii_height };
         bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
         title_x = result.x_advance;
     }
@@ -192,7 +203,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
     paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance, 2 };
-    paint.box = (struct box){ (menu->title ? 2 : 4), 0, 2, 2, width - paint.pos.x, 0 };
+    paint.box = (struct box){ (menu->title ? 2 : 4), 0, 2, 2, width - paint.pos.x, ascii_height };
     bm_cairo_draw_line(cairo, &paint, &result, "%s", (menu->filter ? menu->filter : ""));
     const uint32_t titleh = result.height;
     out_result->height = titleh;
@@ -237,16 +248,16 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
 
             if (menu->prefix && highlighted) {
                 paint.pos = (struct pos){ 0, 2 + posy };
-                paint.box = (struct box){ 4 + spacing_x, 0, 2, 2, width - paint.pos.x, 0 };
+                paint.box = (struct box){ 4 + spacing_x, 0, 2, 2, width - paint.pos.x, ascii_height };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
                 paint.pos = (struct pos){ 0, 2 + posy };
-                paint.box = (struct box){ 4 + spacing_x + prefix_x, 0, 2, 2, width - paint.pos.x, 0 };
+                paint.box = (struct box){ 4 + spacing_x + prefix_x, 0, 2, 2, width - paint.pos.x, ascii_height };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
             }
 
             posy += (spacing_y ? spacing_y : result.height);
-            out_result->height = posy + 2;
+            out_result->height = posy;
             out_result->displayed++;
         }
 
@@ -273,7 +284,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
 
         if (menu->wrap || menu->index > 0) {
             paint.pos = (struct pos){ cl, 2 };
-            paint.box = (struct box){ 1, 2, 2, 2, 0, 0 };
+            paint.box = (struct box){ 1, 2, 2, 2, 0, ascii_height };
             bm_cairo_draw_line(cairo, &paint, &result, "<");
             cl += result.x_advance + 1;
         }
@@ -293,7 +304,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
             }
 
             paint.pos = (struct pos){ cl, 2 };
-            paint.box = (struct box){ 2, 4, 2, 2, 0, 0 };
+            paint.box = (struct box){ 2, 4, 2, 2, 0, ascii_height };
             bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
             cl += result.x_advance + 2;
             out_result->displayed += (cl < width);
@@ -305,7 +316,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
             bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
             bm_pango_get_text_extents(cairo, &paint, &result, ">");
             paint.pos = (struct pos){ width - result.x_advance - 2, 2 };
-            paint.box = (struct box){ 1, 2, 2, 2, 0, 0 };
+            paint.box = (struct box){ 1, 2, 2, 2, 0, ascii_height };
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }
     }
