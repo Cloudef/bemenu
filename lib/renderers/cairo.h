@@ -22,6 +22,7 @@ struct cairo_paint {
     struct cairo_color fg;
     struct cairo_color bg;
     const char *font;
+    int32_t baseline;
 
     struct box {
         int32_t lx, rx; // left/right offset (pos.x - lx, box.w + rx)
@@ -37,6 +38,7 @@ struct cairo_paint {
 struct cairo_result {
     uint32_t x_advance;
     uint32_t height;
+    uint32_t baseline;
 };
 
 struct cairo_paint_result {
@@ -104,10 +106,12 @@ bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct
     PangoRectangle rect;
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
     pango_layout_get_pixel_extents(layout, NULL, &rect);
+    int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
     g_object_unref(layout);
 
     result->x_advance = rect.x + rect.width;
     result->height = rect.height;
+    result->baseline = baseline;
     return true;
 }
 
@@ -131,6 +135,7 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     int width, height;
     pango_layout_get_pixel_size(layout, &width, &height);
     height = paint->box.h > 0 ? paint->box.h : height;
+    int base = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
     cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
     cairo_rectangle(cairo->cr,
@@ -140,7 +145,7 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
-    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y);
+    cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - base + paint->baseline);
     pango_cairo_show_layout(cairo->cr, layout);
 
     g_object_unref(layout);
@@ -182,6 +187,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t ma
     bm_pango_get_text_extents(cairo, &paint, &result, "!\"#$%%&'()*+,-./0123456789:;<=>?@ABCD"
                               "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
     ascii_height = result.height;
+    paint.baseline = result.baseline;
 
     memset(&result, 0, sizeof(result));
     uint32_t title_x = 0;
