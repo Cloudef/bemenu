@@ -208,9 +208,6 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
 {
     assert(window && menu);
 
-    if (window->frame_cb)
-        return;
-
     struct buffer *buffer;
     for (int tries = 0; tries < 2; ++tries) {
         if (!(buffer = next_buffer(window))) {
