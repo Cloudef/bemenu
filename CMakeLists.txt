@@ -1,5 +1,5 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(bemenu, C)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+PROJECT(bemenu C)
 SET(BEMENU_NAME "bemenu")
 SET(BEMENU_DESCRIPTION "Dynamic menu library and client program inspired by dmenu")
 SET(BEMENU_VERSION "1.0.0")
