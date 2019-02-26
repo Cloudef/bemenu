@@ -26,7 +26,7 @@ render(const struct bm_menu *menu)
     }
 
     struct epoll_event ep[16];
-    uint32_t num = epoll_wait(efd, ep, 16, -1);
+    uint32_t num = epoll_wait(efd, ep, 16, 0);
     for (uint32_t i = 0; i < num; ++i) {
         if (ep[i].data.ptr == &wayland->fds.display) {
             if (ep[i].events & EPOLLERR || ep[i].events & EPOLLHUP ||
