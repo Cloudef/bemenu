@@ -6,6 +6,13 @@ bemenu
 
 Dynamic menu library and client program inspired by dmenu
 
+## Usage
+For more info see `bemenu-run -h`, e.g. if you want to show it at the bottom of the screen add
+```
+set $menu bemenu-run -b
+```
+to your sway config file.
+
 ## License
 * [GNU GPLv3 (or any later version)](LICENSE-CLIENT) for client program[s] and
   other sources except library and bindings
