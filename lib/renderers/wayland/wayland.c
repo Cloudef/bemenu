@@ -25,6 +25,13 @@ render(const struct bm_menu *menu)
         return;
     }
 
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        if (window->render_pending)
+            bm_wl_window_render(window, wayland->display, menu);
+    }
+    wl_display_flush(wayland->display);
+
     struct epoll_event ep[16];
     uint32_t num = epoll_wait(efd, ep, 16, -1);
     for (uint32_t i = 0; i < num; ++i) {
@@ -38,10 +45,10 @@ render(const struct bm_menu *menu)
     }
 
     if (wayland->input.code != wayland->input.last_code) {
-        struct window *window;
-            wl_list_for_each(window, &wayland->windows, link) {
-            bm_wl_window_render(window, wayland->display, menu);
+        wl_list_for_each(window, &wayland->windows, link) {
+            bm_wl_window_schedule_render(window);
         }
+
         wayland->input.last_code = wayland->input.code;
     }
 }
@@ -263,6 +270,7 @@ constructor(struct bm_menu *menu)
             goto fail;
         window->notify.render = bm_cairo_paint;
         window->max_height = output->height;
+        window->render_pending = true;
         wl_list_insert(&wayland->windows, &window->link);
     }
 
