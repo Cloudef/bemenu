@@ -84,8 +84,8 @@ usage(FILE *out, const char *name)
 
           " -b, --bottom          appears at the bottom of the screen. (wx)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
-          " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
+          " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
           " --tf                  defines the title foreground color. (wx)\n"
@@ -123,6 +123,7 @@ parse_args(struct client *client, int *argc, char **argv[])
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
+        { "no-overlap",  no_argument,       0, 'n' },
         { "monitor",     required_argument, 0, 'm' },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
