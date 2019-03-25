@@ -84,6 +84,7 @@ struct window {
     uint32_t displayed;
     struct wl_list link;
     bool bottom;
+    bool render_pending;
 
     struct {
         void (*render)(struct cairo *cairo, uint32_t width, uint32_t height, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
@@ -117,6 +118,7 @@ struct wayland {
 void bm_wl_repeat(struct wayland *wayland);
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
+void bm_wl_window_schedule_render(struct window *window);
 void bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu);
 void bm_wl_window_set_bottom(struct window *window, struct wl_display *display, bool bottom);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);

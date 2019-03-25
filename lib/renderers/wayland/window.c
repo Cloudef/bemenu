@@ -197,6 +197,7 @@ frame_callback(void *data, struct wl_callback *callback, uint32_t time)
     struct window *window = data;
     wl_callback_destroy(callback);
     window->frame_cb = NULL;
+    window->render_pending = true;
 }
 
 static const struct wl_callback_listener listener = {
@@ -204,10 +205,21 @@ static const struct wl_callback_listener listener = {
 };
 
 void
+bm_wl_window_schedule_render(struct window *window)
+{
+    assert(window);
+    if (window->frame_cb)
+        return;
+
+    window->frame_cb = wl_surface_frame(window->surface);
+    wl_callback_add_listener(window->frame_cb, &listener, window);
+    wl_surface_commit(window->surface);
+}
+
+void
 bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu)
 {
     assert(window && menu);
-
     struct buffer *buffer;
     for (int tries = 0; tries < 2; ++tries) {
         if (!(buffer = next_buffer(window))) {
@@ -232,13 +244,11 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
         destroy_buffer(buffer);
     }
 
-    window->frame_cb = wl_surface_frame(window->surface);
-    wl_callback_add_listener(window->frame_cb, &listener, window);
-
     wl_surface_damage(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
     wl_surface_commit(window->surface);
     buffer->busy = true;
+    window->render_pending = false;
 }
 
 void
