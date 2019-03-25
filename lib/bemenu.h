@@ -472,6 +472,11 @@ void bm_menu_grab_keyboard(struct bm_menu *menu, bool grab);
  */
 bool bm_menu_is_keyboard_grabbed(struct bm_menu *menu);
 
+/**
+ * Tell the renderer to position the menu that it can overlap panels.
+ */
+void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
+
 /**  @} Properties */
 
 /**

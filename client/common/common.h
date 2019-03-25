@@ -17,6 +17,7 @@ struct client {
     bool grab;
     bool wrap;
     bool ifne;
+    bool no_overlap;
 };
 
 void parse_args(struct client *client, int *argc, char **argv[]);

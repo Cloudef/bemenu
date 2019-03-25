@@ -84,6 +84,7 @@ usage(FILE *out, const char *name)
 
           " -b, --bottom          appears at the bottom of the screen. (wx)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
+          " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (x)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
@@ -122,6 +123,7 @@ parse_args(struct client *client, int *argc, char **argv[])
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
+        { "no-overlap",  no_argument,       0, 'n' },
         { "monitor",     required_argument, 0, 'm' },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
@@ -146,7 +148,7 @@ parse_args(struct client *client, int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:", opts, NULL);
+        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:n", opts, NULL);
         if (opt < 0)
             break;
 
@@ -191,6 +193,9 @@ parse_args(struct client *client, int *argc, char **argv[])
                 break;
             case 'm':
                 client->monitor = strtol(optarg, NULL, 10);
+                break;
+            case 'n':
+                client->no_overlap = true;
                 break;
 
             case 0x101:
@@ -284,6 +289,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(stru
 {
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
+    bm_menu_set_panel_overlap(menu, !client->no_overlap);
 
     if (client->ifne && !bm_menu_get_items(menu, NULL))
         return BM_RUN_RESULT_CANCEL;
