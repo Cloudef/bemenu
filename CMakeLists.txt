@@ -5,6 +5,10 @@ SET(BEMENU_DESCRIPTION "Dynamic menu library and client program inspired by dmen
 SET(BEMENU_VERSION "0.1.0")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 
+OPTION(BEMENU_CURSES_RENDERER "Build curses backend" ON)
+OPTION(BEMENU_X11_RENDERER "Build X11 backend" ON)
+OPTION(BEMENU_WAYLAND_RENDERER "Build wayland renderer" OFF)
+
 INCLUDE(CTest)
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
