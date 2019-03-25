@@ -370,6 +370,20 @@ bm_menu_is_keyboard_grabbed(struct bm_menu *menu)
     return menu->grabbed;
 }
 
+void
+bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap)
+{
+    assert(menu);
+
+    if (menu->overlap == overlap)
+        return;
+
+    menu->overlap = overlap;
+
+    if (menu->renderer->api.set_overlap)
+        menu->renderer->api.set_overlap(menu, overlap);
+}
+
 bool
 bm_menu_add_items_at(struct bm_menu *menu, struct bm_item *item, uint32_t index)
 {

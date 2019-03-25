@@ -310,6 +310,14 @@ bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bo
     wl_display_roundtrip(display);
 }
 
+void
+bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap)
+{
+    zwlr_layer_surface_v1_set_exclusive_zone(window->layer_surface, overlap ? -1 : 0);
+    wl_surface_commit(window->surface);
+    wl_display_roundtrip(display);
+}
+
 bool
 bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface)
 {
@@ -317,7 +325,6 @@ bm_wl_window_create(struct window *window, struct wl_display *display, struct wl
 
     if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "menu"))) {
         zwlr_layer_surface_v1_add_listener(window->layer_surface, &layer_surface_listener, window);
-        zwlr_layer_surface_v1_set_exclusive_zone(window->layer_surface, -1);
         zwlr_layer_surface_v1_set_anchor(window->layer_surface, (window->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) | ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
         zwlr_layer_surface_v1_set_size(window->layer_surface, 0, 32);
         wl_surface_commit(surface);

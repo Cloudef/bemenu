@@ -209,6 +209,18 @@ grab_keyboard(const struct bm_menu *menu, bool grab)
 }
 
 static void
+set_overlap(const struct bm_menu *menu, bool overlap)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_set_overlap(window, wayland->display, overlap);
+    }
+}
+
+static void
 destructor(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -303,6 +315,7 @@ register_renderer(struct render_api *api)
     api->render = render;
     api->set_bottom = set_bottom;
     api->grab_keyboard = grab_keyboard;
+    api->set_overlap = set_overlap;
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";

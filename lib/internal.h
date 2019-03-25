@@ -91,6 +91,11 @@ struct render_api {
     void (*grab_keyboard)(const struct bm_menu *menu, bool grab);
 
     /**
+     * Control overlap with panels
+     */
+    void (*set_overlap)(const struct bm_menu *menu, bool overlap);
+
+    /**
      * Version of the plugin.
      * Should match BM_PLUGIN_VERSION or failure.
      */
@@ -296,6 +301,11 @@ struct bm_menu {
      * Is menu grabbed?
      */
     bool grabbed;
+
+    /**
+     * Should the menu overlap panels
+     */
+    bool overlap;
 };
 
 /* library.c */
