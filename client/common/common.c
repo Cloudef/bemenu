@@ -66,7 +66,7 @@ usage(FILE *out, const char *name)
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
-          " -P, --prefix          text to shown before highlighted item.\n"
+          " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
           " --scrollbar           display scrollbar. (always, autohide)\n"
           " --ifne                only display menu if there are items.\n\n"
