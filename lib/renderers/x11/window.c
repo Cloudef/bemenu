@@ -72,7 +72,7 @@ bm_x11_window_render(struct window *window, const struct bm_menu *menu)
 
         cairo_push_group(buffer->cairo.cr);
         struct cairo_paint_result result;
-        window->notify.render(&buffer->cairo, buffer->width, buffer->height, window->max_height, menu, &result);
+        window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
         cairo_pop_group_to_source(buffer->cairo.cr);
 
