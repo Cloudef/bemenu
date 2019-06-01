@@ -16,6 +16,8 @@
 *.exe
 *.out
 *.app
+/client/bemenu
+/client/bemenu-run
 
 # Vim swap files
 .*.swp
@@ -38,3 +40,19 @@ bin/
 *~
 *.backup
 *.old
+
+# CMake
+CMakeFiles
+CTestTestfile.cmake
+Makefile
+cmake_install.cmake
+CMakeCache.txt
+CMakeDoxyfile.in
+CMakeDoxygenDefaults.cmake
+DartConfiguration.tcl
+Doxyfile
+
+# Generated source files
+/lib/version.h
+/lib/renderers/wayland/wayland-*-client-protocol.h
+/lib/renderers/wayland/wayland-*-protocol.c
