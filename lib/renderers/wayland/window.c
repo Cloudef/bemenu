@@ -231,7 +231,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
             break;
 
         struct cairo_paint_result result;
-        window->notify.render(&buffer->cairo, buffer->width, fmin(buffer->height, window->max_height), window->max_height, menu, &result);
+        window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
         if (window->height == result.height)

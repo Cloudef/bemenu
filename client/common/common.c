@@ -86,6 +86,7 @@ usage(FILE *out, const char *name)
           " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (x)\n"
+          " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
           " --tf                  defines the title foreground color. (wx)\n"
@@ -125,6 +126,7 @@ parse_args(struct client *client, int *argc, char **argv[])
         { "grab",        no_argument,       0, 'f' },
         { "no-overlap",  no_argument,       0, 'n' },
         { "monitor",     required_argument, 0, 'm' },
+        { "line-height", required_argument, 0, 'H' },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
         { "tf",          required_argument, 0, 0x103 },
@@ -148,7 +150,7 @@ parse_args(struct client *client, int *argc, char **argv[])
      * or parse them before running getopt.. */
 
     for (;;) {
-        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:n", opts, NULL);
+        int32_t opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:H:n", opts, NULL);
         if (opt < 0)
             break;
 
@@ -198,6 +200,9 @@ parse_args(struct client *client, int *argc, char **argv[])
                 client->no_overlap = true;
                 break;
 
+            case 'H':
+                client->line_height = strtol(optarg, NULL, 10);
+                break;
             case 0x101:
                 client->font = optarg;
                 break;
@@ -262,6 +267,7 @@ menu_with_options(const struct client *client)
         return NULL;
 
     bm_menu_set_font(menu, client->font);
+    bm_menu_set_line_height(menu, client->line_height);
     bm_menu_set_title(menu, client->title);
     bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);

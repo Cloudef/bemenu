@@ -10,6 +10,7 @@ struct client {
     const char *title;
     const char *prefix;
     const char *font;
+    uint32_t line_height;
     uint32_t lines;
     uint32_t selected;
     uint32_t monitor;

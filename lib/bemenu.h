@@ -386,6 +386,23 @@ bool bm_menu_set_font(struct bm_menu *menu, const char *font);
 const char* bm_menu_get_font(const struct bm_menu *menu);
 
 /**
+ * Set size of line in pixels.
+ * Some renderers such as ncurses may ignore this when it does not make sense.
+ *
+ * @param menu bm_menu instance where to set line height.
+ * @param line_height 0 for default line height, > 0 for that many pixels.
+ */
+void bm_menu_set_line_height(struct bm_menu *menu, uint32_t line_height);
+
+/**
+ * Get size of line in pixels.
+ *
+ * @param menu bm_menu instance where to get line height.
+ * @return uint32_t for max amount of vertical lines to be shown.
+ */
+uint32_t bm_menu_get_line_height(struct bm_menu *menu);
+
+/**
  * Set a hexadecimal color for element.
  *
  * @param menu bm_menu instance where to set color.

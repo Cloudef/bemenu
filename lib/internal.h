@@ -225,6 +225,11 @@ struct bm_menu {
     struct bm_font font;
 
     /**
+     * Line height.
+     */
+    uint32_t line_height;
+
+    /**
      * Colors.
      */
     struct bm_hex_color colors[BM_COLOR_LAST];
