@@ -66,6 +66,8 @@ get_paths(const char *env, const char *default_paths, struct paths *state)
         if ((f = strcspn(state->path, ":")) > 0) {
             state->path += f + (path[f] ? 1 : 0);
             path[f] = 0;
+        } else {
+            state->path += 1;
         }
 
         if (!*path) {
