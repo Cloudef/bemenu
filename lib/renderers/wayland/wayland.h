@@ -81,6 +81,7 @@ struct window {
     struct wl_shm *shm;
     struct buffer buffers[2];
     uint32_t width, height, max_height;
+    int32_t scale;
     uint32_t displayed;
     struct wl_list link;
     bool bottom;
@@ -95,6 +96,7 @@ struct output {
     struct wl_output *output;
     struct wl_list link;
     int height;
+    int scale;
 };
 
 struct wayland {

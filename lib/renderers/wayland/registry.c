@@ -243,7 +243,10 @@ display_handle_done(void *data, struct wl_output *wl_output)
 static void
 display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
 {
-    (void)data, (void)wl_output, (void)scale;
+    (void)wl_output;
+    struct output *output = data;
+
+    output->scale = scale;
 }
 
 static void
@@ -271,7 +274,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
     struct wayland *wayland = data;
 
     if (strcmp(interface, "wl_compositor") == 0) {
-        wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 1);
+        wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 3);
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
         wayland->layer_shell = wl_registry_bind(registry, id, &zwlr_layer_shell_v1_interface, 1);
     } else if (strcmp(interface, "wl_seat") == 0) {
@@ -284,6 +287,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         struct wl_output *wl_output = wl_registry_bind(registry, id, &wl_output_interface, 2);
         struct output *output = calloc(1, sizeof(struct output));
         output->output = wl_output;
+        output->scale = 1;
         wl_list_insert(&wayland->outputs, &output->link);
         wl_output_add_listener(wl_output, &output_listener, output);
     }
