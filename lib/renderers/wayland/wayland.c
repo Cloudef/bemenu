@@ -122,6 +122,8 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XKB_KEY_Return:
             return (mods & MOD_CTRL ? BM_KEY_CONTROL_RETURN : (mods & MOD_SHIFT ? BM_KEY_SHIFT_RETURN : BM_KEY_RETURN));
 
+        case XKB_KEY_g:
+            if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
         case XKB_KEY_Escape:
             return BM_KEY_ESCAPE;
 
