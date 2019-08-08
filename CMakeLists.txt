@@ -27,5 +27,6 @@ ADD_SUBDIRECTORY(test)
 
 # Generate documentation (make doxygen)
 ADD_SUBDIRECTORY(doxygen)
+ADD_SUBDIRECTORY(man)
 
 # vim: set ts=8 sw=4 tw=0

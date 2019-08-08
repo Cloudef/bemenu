@@ -1,0 +1,194 @@
+.TH bemenu 1 2019-08-07
+
+.SH NAME
+bemenu \- Dynamic menu inspired by
+.BR dmenu (1)
+
+.SH SYNOPSIS
+.B bemenu
+.RB [ -hviw ]
+.RB [ -l
+.IR lines ]
+.RB [ -p
+.IR prompt ]
+.RB [ -P
+.IR prefix ]
+.RB [ -I
+.IR index ]
+.RB [ --scrollbar
+.IR when ]
+.RB [ --ifne ]
+.RI [ backend-options ]
+
+.B bemenu-run ...
+
+.SH DESCRIPTION
+.B bemenu
+is a dynamic menu for
+.BR tty (4)
+(using
+.BR ncurses (3)),
+X11 and/or Wayland, inspired by
+.RB dmenu (1).
+It reads a list of newline-separated items from standard input.
+When the user selects an item and presses Return,
+their choice is printed to standard output and bemenu terminates.
+Entering text will narrow the items to those matching the tokens in the input.
+
+.B bemenu-run
+is a special-case invocation of
+.BR bemenu ,
+where the input is a list of executables in the $PATH directories,
+and the selection gets executed.
+
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Display bemenu help and exit.
+
+.TP
+.B \-v, \-\-version
+Display bemenu version and exit.
+
+.TP
+.B \-i, \-\-ignorecase
+Match items case-insensitively.
+
+.TP
+.B \-w, \-\-wrap
+Wraps cursor selection.
+
+.TP
+.BI \-l \ NUMBER ,\ \-\-list= NUMBER
+Lists items vertically with the given \fINUMBER\fR of lines.
+
+.TP
+.BI \-p \ PROMPT ,\ \-\-prompt= PROMPT
+Defines the \fIPROMPT\fR text to be displayed.
+
+.TP
+.BI \-P \ PREFIX ,\ \-\-prefix= PREFIX
+Text to show before highlighted item.
+
+.TP
+.BI \-I \ INDEX ,\ \-\-index= INDEX
+Select item at \fIINDEX\fR automatically.
+
+.TP
+.BI \-\-scrollbar= WHEN
+Display a scrollbar.
+Valid values for \fIWHEN\fR are:
+.RS
+.TP
+.I always
+Always show the scrollbar.
+.TP
+.I autohide
+Show scrollbar only when necessary.
+.RE
+
+.TP
+.B \-\-ifne
+Only displays the menu when there are items.
+
+.SS Backend-specific Options
+
+These options are only available on backends specified in the parentheses
+(Curses, Wayland and/or X11).
+
+.TP
+.BR "\-b, \-\-bottom"
+(Wayland, X11) The menu will appear at the bottom of the screen.
+
+.TP
+.BR "\-f, \-\-grab"
+(Wayland, X11) Show the menu before reading the standard input.
+
+.TP
+.BR "\-n, \-\-no\-overlap"
+(Wayland) Adjust geometry to not overlap with panels.
+
+.TP
+.BI \-m " INDEX" ", \-\-monitor=" INDEX
+(X11) Specify \fIINDEX\fR of the monitor where the menu should appear.
+
+.TP
+.BI \-H " HEIGHT" ", \-\-line\-height=" HEIGHT
+(Wayland, X11) Defines the \fIHEIGHT\fR to make each menu line. Use \fI0\fR for default height.
+
+.TP
+.BI \-\-fn " NAME [SIZE]"
+(Wayland, X11) Defines the font to be used.
+
+.TP
+.BI \-\-tb= COLOR
+(Wayland, X11) Defines the title background \fICOLOR\fR.
+
+.TP
+.BI \-\-tf= COLOR
+(Wayland, X11) Defines the title foreground \fICOLOR\fR.
+
+.TP
+.BI \-\-fb= COLOR
+(Wayland, X11) Defines the filter background \fICOLOR\fR.
+
+.TP
+.BI \-\-ff= COLOR
+(Wayland, X11) Defines the filter foreground \fICOLOR\fR.
+
+.TP
+.BI \-\-nb= COLOR
+(Wayland, X11) Defines the normal background \fICOLOR\fR.
+
+.TP
+.BI \-\-nf= COLOR
+(Wayland, X11) Defines the normal foreground \fICOLOR\fR.
+
+.TP
+.BI \-\-hb= COLOR
+(Wayland, X11) Defines the highlighted background \fICOLOR\fR.
+
+.TP
+.BI \-\-hf= COLOR
+(Wayland, X11) Defines the highlighted foreground \fICOLOR\fR.
+
+.TP
+.BI \-\-sb= COLOR
+(Wayland, X11) Defines the selected background \fICOLOR\fR.
+
+.TP
+.BI \-\-sf= COLOR
+(Wayland, X11) Defines the selected foreground \fICOLOR\fR.
+
+.TP
+.BI \-\-scb= COLOR
+(Wayland, X11) Defines the scrollbar background \fICOLOR\fR.
+
+.TP
+.BI \-\-scf= COLOR
+(Wayland, X11) Defines the scrollbar foreground \fICOLOR\fR.
+
+.SH EXIT STATUS
+
+0 when the user selects an option, 1 when the user aborts the selection.
+
+.SH ENVIRONMENT
+
+.TP
+.B BEMENU_BACKEND
+.RS
+If set, the appropriate backend will be forced.
+If empty, one of the GUI backends (Wayland, X11) will be selected automatically.
+
+The accepted values are:
+.TP
+.I curses
+.BR ncurses (3)
+based terminal backend.
+.TP
+.I wayland
+Wayland backend.
+.TP
+.I x11
+X11 backend.
+.RE
