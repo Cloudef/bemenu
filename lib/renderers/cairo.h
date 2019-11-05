@@ -131,6 +131,7 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
         return false;
 
 
+    assert(cairo->scale > 0);
     cairo_scale(cairo->cr, cairo->scale, cairo->scale);
 
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);

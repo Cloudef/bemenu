@@ -246,6 +246,7 @@ display_handle_scale(void *data, struct wl_output *wl_output, int32_t scale)
     (void)wl_output;
     struct output *output = data;
 
+    assert(scale > 0);
     output->scale = scale;
 }
 
