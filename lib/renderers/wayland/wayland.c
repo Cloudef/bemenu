@@ -278,8 +278,12 @@ constructor(struct bm_menu *menu)
         struct wl_surface *surface;
         if (!(surface = wl_compositor_create_surface(wayland->compositor)))
             goto fail;
+
+        wl_surface_set_buffer_scale(surface, output->scale);
+
         struct window *window = calloc(1, sizeof(struct window));
         window->bottom = menu->bottom;
+        window->scale = output->scale;
         if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
             goto fail;
         window->notify.render = bm_cairo_paint;

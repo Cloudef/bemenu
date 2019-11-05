@@ -12,6 +12,7 @@ struct cairo {
     cairo_t *cr;
     cairo_surface_t *surface;
     PangoContext *pango;
+    int scale;
 };
 
 struct cairo_color {
@@ -129,6 +130,10 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     if (!ret)
         return false;
 
+
+    assert(cairo->scale > 0);
+    cairo_scale(cairo->cr, cairo->scale, cairo->scale);
+
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
     pango_cairo_update_layout(cairo->cr, layout);
 
@@ -152,6 +157,8 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
 
     result->x_advance = width + paint->box.rx;
     result->height = height + paint->box.by + paint->box.ty;
+
+    cairo_identity_matrix(cairo->cr);
     return true;
 }
 
@@ -293,7 +300,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             cl += result.x_advance + 1;
         }
 
-        for (uint32_t i = menu->index; i < count && cl < width; ++i) {
+        for (uint32_t i = menu->index; i < count && cl < (width/cairo->scale); ++i) {
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
 
             if (highlighted) {
@@ -319,7 +326,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
             bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
             bm_pango_get_text_extents(cairo, &paint, &result, ">");
-            paint.pos = (struct pos){ width - result.x_advance - 2, vpadding };
+            paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 2, vpadding };
             paint.box = (struct box){ 1, 2, vpadding, vpadding, 0, ascii_height };
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }

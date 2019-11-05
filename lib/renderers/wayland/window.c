@@ -107,7 +107,7 @@ destroy_buffer(struct buffer *buffer)
 }
 
 static bool
-create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format)
+create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format, int32_t scale)
 {
     int fd = -1;
     struct wl_shm_pool *pool = NULL;
@@ -151,6 +151,7 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
         goto fail;
     }
 
+    buffer->cairo.scale = scale;
     buffer->width = width;
     buffer->height = height;
     return true;
@@ -181,10 +182,10 @@ next_buffer(struct window *window)
     if (!buffer)
         return NULL;
 
-    if (window->width != buffer->width || window->height != buffer->height)
+    if (window->width * window->scale != buffer->width || window->height * window->scale != buffer->height)
         destroy_buffer(buffer);
 
-    if (!buffer->buffer && !create_buffer(window->shm, buffer, window->width, window->height, WL_SHM_FORMAT_ARGB8888))
+    if (!buffer->buffer && !create_buffer(window->shm, buffer, window->width * window->scale, window->height * window->scale, WL_SHM_FORMAT_ARGB8888, window->scale))
         return NULL;
 
     return buffer;
@@ -231,7 +232,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
             break;
 
         struct cairo_paint_result result;
-        window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
+        window->notify.render(&buffer->cairo, buffer->width, window->max_height * window->scale, menu, &result);
         window->displayed = result.displayed;
 
         if (window->height == result.height)

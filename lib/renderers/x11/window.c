@@ -25,6 +25,7 @@ create_buffer(struct window *window, struct buffer *buffer, int32_t width, int32
         goto fail;
     }
 
+    buffer->cairo.scale = 1;
     buffer->width = width;
     buffer->height = height;
     buffer->created = true;
