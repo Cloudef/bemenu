@@ -9,7 +9,7 @@
 /**
  * Default font.
  */
-static const char *default_font = "Fixed 9";
+static const char *default_font = "monospace 10";
 
 /**
  * Default hexadecimal colors.
