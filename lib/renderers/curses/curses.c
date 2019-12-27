@@ -24,7 +24,7 @@ static const char *TTY = "/dev/tty";
 #endif
 
 static struct curses {
-    WINDOW *stdscr;
+    WINDOW *stdscreen;
     struct sigaction abrt_action;
     struct sigaction segv_action;
     struct sigaction winch_action;
@@ -87,14 +87,14 @@ terminate(void)
         curses.blen = 0;
     }
 
-    if (!curses.stdscr)
+    if (!curses.stdscreen)
         return;
 
     reopen_stdin_stdout();
     refresh();
     endwin();
     restore_stdin_stdout();
-    curses.stdscr = NULL;
+    curses.stdscreen = NULL;
 }
 
 static void
@@ -108,7 +108,7 @@ static void
 resize_handler(int sig)
 {
     (void)sig;
-    if (!curses.stdscr)
+    if (!curses.stdscreen)
         return;
 
     refresh();
@@ -121,7 +121,7 @@ draw_line(int32_t pair, int32_t y, const char *fmt, ...)
     assert(fmt);
 
     size_t ncols;
-    if ((ncols = getmaxx(curses.stdscr)) <= 0)
+    if ((ncols = getmaxx(curses.stdscreen)) <= 0)
         return;
 
     va_list args;
@@ -182,17 +182,17 @@ render(const struct bm_menu *menu)
         curses.should_terminate = false;
     }
 
-    if (!curses.stdscr) {
+    if (!curses.stdscreen) {
         store_stdin_stdout();
         reopen_stdin_stdout();
         setlocale(LC_CTYPE, "");
 
-        if ((curses.stdscr = initscr()) == NULL)
+        if ((curses.stdscreen = initscr()) == NULL)
             return;
 
         set_escdelay(25);
         flushinp();
-        keypad(curses.stdscr, true);
+        keypad(curses.stdscreen, true);
         curs_set(1);
         noecho();
         raw();
@@ -205,7 +205,7 @@ render(const struct bm_menu *menu)
 
     erase();
 
-    uint32_t ncols = getmaxx(curses.stdscr);
+    uint32_t ncols = getmaxx(curses.stdscreen);
     uint32_t title_len = (menu->title ? strlen(menu->title) + 1 : 0);
 
     if (title_len >= ncols)
@@ -229,7 +229,7 @@ render(const struct bm_menu *menu)
     }
 
     uint32_t count, cl = 0;
-    const uint32_t lines = fmax(getmaxy(curses.stdscr), 1) - 1;
+    const uint32_t lines = fmax(getmaxy(curses.stdscreen), 1) - 1;
     if (lines > 1) {
         uint32_t displayed = 0;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
@@ -279,7 +279,7 @@ static uint32_t
 get_displayed_count(const struct bm_menu *menu)
 {
     (void)menu;
-    return (curses.stdscr ? getmaxy(curses.stdscr) : 0);
+    return (curses.stdscreen ? getmaxy(curses.stdscreen) : 0);
 }
 
 static enum bm_key
@@ -290,7 +290,7 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
     *unicode = 0;
     curses.polled_once = true;
 
-    if (!curses.stdscr || curses.should_terminate)
+    if (!curses.stdscreen || curses.should_terminate)
         return BM_KEY_NONE;
 
     get_wch((wint_t*)unicode);
@@ -406,7 +406,7 @@ static bool
 constructor(struct bm_menu *menu)
 {
     (void)menu;
-    assert(!curses.stdscr && "bemenu supports only one curses instance");
+    assert(!curses.stdscreen && "bemenu supports only one curses instance");
 
     memset(&curses, 0, sizeof(curses));
     curses.old_stdin = -1;
