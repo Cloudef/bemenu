@@ -124,6 +124,8 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
 
         case XKB_KEY_g:
             if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
+        case XKB_KEY_bracketleft:
+            if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
         case XKB_KEY_Escape:
             return BM_KEY_ESCAPE;
 
