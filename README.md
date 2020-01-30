@@ -12,7 +12,7 @@ bemenu supports three different renderers:
 
 - ncurses
 - X11
-- Wayland
+- Wayland; specifically, [wlroots](https://github.com/swaywm/wlroots)-based compositors
 
 Enable/disable the renderers by appending these CMake options when executing `cmake <dir>`:
 
