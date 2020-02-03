@@ -34,9 +34,6 @@ LIST(GET VERSION_COMPONENTS 0 SOVERSION)
 # Add include directories
 INCLUDE_DIRECTORIES(${BEMENU_INCLUDE} ${CMAKE_CURRENT_BINARY_DIR})
 
-# Compile renderer plugins
-ADD_SUBDIRECTORY(renderers)
-
 # Compile
 ADD_LIBRARY(bemenu SHARED ${BEMENU_SOURCE})
 SET_TARGET_PROPERTIES(bemenu PROPERTIES
@@ -57,5 +54,8 @@ SET(BEMENU_LIBRARIES)
 SET(BEMENU_INCLUDES "bemenu.h" CACHE STRING "bemenu includes exported from CMake")
 SET(BEMENU_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "bemenu public header include path exported from CMake")
 SET(BEMENU_LIBRARIES "bemenu" "dl" CACHE STRING "bemenu libraries exported from CMake")
+
+# Compile renderer plugins
+ADD_SUBDIRECTORY(renderers)
 
 # vim: set ts=8 sw=4 tw=0 :
