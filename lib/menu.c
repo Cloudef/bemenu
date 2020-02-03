@@ -169,7 +169,7 @@ bm_menu_set_filter(struct bm_menu *menu, const char *filter)
     assert(menu);
 
     free(menu->filter);
-    menu->filter = (filter && strlen(filter) > 0  ? bm_strdup(filter) : NULL);
+    menu->filter = (filter && strlen(filter) > 0 ? bm_strdup(filter) : NULL);
     menu->filter_size = (filter ? strlen(filter) : 0);
 }
 
