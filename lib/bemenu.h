@@ -289,6 +289,8 @@ const char* bm_menu_get_prefix(struct bm_menu *menu);
 /**
  * Set filter text to bm_menu instance.
  *
+ * The cursor will be automatically placed at the end of the new filter text.
+ *
  * @param menu bm_menu instance where to set filter.
  * @param filter Null terminated C "string" to act as filter. May be set **NULL** for none.
  */

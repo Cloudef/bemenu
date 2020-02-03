@@ -169,8 +169,10 @@ bm_menu_set_filter(struct bm_menu *menu, const char *filter)
     assert(menu);
 
     free(menu->filter);
-    menu->filter = (filter && strlen(filter) > 0 ? bm_strdup(filter) : NULL);
     menu->filter_size = (filter ? strlen(filter) : 0);
+    menu->filter = (menu->filter_size > 0 ? bm_strdup(filter) : NULL);
+    menu->curses_cursor = (menu->filter ? bm_utf8_string_screen_width(menu->filter) : 0);
+    menu->cursor = menu->filter_size;
 }
 
 const char*
@@ -755,11 +757,8 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             {
                 const char *text;
                 struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
-                if (highlighted && (text = bm_item_get_text(highlighted))) {
+                if (highlighted && (text = bm_item_get_text(highlighted)))
                     bm_menu_set_filter(menu, text);
-                    menu->cursor = (menu->filter ? strlen(menu->filter) : 0);
-                    menu->curses_cursor = (menu->filter ? bm_utf8_string_screen_width(menu->filter) : 0);
-                }
             }
             break;
 
