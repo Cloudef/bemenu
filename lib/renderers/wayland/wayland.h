@@ -33,8 +33,8 @@ enum mask {
     MASK_LAST
 };
 
-const char *BM_XKB_MASK_NAMES[MASK_LAST];
-const enum mod_bit BM_XKB_MODS[MASK_LAST];
+extern const char *BM_XKB_MASK_NAMES[MASK_LAST];
+extern const enum mod_bit BM_XKB_MODS[MASK_LAST];
 
 struct xkb {
     struct xkb_state *state;
