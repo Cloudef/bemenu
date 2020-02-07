@@ -326,7 +326,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
         uint32_t cl = fmin(title_x + result.x_advance, width / 4);
         paint.pos = (struct pos){ cl, vpadding };
         paint.box = (struct box){ 1, 2, vpadding, vpadding, 0, ascii_height };
-        bm_cairo_draw_line(cairo, &paint, &result, ((menu->wrap || menu->index > 0) ? "<" : " "));
+        bm_cairo_draw_line(cairo, &paint, &result, (count > 0 && (menu->wrap || menu->index > 0) ? "<" : " "));
         cl += result.x_advance + 1;
 
         for (uint32_t i = menu->index; i < count && cl < (width/cairo->scale); ++i) {
