@@ -2,6 +2,7 @@
 #define _BM_COMMON_H_
 
 #include <bemenu.h>
+#include <stddef.h>
 
 struct client {
     enum bm_filter_mode filter_mode;
@@ -21,6 +22,8 @@ struct client {
     bool no_overlap;
 };
 
+char* cstrcopy(const char *str, size_t size);
+char** tokenize_quoted_to_argv(const char *str, char *argv0, int *out_argc);
 void parse_args(struct client *client, int *argc, char **argv[]);
 struct bm_menu* menu_with_options(const struct client *client);
 enum bm_run_result run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(struct bm_item *item, const char *text));

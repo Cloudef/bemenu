@@ -18,16 +18,9 @@ struct paths {
 };
 
 static char*
-c_strdup2(const char *str, size_t size)
-{
-    char *cpy = calloc(1, size + 1);
-    return (cpy ? memcpy(cpy, str, size) : NULL);
-}
-
-static char*
 c_strdup(const char *str)
 {
-    return c_strdup2(str, strlen(str));
+    return cstrcopy(str, strlen(str));
 }
 
 static char*
@@ -134,73 +127,6 @@ read_items_to_menu_from_path(struct bm_menu *menu)
         read_items_to_menu_from_dir(menu, path);
 }
 
-#define WHITESPACE " \t\n\r"
-
-static const char*
-tokenize(const char *cstr, size_t *out_len, const char *separator, bool skip_whitespace, const char **state)
-{
-   assert(out_len && separator && state);
-   const char *current = (state && *state ? *state : cstr);
-
-   if (!current || !*current || !cstr || !*cstr)
-      return NULL;
-
-   current += strspn(current, separator);
-
-   if (skip_whitespace)
-      current += strspn(current, WHITESPACE);
-
-   *out_len = strcspn(current, separator);
-   *state = current + *out_len;
-
-   if (skip_whitespace) {
-      const size_t ws = strcspn(current, WHITESPACE);
-      *out_len -= (ws < *out_len ? *out_len - ws : 0);
-   }
-
-   return current;
-}
-
-static const char*
-tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const char *quotes, const char **state)
-{
-    assert(out_len && separator && quotes && state);
-    const char *e, *current = tokenize(cstr, out_len, separator, true, state);
-
-    if (!current)
-        return NULL;
-
-    for (const char *q = quotes; *q; ++q) {
-        if (*current != *q)
-            continue;
-
-        bool escaped = false;
-        for (e = ++current; *e; ++e) {
-            if (escaped)
-                escaped = false;
-            else if (*e == '\\')
-                escaped = true;
-            else if (*e == *q)
-                break;
-        }
-
-        *out_len = e - current;
-        e = (!*e ? e : e + 1);
-
-        if (*e) {
-            size_t tmp;
-            const char *state2 = NULL;
-            *state = tokenize(e, &tmp, separator, true, &state2);
-        } else {
-            *state = e;
-        }
-
-        break;
-    }
-
-    return current;
-}
-
 static inline void ignore_ret(int useless, ...) { (void)useless; }
 
 static void
@@ -214,26 +140,9 @@ launch(const char *bin)
         ignore_ret(0, freopen("/dev/null", "w", stdout));
         ignore_ret(0, freopen("/dev/null", "w", stderr));
 
-        size_t count = 0;
-        {
-            size_t len;
-            const char *state = NULL;
-            while (tokenize_quoted(bin, &len, " ", "\"'", &state))
-                ++count;
-        }
-
         char **tokens;
-        if (!count || !(tokens = calloc(count + 1, sizeof(char*))))
+        if (!(tokens = tokenize_quoted_to_argv(bin, NULL, NULL)))
             _exit(EXIT_FAILURE);
-
-        {
-            size_t i = 0, len;
-            const char *t, *state = NULL;
-            while (i < count && (t = tokenize_quoted(bin, &len, " ", "\"'", &state))) {
-                if (!(tokens[i++] = c_strdup2(t, len)))
-                    _exit(EXIT_FAILURE);
-            }
-        }
 
         execvp(tokens[0], tokens);
         _exit(EXIT_SUCCESS);

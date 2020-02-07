@@ -64,6 +64,7 @@ All dependencies are searched with `pkg-config`
 
 | Variable         | Description                             | Value                |
 |------------------|-----------------------------------------|----------------------|
+| BEMENU_OPTS      | Options for bemenu, bemenu-run from env | Any cli argument     |
 | BEMENU_BACKEND   | Forces a renderer by name               | x11, wayland, curses |
 | BEMENU_RENDERER  | Forces a renderer by loading a .so file | Path to the .so file |
 | BEMENU_RENDERERS | Override renderer load directory        | Path to a directory  |
