@@ -50,7 +50,7 @@ struct cairo_paint_result {
 static size_t blen = 0;
 static char *buffer = NULL;
 
-__attribute__((unused)) static bool
+static inline bool
 bm_cairo_create_for_surface(struct cairo *cairo, cairo_surface_t *surface)
 {
     assert(cairo && surface);
@@ -69,7 +69,7 @@ fail:
     return false;
 }
 
-__attribute__((unused)) static void
+static inline void
 bm_cairo_destroy(struct cairo *cairo)
 {
     if (cairo->cr)
@@ -78,7 +78,7 @@ bm_cairo_destroy(struct cairo *cairo)
         cairo_surface_destroy(cairo->surface);
 }
 
-__attribute__((unused)) static PangoLayout*
+static inline PangoLayout*
 bm_pango_get_layout(struct cairo *cairo, struct cairo_paint *paint, const char *buffer)
 {
     PangoLayout *layout = pango_cairo_create_layout(cairo->cr);
@@ -90,7 +90,7 @@ bm_pango_get_layout(struct cairo *cairo, struct cairo_paint *paint, const char *
     return layout;
 }
 
-__attribute__((unused)) BM_LOG_ATTR(4, 5) static bool
+BM_LOG_ATTR(4, 5) static inline bool
 bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *fmt, ...)
 {
     assert(cairo && paint && result && fmt);
@@ -116,7 +116,7 @@ bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct
     return true;
 }
 
-__attribute__((unused)) BM_LOG_ATTR(4, 5) static bool
+BM_LOG_ATTR(4, 5) static inline bool
 bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *fmt, ...)
 {
     assert(cairo && paint && result && fmt);
@@ -161,7 +161,7 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     return true;
 }
 
-__attribute__((unused)) static void
+static inline void
 bm_cairo_color_from_menu_color(const struct bm_menu *menu, enum bm_color color, struct cairo_color *c)
 {
     assert(menu);
@@ -171,7 +171,7 @@ bm_cairo_color_from_menu_color(const struct bm_menu *menu, enum bm_color color, 
     c->a = 1.0f;
 }
 
-__attribute__((unused)) static void
+static inline void
 bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *out_result)
 {
     assert(cairo && menu && out_result);
