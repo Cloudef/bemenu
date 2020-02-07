@@ -95,7 +95,7 @@ doxygen:
 
 clean:
 	$(RM) $(libs) $(bins) $(renderers) *.a *.so.*
-	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c
+	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
 .PHONY: all clean install install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
