@@ -250,6 +250,11 @@ struct bm_menu {
     char *old_filter;
 
     /**
+     * Used when selecting the filter text (ex. SHIFT_RETURN)
+     */
+    struct bm_item *filter_item;
+
+    /**
      * Size of filter buffer
      */
     size_t filter_size;

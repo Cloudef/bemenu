@@ -97,6 +97,9 @@ bm_menu_new(const char *renderer)
             goto fail;
     }
 
+    if (!(menu->filter_item = bm_item_new(NULL)))
+        goto fail;
+
     return menu;
 
 fail:
@@ -131,6 +134,9 @@ bm_menu_free_items(struct bm_menu *menu)
     list_free_list(&menu->selection);
     list_free_list(&menu->filtered);
     list_free_items(&menu->items, (list_free_fun)bm_item_free);
+
+    if (menu->filter_item)
+        free(menu->filter_item);
 }
 
 void
@@ -767,6 +773,11 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_SHIFT_RETURN:
+            list_free_list(&menu->selection);
+            bm_item_set_text(menu->filter_item, menu->filter);
+            list_add_item(&menu->selection, menu->filter_item);
+            break;
+
         case BM_KEY_ESCAPE:
             list_free_list(&menu->selection);
             break;

@@ -315,9 +315,6 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(stru
             const char *text = bm_item_get_text(items[i]);
             item_cb(items[i], text);
         }
-
-        if (!count && bm_menu_get_filter(menu))
-            item_cb(NULL, bm_menu_get_filter(menu));
     }
 
     return status;
