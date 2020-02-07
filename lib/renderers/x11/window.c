@@ -164,7 +164,7 @@ bm_x11_window_set_monitor(struct window *window, uint32_t monitor)
             /* no focused window is on screen, so use pointer location instead */
             if (monitor == 0 && !area && XQueryPointer(window->display, root, &dw, &dw, &x, &y, &di, &di, &du)) {
                 for (i = 0; i < n; i++) {
-                    if (INTERSECT(x, y, 1, 1, info[i]))
+                    if (INTERSECT(x, y, 1, 1, info[i]) > 0)
                         break;
                 }
             }
