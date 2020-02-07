@@ -40,16 +40,14 @@ make doxygen
 ## OSX
 
 ```sh
-# Make sure you have GNU coreutils, GNU Make and pkg-config installed
-brew install coreutils make pkg-config
+# Make sure you have GNU Make and pkg-config installed
+brew install make pkg-config
 
-# You may need to setup your pkg-config to point to brew version of the libraries
+# You may need to setup your pkg-config to point to the brew version of the libraries
 # For example to build curses renderer, you'd do:
 PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
 
 # Other than that, follow the normal build steps, but use gmake instead of make
-# For installs, you need to have GNU coreutils in the path:
-PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH" gmake install
 ```
 
 ## Dependencies
