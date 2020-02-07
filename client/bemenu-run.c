@@ -201,7 +201,7 @@ tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const 
     return current;
 }
 
-static inline void ignore_ret() {}
+static inline void ignore_ret(int useless, ...) { (void)useless; }
 
 static void
 launch(const char *bin)
@@ -211,8 +211,8 @@ launch(const char *bin)
 
     if (fork() == 0) {
         setsid();
-        ignore_ret(freopen("/dev/null", "w", stdout));
-        ignore_ret(freopen("/dev/null", "w", stderr));
+        ignore_ret(0, freopen("/dev/null", "w", stdout));
+        ignore_ret(0, freopen("/dev/null", "w", stderr));
 
         size_t count = 0;
         {

@@ -35,19 +35,19 @@ static struct curses {
     bool should_terminate;
 } curses;
 
-static inline void ignore_ret() {}
+static inline void ignore_ret(int useless, ...) { (void)useless; }
 
 static void
 reopen_stdin(void)
 {
-    ignore_ret(freopen(TTY, "r", stdin));
+    ignore_ret(0, freopen(TTY, "r", stdin));
 }
 
 static void
 reopen_stdin_stdout(void)
 {
     reopen_stdin();
-    ignore_ret(freopen(TTY, "w", stdout));
+    ignore_ret(0, freopen(TTY, "w", stdout));
 }
 
 static void
