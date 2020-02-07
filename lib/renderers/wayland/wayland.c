@@ -80,10 +80,10 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
             return BM_KEY_DOWN;
 
         case XKB_KEY_Left:
-            return BM_KEY_LEFT;
+            return (mods & MOD_SHIFT ? BM_KEY_UP : BM_KEY_LEFT);
 
         case XKB_KEY_Right:
-            return BM_KEY_RIGHT;
+            return (mods & MOD_SHIFT ? BM_KEY_DOWN : BM_KEY_RIGHT);
 
         case XKB_KEY_Home:
             return BM_KEY_HOME;

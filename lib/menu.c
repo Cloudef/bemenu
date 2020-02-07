@@ -639,22 +639,18 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
     switch (key) {
         case BM_KEY_LEFT:
-            if (menu->lines > 0 && menu->filter) {
-                uint32_t oldCursor = menu->cursor;
+            if (menu->filter) {
+                const uint32_t old_cursor = menu->cursor;
                 menu->cursor -= bm_utf8_rune_prev(menu->filter, menu->cursor);
-                menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, oldCursor - menu->cursor);
-            } else if (menu->lines == 0) {
-                menu_prev(menu, count, menu->wrap);
+                menu->curses_cursor -= bm_utf8_rune_width(menu->filter + menu->cursor, old_cursor - menu->cursor);
             }
             break;
 
         case BM_KEY_RIGHT:
-            if (menu->lines > 0 && menu->filter) {
-                uint32_t oldCursor = menu->cursor;
+            if (menu->filter) {
+                const uint32_t old_cursor = menu->cursor;
                 menu->cursor += bm_utf8_rune_next(menu->filter, menu->cursor);
-                menu->curses_cursor += bm_utf8_rune_width(menu->filter + oldCursor, menu->cursor - oldCursor);
-            } else if (menu->lines == 0) {
-                menu_next(menu, count, menu->wrap);
+                menu->curses_cursor += bm_utf8_rune_width(menu->filter + old_cursor, menu->cursor - old_cursor);
             }
             break;
 
