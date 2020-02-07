@@ -3,9 +3,9 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <assert.h>
-#include "common.h"
-#include "../lib/3rdparty/tinydir.h"
+#include "common/common.h"
 
 static struct client client = {
     .filter_mode = BM_FILTER_MODE_DMENU,
@@ -91,27 +91,22 @@ read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
 {
     assert(menu && path);
 
-    tinydir_dir dir;
-    if (tinydir_open(&dir, path) == -1)
+    DIR *dir;
+    if (!(dir = opendir(path)))
         return;
 
-    while (dir.has_next) {
-        tinydir_file file;
-        memset(&file, 0, sizeof(file));
-        tinydir_readfile(&dir, &file);
-
-        if (!file.is_dir && file.name) {
+    struct dirent *file;
+    while ((file = readdir(dir))) {
+        if (file->d_type != DT_DIR && strlen(file->d_name)) {
             struct bm_item *item;
-            if (!(item = bm_item_new(file.name)))
+            if (!(item = bm_item_new(file->d_name)))
                 break;
 
             bm_menu_add_item(menu, item);
         }
-
-        tinydir_next(&dir);
     }
 
-    tinydir_close(&dir);
+    closedir(dir);
 
     uint32_t count;
     struct bm_item **items = bm_menu_get_items(menu, &count);
@@ -206,6 +201,8 @@ tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const 
     return current;
 }
 
+static inline void ignore_ret() {}
+
 static void
 launch(const char *bin)
 {
@@ -214,8 +211,8 @@ launch(const char *bin)
 
     if (fork() == 0) {
         setsid();
-        freopen("/dev/null", "w", stdout);
-        freopen("/dev/null", "w", stderr);
+        ignore_ret(freopen("/dev/null", "w", stdout));
+        ignore_ret(freopen("/dev/null", "w", stderr));
 
         size_t count = 0;
         {

@@ -289,7 +289,7 @@ bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
 
     const char *nhex = (hex ? hex : default_colors[color]);
 
-    int32_t r, g, b;
+    unsigned int r, g, b;
     if (sscanf(nhex,"#%2x%2x%2x", &r, &b, &g) != 3)
         return false;
 

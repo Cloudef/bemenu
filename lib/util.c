@@ -355,7 +355,7 @@ bm_utf8_rune_insert(char **in_out_string, size_t *in_out_buf_size, size_t start,
             free(*in_out_string);
         }
 
-        memset(tmp + *in_out_buf_size, 0, *in_out_buf_size);
+        memset((char*)tmp + *in_out_buf_size, 0, *in_out_buf_size);
         *in_out_string = tmp;
         *in_out_buf_size *= 2;
     }

@@ -4,7 +4,7 @@
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 
-#include "wayland-layer-shell-client-protocol.h"
+#include "wlr-layer-shell-unstable-v1.h"
 
 #include "renderers/cairo.h"
 

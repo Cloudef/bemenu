@@ -11,12 +11,11 @@
 
 #ifndef __GLIBC__
 #   define secure_getenv getenv
+#else
+extern char *secure_getenv(const char *name);
 #endif
 
-#ifndef size_t
-#   include <stddef.h> /* for size_t */
-#endif
-
+#include <stddef.h> /* for size_t */
 #include <stdarg.h>
 
 /**

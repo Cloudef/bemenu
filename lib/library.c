@@ -1,10 +1,11 @@
 #include "internal.h"
-#include "version.h"
 
-#include "3rdparty/tinydir.h"
 #include "3rdparty/cdl.h"
 
+#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -32,12 +33,16 @@ load(const char *file, struct bm_renderer *renderer)
     if (!(handle = chckDlLoad(file, &error)))
         goto load_fail;
 
-    const char* (*regfun)(struct render_api*);
-    if (!(regfun = chckDlLoadSymbol(handle, "register_renderer", &error)))
+    union {
+        const char* (*fun)(struct render_api*);
+        void *ptr;
+    } reg;
+
+    if (!(reg.ptr = chckDlLoadSymbol(handle, "register_renderer", &error)))
         goto load_fail;
 
     const char *name;
-    if (!(name = regfun(&renderer->api)))
+    if (!(name = reg.fun(&renderer->api)))
         goto fail;
 
     if (strcmp(renderer->api.version, BM_PLUGIN_VERSION))
@@ -133,27 +138,22 @@ bm_init(void)
     if (!path || access(path, R_OK) == -1)
         path = rpath;
 
-    tinydir_dir dir;
-    if (tinydir_open(&dir, path) == -1)
+    DIR *dir;
+    if (!(dir = opendir(path)))
         goto fail;
 
-    while (dir.has_next) {
-        tinydir_file file;
-        memset(&file, 0, sizeof(file));
-        tinydir_readfile(&dir, &file);
-
-        if (!file.is_dir && !strncmp(file.name, "bemenu-renderer-", strlen("bemenu-renderer-"))) {
+    struct dirent *file;
+    while ((file = readdir(dir))) {
+        if (file->d_type != DT_DIR && !strncmp(file->d_name, "bemenu-renderer-", strlen("bemenu-renderer-"))) {
             char *fpath;
-            if ((fpath = bm_dprintf("%s/%s", path, file.name))) {
+            if ((fpath = bm_dprintf("%s/%s", path, file->d_name))) {
                 load_to_list(fpath);
                 free(fpath);
             }
         }
-
-        tinydir_next(&dir);
     }
 
-    tinydir_close(&dir);
+    closedir(dir);
     return (renderers.count > 0 ? true : false);
 
 fail:

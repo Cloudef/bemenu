@@ -1,5 +1,0 @@
-#define INSTALL_LIBDIR "@CMAKE_INSTALL_FULL_LIBDIR@"
-#define BM_VERSION "@BEMENU_VERSION@"
-#define BM_PLUGIN_VERSION "@BEMENU_VERSION@-@GIT_SHA1@"
-
-/* vim: set ts=8 sw=4 tw=0 :*/

@@ -1,5 +1,4 @@
 #include "internal.h"
-#include "version.h"
 #include "x11.h"
 #include "xkb_unicode.h"
 

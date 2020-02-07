@@ -1,6 +1,4 @@
 #include "internal.h"
-#include "version.h"
-
 #include <wchar.h>
 #include <signal.h>
 #include <unistd.h>
@@ -11,7 +9,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <ncurses.h>
+#define NCURSES_WIDECHAR 1
+#include <curses.h>
 
 #if _WIN32
 static const char *TTY = "CON";
@@ -36,17 +35,19 @@ static struct curses {
     bool should_terminate;
 } curses;
 
+static inline void ignore_ret() {}
+
 static void
 reopen_stdin(void)
 {
-    freopen(TTY, "r", stdin);
+    ignore_ret(freopen(TTY, "r", stdin));
 }
 
 static void
 reopen_stdin_stdout(void)
 {
     reopen_stdin();
-    freopen(TTY, "w", stdout);
+    ignore_ret(freopen(TTY, "w", stdout));
 }
 
 static void

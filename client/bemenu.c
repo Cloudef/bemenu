@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "common.h"
+#include "common/common.h"
 
 static struct client client = {
     .filter_mode = BM_FILTER_MODE_DMENU,

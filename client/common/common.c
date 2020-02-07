@@ -11,7 +11,7 @@ static void
 disco_trap(int sig)
 {
     (void)sig;
-    fprintf(stderr, "\e[?25h");
+    fprintf(stderr, "\x1B[?25h");
     fflush(stderr);
     exit(EXIT_FAILURE);
 }
@@ -28,7 +28,7 @@ disco(void)
     sigaction(SIGINT, &action, NULL);
 
     uint32_t cc, c = 80;
-    fprintf(stderr, "\e[?25l");
+    fprintf(stderr, "\x1B[?25l");
     while (1) {
         for (uint32_t i = 1; i < c - 1; ++i) {
             fprintf(stderr, "\r    %*s%s %s %s ", (i > c / 2 ? c - i : i), " ", ((i % 2) ? "<o/" : "\\o>"), ((i % 4) ? "DISCO" : "     "), ((i %2) ? "\\o>" : "<o/"));
@@ -39,7 +39,7 @@ disco(void)
             usleep(140 * 1000);
         }
     }
-    fprintf(stderr, "\e[?25h");
+    fprintf(stderr, "\x1B[?25h");
     exit(EXIT_SUCCESS);
 }
 

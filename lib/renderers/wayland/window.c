@@ -115,13 +115,13 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
     uint32_t size = stride * height;
 
     if ((fd = os_create_anonymous_file(size)) < 0) {
-        fprintf(stderr, "creating a buffer file for %d B failed: %m\n", size);
+        fprintf(stderr, "wayland: creating a buffer file for %d B failed\n", size);
         return false;
     }
 
     void *data;
     if ((data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        fprintf(stderr, "mmap failed: %m\n");
+        fprintf(stderr, "wayland: mmap failed\n");
         close(fd);
         return false;
     }
