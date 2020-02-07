@@ -215,7 +215,6 @@ bm_x11_window_create(struct window *window, Display *display)
     };
 
     window->drawable = XCreateWindow(display, DefaultRootWindow(display), 0, 0, window->width, window->height, 0, DefaultDepth(display, window->screen), CopyFromParent, DefaultVisual(display, window->screen), CWOverrideRedirect | CWBackPixel | CWEventMask, &wa);
-
     XSelectInput(display, window->drawable, ButtonPressMask | KeyPressMask);
     XMapRaised(display, window->drawable);
     window->xim = XOpenIM(display, NULL, NULL, NULL);
