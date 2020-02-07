@@ -52,6 +52,16 @@ PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
 PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH" gmake install
 ```
 
+## Dependencies
+
+All dependencies are searched with `pkg-config`
+
+| Renderer | Dependencies                            |
+|----------|-----------------------------------------|
+| curses   | ncurses                                 |
+| x11      | x11, cairo, pango                       |
+| Wayland  | wayland-client, cairo, pango, xbkcommon |
+
 ## Environment variables
 
 | Variable         | Description                             | Value                |
