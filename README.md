@@ -30,8 +30,8 @@ make install
 make install PREFIX=/usr
 
 # Other usual variables are available for modifying such as DESTDIR, bindir, libdir and mandir
-# Note that if you want a custom libdir, you should pass that during build as well, since it
-# will be used compile-time to figure out where to load renderers from!
+# Note that if you want a custom PREFIX or libdir, you should pass those during build as well,
+# since they will be used compile-time to figure out where to load renderers from!
 
 # HTML API documentation (requires doxygen installed):
 make doxygen
