@@ -52,13 +52,13 @@ bemenu-renderer-x11.so: private override CPPFLAGS += $(shell pkg-config --cflags
 bemenu-renderer-x11.so: lib/renderers/cairo.h lib/renderers/x11/x11.c lib/renderers/x11/x11.h lib/renderers/x11/window.c lib/renderers/x11/xkb_unicode.c lib/renderers/x11/xkb_unicode.h
 
 lib/renderers/wayland/xdg-shell.c:
-	wayland-scanner code < "$$(pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
+	wayland-scanner private-code < "$$(pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
 
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.h:
 	wayland-scanner client-header < $(subst .h,.xml,$@) > $@
 
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.c:
-	wayland-scanner code < $(subst .c,.xml,$@) > $@
+	wayland-scanner private-code < $(subst .c,.xml,$@) > $@
 
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
