@@ -45,7 +45,7 @@ cdl.a: lib/3rdparty/cdl.c lib/3rdparty/cdl.h
 libbemenu.so: private override LDLIBS += -ldl
 libbemenu.so: lib/bemenu.h lib/internal.h lib/filter.c lib/item.c lib/library.c lib/list.c lib/menu.c lib/util.c cdl.a
 
-bemenu-renderer-curses.so: private override LDLIBS += `pkg-config --libs ncurses` -lm
+bemenu-renderer-curses.so: private override LDLIBS += `pkg-config --libs ncurses || if [ -r /usr/lib/libncursesw.so ]; then echo /usr/lib/libncursesw.so; else echo /usr/lib/libncurses.so; fi` -lm
 bemenu-renderer-curses.so: private override CPPFLAGS += `pkg-config --cflags-only-I ncurses`
 bemenu-renderer-curses.so: lib/renderers/curses/curses.c
 
