@@ -273,6 +273,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             prefix_x += result.x_advance;
         }
 
+        uint32_t scrollbar_w = 0;
+        if (scrollbar) {
+            bm_pango_get_text_extents(cairo, &paint, &result, "#");
+            spacing_x += (scrollbar_w = result.x_advance);
+        }
+
         uint32_t posy = titleh;
         const uint32_t page = (menu->index / lines) * lines;
         for (uint32_t l = 0, i = page; l < lines && i < count && posy < max_height; ++i, ++l) {
@@ -310,14 +316,14 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
             const uint32_t sheight = out_result->height - titleh;
             cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
-            cairo_rectangle(cairo->cr, 0, titleh, 2, sheight);
+            cairo_rectangle(cairo->cr, 0, titleh, scrollbar_w, sheight);
             cairo_fill(cairo->cr);
 
             const float percent = fmin(((float)page / (count - lines)), 1.0f);
             const uint32_t size = fmax(sheight * ((float)lines / count), 2.0f);
             const uint32_t posy = percent * (sheight - size);
             cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
-            cairo_rectangle(cairo->cr, 0, titleh + posy, 2, size);
+            cairo_rectangle(cairo->cr, 0, titleh + posy, scrollbar_w, size);
             cairo_fill(cairo->cr);
         }
     } else {
