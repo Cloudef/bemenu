@@ -24,6 +24,8 @@ struct cairo_paint {
     struct cairo_color bg;
     const char *font;
     int32_t baseline;
+    uint32_t cursor;
+    bool draw_cursor;
 
     struct box {
         int32_t lx, rx; // left/right offset (pos.x - lx, box.w + rx)
@@ -152,6 +154,36 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - base + paint->baseline);
     pango_cairo_show_layout(cairo->cr, layout);
 
+    if (paint->draw_cursor) {
+        size_t chr = 0;
+        for (size_t c = 0; c < paint->cursor; ++chr, c += bm_utf8_rune_next(buffer, c));
+
+        PangoRectangle rect;
+        pango_layout_index_to_pos(layout, chr, &rect);
+
+        if (!rect.width) {
+            struct cairo_result result = {0};
+            bm_pango_get_text_extents(cairo, paint, &result, "#");
+            rect.width = result.x_advance * PANGO_SCALE;
+        }
+
+        cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
+        cairo_rectangle(cairo->cr,
+                paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty,
+                rect.width / PANGO_SCALE, height + paint->box.by + paint->box.ty);
+        cairo_fill(cairo->cr);
+
+        cairo_rectangle(cairo->cr,
+                paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty,
+                rect.width / PANGO_SCALE, height + paint->box.by + paint->box.ty);
+        cairo_clip(cairo->cr);
+
+        cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
+        cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - base + paint->baseline);
+        pango_cairo_show_layout(cairo->cr, layout);
+        cairo_reset_clip(cairo->cr);
+    }
+
     g_object_unref(layout);
 
     result->x_advance = width + paint->box.rx;
@@ -210,9 +242,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
+    paint.draw_cursor = true;
+    paint.cursor = menu->cursor;
     paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance, vpadding };
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
     bm_cairo_draw_line(cairo, &paint, &result, "%s", (menu->filter ? menu->filter : ""));
+    paint.draw_cursor = false;
     const uint32_t titleh = result.height;
     out_result->height = titleh;
 
