@@ -11,8 +11,8 @@ MAKEFLAGS += --no-builtin-rules
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
 	-Wfloat-equal -Wcast-align -Wpointer-arith -Wchar-subscripts -Warray-bounds=2 -Wno-unknown-warning-option
 
-override CFLAGS ?= -g -O2 -fPIC $(WARNINGS)
-override CFLAGS += -std=c99
+override CFLAGS ?= -g -O2 $(WARNINGS)
+override CFLAGS += -std=c99 -fPIC
 override CPPFLAGS ?= -D_FORTIFY_SOURCE=2 -D_DEFAULT_SOURCE
 override CPPFLAGS += -DBM_VERSION=\"$(VERSION)\" -DBM_PLUGIN_VERSION=\"$(VERSION)-$(GIT_SHA1)\" -DINSTALL_LIBDIR=\"$(PREFIX)$(libdir)\"
 override CPPFLAGS += -Ilib
