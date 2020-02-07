@@ -70,7 +70,7 @@ install-libs: $(libs)
 	install -Dm755 $(addsuffix .$(VERSION), $^) -t "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-lib-symlinks: $(libs) | install-libs
-	 cp -P $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
+	cp -P $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-renderers:
 	install -Dm755 $(renderers) -t "$(DESTDIR)$(PREFIX)$(libdir)/bemenu" || true
