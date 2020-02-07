@@ -259,8 +259,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
         /* vertical mode */
 
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
-        const uint32_t spacing_x = (scrollbar ? 4 : 0);
-        uint32_t spacing_y = 0; // 0 == variable width spacing
+        uint32_t spacing_x = title_x, spacing_y = 0; // 0 == variable width spacing
         if (lines > max_height / titleh) {
             /* there is more lines than screen can fit, enter fixed spacing mode */
             lines = max_height / titleh - 1;
@@ -276,7 +275,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
         uint32_t scrollbar_w = 0;
         if (scrollbar) {
             bm_pango_get_text_extents(cairo, &paint, &result, "#");
-            spacing_x += (scrollbar_w = result.x_advance);
+            scrollbar_w = result.x_advance;
+            spacing_x += (title_x < scrollbar_w ? scrollbar_w - title_x : 0);
         }
 
         uint32_t posy = titleh;
@@ -296,18 +296,26 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             }
 
             if (menu->prefix && highlighted) {
-                paint.pos = (struct pos){ 0, vpadding + posy };
-                paint.box = (struct box){ 4 + spacing_x, 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
+                paint.pos = (struct pos){ spacing_x, vpadding + posy };
+                paint.box = (struct box){ 4, 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
             } else {
-                paint.pos = (struct pos){ 0, vpadding + posy };
-                paint.box = (struct box){ 4 + spacing_x + prefix_x, 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
+                paint.pos = (struct pos){ spacing_x, vpadding + posy };
+                paint.box = (struct box){ 4 + prefix_x, 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
                 bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
             }
 
             posy += (spacing_y ? spacing_y : result.height);
             out_result->height = posy;
             out_result->displayed++;
+        }
+
+        if (spacing_x) {
+            bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
+            const uint32_t sheight = out_result->height - titleh;
+            cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
+            cairo_rectangle(cairo->cr, scrollbar_w, titleh, spacing_x - scrollbar_w, sheight);
+            cairo_fill(cairo->cr);
         }
 
         if (scrollbar && count > 0) {

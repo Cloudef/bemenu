@@ -235,7 +235,7 @@ render(const struct bm_menu *menu)
         uint32_t displayed = 0;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
-        const int32_t offset_x = (scrollbar ? 2 : 0);
+        const int32_t offset_x = title_len + (scrollbar ? 2 : 0);
         const int32_t prefix_x = (menu->prefix ? bm_utf8_string_screen_width(menu->prefix) : 0);
 
         const uint32_t page = menu->index / lines * lines;
