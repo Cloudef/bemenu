@@ -30,7 +30,7 @@ wayland: bemenu-renderer-wayland.so
 	$(LINK.c) -c $(filter %.c,$^) $(LDLIBS) -o $@
 
 $(libs): %:
-	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@)
+	$(LINK.c) -shared -Wl,-soname=$(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@) -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $@
 
