@@ -43,16 +43,16 @@ cdl.a: lib/3rdparty/cdl.c lib/3rdparty/cdl.h
 libbemenu.so: private override LDLIBS += -ldl
 libbemenu.so: lib/bemenu.h lib/internal.h lib/filter.c lib/item.c lib/library.c lib/list.c lib/menu.c lib/util.c cdl.a
 
-bemenu-renderer-curses.so: private override LDLIBS += `pkg-config --libs ncurses` -lm
-bemenu-renderer-curses.so: private override CPPFLAGS += `pkg-config --cflags-only-I ncurses`
+bemenu-renderer-curses.so: private override LDLIBS += $(shell pkg-config --libs ncurses) -lm
+bemenu-renderer-curses.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I ncurses)
 bemenu-renderer-curses.so: lib/renderers/curses/curses.c
 
-bemenu-renderer-x11.so: private override LDLIBS += `pkg-config --libs x11 xinerama cairo pango pangocairo`
-bemenu-renderer-x11.so: private override CPPFLAGS += `pkg-config --cflags-only-I x11 xinerama cairo pango pangocairo`
+bemenu-renderer-x11.so: private override LDLIBS += $(shell pkg-config --libs x11 xinerama cairo pango pangocairo)
+bemenu-renderer-x11.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I x11 xinerama cairo pango pangocairo)
 bemenu-renderer-x11.so: lib/renderers/cairo.h lib/renderers/x11/x11.c lib/renderers/x11/x11.h lib/renderers/x11/window.c lib/renderers/x11/xkb_unicode.c lib/renderers/x11/xkb_unicode.h
 
 lib/renderers/wayland/xdg-shell.c:
-	wayland-scanner code < "`pkg-config --variable=pkgdatadir wayland-protocols`/stable/xdg-shell/xdg-shell.xml" > $@
+	wayland-scanner code < "$$(pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
 
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.h:
 	wayland-scanner client-header < $(subst .h,.xml,$@) > $@
@@ -62,8 +62,8 @@ lib/renderers/wayland/wlr-layer-shell-unstable-v1.c:
 
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
-bemenu-renderer-wayland.so: private override LDLIBS += `pkg-config --libs wayland-client cairo pango pangocairo xkbcommon`
-bemenu-renderer-wayland.so: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon`
+bemenu-renderer-wayland.so: private override LDLIBS += $(shell pkg-config --libs wayland-client cairo pango pangocairo xkbcommon)
+bemenu-renderer-wayland.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon)
 bemenu-renderer-wayland.so: lib/renderers/cairo.h lib/renderers/wayland/wayland.c lib/renderers/wayland/wayland.h lib/renderers/wayland/registry.c lib/renderers/wayland/window.c xdg-shell.a wlr-layer-shell.a
 
 common.a: client/common/common.c client/common/common.h
@@ -71,31 +71,37 @@ bemenu: common.a client/bemenu.c
 bemenu-run: common.a client/bemenu-run.c
 
 install-libs: $(libs)
-	install -Dm755 $(addsuffix .$(VERSION), $^) -t "$(DESTDIR)$(PREFIX)$(libdir)"
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)"
+	cp $(addsuffix .$(VERSION), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-lib-symlinks: $(libs) | install-libs
-	cp -P $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
+	cp -RP $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-renderers:
-	install -Dm755 $(renderers) -t "$(DESTDIR)$(PREFIX)$(libdir)/bemenu" || true
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	-cp $(renderers) "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 
 install-bins:
-	install -Dm755 $(bins) -t "$(DESTDIR)$(PREFIX)$(bindir)" || true
+	mkdir -p "$(DESTDIR)$(PREFIX)$(bindir)"
+	-cp $(bins) "$(DESTDIR)$(PREFIX)$(bindir)"
+	-chmod 0755 "$(DESTDIR)$(PREFIX)$(bindir)"/*
 
 install-man: man/bemenu.1 man/bemenu-run.1
-	install -Dm644 $^ -t "$(DESTDIR)$(PREFIX)$(mandir)"
+	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
+	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
 
 install: install-lib-symlinks install-renderers install-bins install-man
 	@echo "Install OK!"
 
 doxygen:
 	BM_VERSION=$(VERSION) doxygen doxygen/Doxyfile
-	cp -r doxygen/doxygen-qmi-style/navtree html
-	cp -r doxygen/doxygen-qmi-style/search html/search
+	cp -R doxygen/doxygen-qmi-style/navtree html
+	cp -R doxygen/doxygen-qmi-style/search html/search
 
 clean:
 	$(RM) $(libs) $(bins) $(renderers) *.a *.so.*
 	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
+.DELETE_ON_ERROR:
 .PHONY: all clean install install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
