@@ -9,7 +9,7 @@ MAKEFLAGS += --no-builtin-rules
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
 	-Wfloat-equal -Wcast-align -Wpointer-arith -Wchar-subscripts -Warray-bounds=2 -Wno-unknown-warning-option
 
-override CFLAGS ?= -g -O2 $(WARNINGS)
+override CFLAGS ?= -g -O2 -fPIC $(WARNINGS)
 override CFLAGS += -std=c99
 override CPPFLAGS ?= -D_FORTIFY_SOURCE=2 -D_DEFAULT_SOURCE
 override CPPFLAGS += -DBM_VERSION=\"$(VERSION)\" -DBM_PLUGIN_VERSION=\"$(VERSION)-$(GIT_SHA1)\" -DINSTALL_LIBDIR=\"$(PREFIX)$(libdir)\"
@@ -61,9 +61,10 @@ lib/renderers/wayland/wlr-layer-shell-unstable-v1.c:
 	wayland-scanner code < $(subst .c,.xml,$@) > $@
 
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
+wlr-layer-shell.a: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client`
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
-bemenu-renderer-wayland.so: private override LDLIBS += `pkg-config --libs wayland-client cairo pango pangocairo xkbcommon`
-bemenu-renderer-wayland.so: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon`
+bemenu-renderer-wayland.so: private override LDLIBS += `pkg-config --libs wayland-client cairo pango pangocairo xkbcommon` `pkg-config --silence-errors --libs epoll-shim`
+bemenu-renderer-wayland.so: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon` `pkg-config --silence-errors --cflags-only-I epoll-shim`
 bemenu-renderer-wayland.so: lib/renderers/cairo.h lib/renderers/wayland/wayland.c lib/renderers/wayland/wayland.h lib/renderers/wayland/registry.c lib/renderers/wayland/window.c xdg-shell.a wlr-layer-shell.a
 
 common.a: client/common/common.c client/common/common.h
