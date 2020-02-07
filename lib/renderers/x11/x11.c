@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <X11/Xutil.h>
 
 static void
 render(const struct bm_menu *menu)
@@ -229,6 +230,8 @@ constructor(struct bm_menu *menu)
 
     if (!bm_x11_window_create(&x11->window, x11->display))
         goto fail;
+
+    XSetClassHint(x11->window.display, x11->window.drawable, (XClassHint[]){{.res_name = (menu->title ? menu->title : "bemenu"), .res_class = "bemenu"}});
 
     x11->window.bottom = menu->bottom;
     bm_x11_window_set_monitor(&x11->window, menu->monitor);
