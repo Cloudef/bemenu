@@ -185,12 +185,10 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     cairo_rectangle(cairo->cr, 0, 0, width, height);
     cairo_fill(cairo->cr);
 
-    struct cairo_paint paint;
-    memset(&paint, 0, sizeof(paint));
+    struct cairo_paint paint = {0};
     paint.font = menu->font.name;
 
-    struct cairo_result result;
-    memset(&result, 0, sizeof(result));
+    struct cairo_result result = {0};
     int ascii_height;
     bm_pango_get_text_extents(cairo, &paint, &result, "!\"#$%%&'()*+,-./0123456789:;<=>?@ABCD"
                               "EFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
