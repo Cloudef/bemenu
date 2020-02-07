@@ -115,7 +115,6 @@ bm_menu_free(struct bm_menu *menu)
     free(menu->title);
     free(menu->filter);
     free(menu->old_filter);
-
     free(menu->font.name);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
