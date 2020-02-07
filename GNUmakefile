@@ -62,6 +62,7 @@ lib/renderers/wayland/wlr-layer-shell-unstable-v1.h:
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.c:
 	wayland-scanner code < $(subst .c,.xml,$@) > $@
 
+xdg-shell.a: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client`
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
 wlr-layer-shell.a: private override CPPFLAGS += `pkg-config --cflags-only-I wayland-client`
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
