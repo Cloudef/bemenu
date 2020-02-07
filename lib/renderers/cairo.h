@@ -130,7 +130,6 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     if (!ret)
         return false;
 
-
     assert(cairo->scale > 0);
     cairo_scale(cairo->cr, cairo->scale, cairo->scale);
 
