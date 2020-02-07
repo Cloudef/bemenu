@@ -56,11 +56,11 @@ PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH" gmake install
 
 All dependencies are searched with `pkg-config`
 
-| Renderer | Dependencies                            |
-|----------|-----------------------------------------|
-| curses   | ncurses                                 |
-| x11      | x11, cairo, pango                       |
-| Wayland  | wayland-client, cairo, pango, xbkcommon |
+| Renderer | Dependencies                                                           |
+|----------|------------------------------------------------------------------------|
+| curses   | ncurses                                                                |
+| x11      | x11, xinerama, cairo, pango, pangocairo                                |
+| Wayland  | wayland-client, wayland-protocols, cairo, pango, pangocairo, xbkcommon |
 
 ## Environment variables
 
