@@ -37,6 +37,19 @@ make install PREFIX=/usr
 make doxygen
 ```
 
+## OSX
+
+```sh
+# Make sure you have GNU Make and pkg-config installed
+brew install make pkg-config
+
+# You may need to setup your pkg-config to point to brew version of the libraries
+# For example to build curses renderer, you'd do:
+PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
+
+# Other than that, follow the normal build steps, but use gmake instead of make
+```
+
 ## Environment variables
 
 | Variable         | Description                             | Value                |

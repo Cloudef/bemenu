@@ -339,7 +339,7 @@ void list_sort(struct list *list, int (*compar)(const void *a, const void *b));
 char* bm_strdup(const char *s);
 bool bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize);
 BM_LOG_ATTR(1, 2) char* bm_dprintf(const char *fmt, ...);
-bool bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args);
+BM_LOG_ATTR(3, 0) bool bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args);
 size_t bm_strip_token(char *string, const char *token, size_t *out_next);
 int bm_strupcmp(const char *hay, const char *needle);
 int bm_strnupcmp(const char *hay, const char *needle, size_t len);
