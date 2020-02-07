@@ -1,5 +1,7 @@
 VERSION ?= 0.3.0
 PREFIX ?= /usr/local
+INSTALL ?= $(shell command -v ginstall 2>/dev/null || echo install)
+CP ?= $(shell command -v gcp 2>/dev/null || echo cp)
 bindir ?= /bin
 libdir ?= /lib
 mandir ?= /share/man/man1
@@ -72,27 +74,27 @@ bemenu: common.a client/bemenu.c
 bemenu-run: common.a client/bemenu-run.c
 
 install-libs: $(libs)
-	install -Dm755 $(addsuffix .$(VERSION), $^) -t "$(DESTDIR)$(PREFIX)$(libdir)"
+	$(INSTALL) -Dm755 $(addsuffix .$(VERSION), $^) -t "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-lib-symlinks: $(libs) | install-libs
-	cp -P $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
+	$(CP) -P $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
 
 install-renderers:
-	install -Dm755 $(renderers) -t "$(DESTDIR)$(PREFIX)$(libdir)/bemenu" || true
+	$(INSTALL) -Dm755 $(renderers) -t "$(DESTDIR)$(PREFIX)$(libdir)/bemenu" || true
 
 install-bins:
-	install -Dm755 $(bins) -t "$(DESTDIR)$(PREFIX)$(bindir)" || true
+	$(INSTALL) -Dm755 $(bins) -t "$(DESTDIR)$(PREFIX)$(bindir)" || true
 
 install-man: man/bemenu.1 man/bemenu-run.1
-	install -Dm644 $^ -t "$(DESTDIR)$(PREFIX)$(mandir)"
+	$(INSTALL) -Dm644 $^ -t "$(DESTDIR)$(PREFIX)$(mandir)"
 
 install: install-lib-symlinks install-renderers install-bins install-man
 	@echo "Install OK!"
 
 doxygen:
 	BM_VERSION=$(VERSION) doxygen doxygen/Doxyfile
-	cp -r doxygen/doxygen-qmi-style/navtree html
-	cp -r doxygen/doxygen-qmi-style/search html/search
+	$(CP) -r doxygen/doxygen-qmi-style/navtree html
+	$(CP) -r doxygen/doxygen-qmi-style/search html/search
 
 clean:
 	$(RM) $(libs) $(bins) $(renderers) *.a *.so.*
