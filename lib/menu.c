@@ -772,13 +772,8 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             }
             break;
 
-        case BM_KEY_SHIFT_RETURN:
-            list_free_list(&menu->selection);
-            bm_item_set_text(menu->filter_item, menu->filter);
-            list_add_item(&menu->selection, menu->filter_item);
-            break;
-
-        case BM_KEY_ESCAPE:
+        case BM_KEY_SHIFT_RETURN: /* this will return the filter as selected item below! */
+        case BM_KEY_ESCAPE: /* this will cancel however */
             list_free_list(&menu->selection);
             break;
 
@@ -789,7 +784,12 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
     switch (key) {
         case BM_KEY_SHIFT_RETURN:
-        case BM_KEY_RETURN: return BM_RUN_RESULT_SELECTED;
+        case BM_KEY_RETURN:
+            if (!bm_menu_get_selected_items(menu, NULL)) {
+                bm_item_set_text(menu->filter_item, menu->filter);
+                list_add_item(&menu->selection, menu->filter_item);
+            }
+            return BM_RUN_RESULT_SELECTED;
         case BM_KEY_ESCAPE: return BM_RUN_RESULT_CANCEL;
         default: break;
     }
