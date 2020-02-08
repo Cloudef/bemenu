@@ -19,7 +19,7 @@ make
 # - wayland
 # - curses
 #
-# For example this would build the bemenu and bemenu-run binaries and the x11 renderer:
+# For example this would build the bemenu and bemenu-run binaries and the x11 backend:
 make clients x11
 
 # To install the built features, simply run:
@@ -33,7 +33,7 @@ make install PREFIX=/usr
 
 # Other usual variables are available for modifying such as DESTDIR, bindir, libdir and mandir
 # Note that if you want a custom PREFIX or libdir, you should pass those during build as well,
-# since they will be used compile-time to figure out where to load renderers from!
+# since they will be used compile-time to figure out where to load backends from!
 
 # HTML API documentation (requires doxygen installed):
 make doxygen
@@ -49,7 +49,7 @@ LD_LIBRARY_PATH=. BEMENU_RENDERERS=. ./bemenu-run
 brew install make pkg-config
 
 # You may need to setup your pkg-config to point to the brew version of the libraries
-# For example to build curses renderer, you'd do:
+# For example to build curses backend, you'd do:
 PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
 
 # Other than that, follow the normal build steps, but use gmake instead of make
@@ -59,7 +59,7 @@ PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
 
 All dependencies are searched with `pkg-config`
 
-| Renderer | Dependencies                                                           |
+| Backend  | Dependencies                                                           |
 |----------|------------------------------------------------------------------------|
 | curses   | ncursesw                                                               |
 | x11      | x11, xinerama, cairo, pango, pangocairo                                |
@@ -70,9 +70,9 @@ All dependencies are searched with `pkg-config`
 | Variable         | Description                             | Value                |
 |------------------|-----------------------------------------|----------------------|
 | BEMENU_OPTS      | Options for bemenu, bemenu-run from env | Any cli argument     |
-| BEMENU_BACKEND   | Forces a renderer by name               | x11, wayland, curses |
-| BEMENU_RENDERER  | Forces a renderer by loading a .so file | Path to the .so file |
-| BEMENU_RENDERERS | Override renderer load directory        | Path to a directory  |
+| BEMENU_BACKEND   | Force backend by name                   | x11, wayland, curses |
+| BEMENU_RENDERER  | Force backend by loading a .so file     | Path to the .so file |
+| BEMENU_RENDERERS | Override the backend search path        | Path to a directory  |
 
 ## About Wayland support
 

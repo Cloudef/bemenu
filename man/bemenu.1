@@ -175,6 +175,12 @@ These options are only available on backends specified in the parentheses
 .SH ENVIRONMENT
 
 .TP
+.B BEMENU_OPTS
+.RS
+Alternative way to pass any command line argument from the environment.
+.RE
+
+.TP
 .B BEMENU_BACKEND
 .RS
 If set, the appropriate backend will be forced.
@@ -191,4 +197,16 @@ Wayland backend.
 .TP
 .I x11
 X11 backend.
+.RE
+
+.TP
+.B BEMENU_RENDERER
+.RS
+Force backend by loading a .so file.
+.RE
+
+.TP
+.B BEMENU_RENDERERS
+.RS
+Override the backend search path.
 .RE
