@@ -227,7 +227,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prefix",      required_argument, 0, 'P' },
         { "scrollbar",   required_argument, 0, 0x100 },
         { "ifne",        no_argument,       0, 0x115 },
-        { "fork",        required_argument, 0, 0x116 },
+        { "fork",        no_argument,       0, 0x116 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
