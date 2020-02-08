@@ -3,6 +3,8 @@ bemenu
 
 Dynamic menu library and client program inspired by dmenu
 
+![preview](.github/preview.svg)
+
 ## Building
 
 ```sh
