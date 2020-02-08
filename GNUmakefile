@@ -4,7 +4,7 @@ bindir ?= /bin
 libdir ?= /lib
 mandir ?= /share/man/man1
 
-GIT_SHA1 = $(shell git rev-parse HEAD)
+GIT_SHA1 = $(shell git rev-parse HEAD 2>/dev/null || printf 'nogit')
 MAKEFLAGS += --no-builtin-rules
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
@@ -25,6 +25,11 @@ clients: $(bins)
 curses: bemenu-renderer-curses.so
 x11: bemenu-renderer-x11.so
 wayland: bemenu-renderer-wayland.so
+
+# support non git builds
+.git/index:
+	mkdir -p .git
+	touch .git/index
 
 %.a:
 	$(LINK.c) -c $(filter %.c,$^) $(LDLIBS) -o $@
