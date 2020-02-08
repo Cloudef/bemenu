@@ -16,6 +16,7 @@ override CPPFLAGS += -DBM_VERSION=\"$(VERSION)\" -DBM_PLUGIN_VERSION=\"$(VERSION
 override CPPFLAGS += -D_DEFAULT_SOURCE -Ilib
 
 libs = libbemenu.so
+pkgconfigs = bemenu.pc
 bins = bemenu bemenu-run
 renderers = bemenu-renderer-x11.so bemenu-renderer-curses.so bemenu-renderer-wayland.so
 all: $(bins) $(renderers)
@@ -31,6 +32,9 @@ $(libs): %:
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $@
+
+$(pkgconfigs): %: %.in
+	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir)," $(addsuffix .in, $@) > $@
 
 $(renderers): %: | $(libs)
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -L. -lbemenu -o $@
@@ -70,6 +74,10 @@ common.a: client/common/common.c client/common/common.h
 bemenu: common.a client/bemenu.c
 bemenu-run: common.a client/bemenu-run.c
 
+install-pkgconfig: $(pkgconfigs)
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/pkgconfig"
+	cp $^ "$(DESTDIR)$(PREFIX)$(libdir)/pkgconfig"
+
 install-libs: $(libs)
 	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)"
 	cp $(addsuffix .$(VERSION), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
@@ -90,7 +98,7 @@ install-man: man/bemenu.1 man/bemenu-run.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
 	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
 
-install: install-lib-symlinks install-renderers install-bins install-man
+install: install-pkgconfig install-lib-symlinks install-renderers install-bins install-man
 	@echo "Install OK!"
 
 doxygen:
@@ -99,10 +107,10 @@ doxygen:
 	cp -R doxygen/doxygen-qmi-style/search html/search
 
 clean:
-	$(RM) $(libs) $(bins) $(renderers) *.a
+	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) *.a
 	$(RM) -r *.so.* # OSX generates .DSYM dirs with -g ...
 	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
 .DELETE_ON_ERROR:
-.PHONY: all clean install install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
+.PHONY: all clean install install-pkgconfig install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
