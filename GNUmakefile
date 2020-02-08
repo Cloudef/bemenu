@@ -1,9 +1,10 @@
-VERSION ?= 0.3.0
+VERSION ?= $(shell cat VERSION)
 PREFIX ?= /usr/local
 bindir ?= /bin
 libdir ?= /lib
 mandir ?= /share/man/man1
 
+GIT_SHA1 = $(shell git rev-parse HEAD)
 MAKEFLAGS += --no-builtin-rules
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
@@ -28,15 +29,15 @@ wayland: bemenu-renderer-wayland.so
 %.a:
 	$(LINK.c) -c $(filter %.c,$^) $(LDLIBS) -o $@
 
-$(libs): %:
+$(libs): %: VERSION .git/index
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $@
 
-$(pkgconfigs): %: %.in
+$(pkgconfigs): %: VERSION %.in
 	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir)," $(addsuffix .in, $@) > $@
 
-$(renderers): %: | $(libs)
+$(renderers): %: VERSION .git/index | $(libs)
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -L. -lbemenu -o $@
 
 $(bins): %: | $(libs)
