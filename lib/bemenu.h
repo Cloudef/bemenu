@@ -253,6 +253,14 @@ void bm_menu_free_items(struct bm_menu *menu);
  * @{ */
 
 /**
+ * Get the renderer from the bm_menu instance.
+ *
+ * @param menu bm_menu instance which renderer to get.
+ * @return Pointer to bm_renderer instance.
+ */
+const struct bm_renderer* bm_menu_get_renderer(struct bm_menu *menu);
+
+/**
  * Set userdata pointer to bm_menu instance.
  * Userdata will be carried unmodified by the instance.
  *

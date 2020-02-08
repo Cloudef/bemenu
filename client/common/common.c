@@ -174,7 +174,8 @@ usage(FILE *out, const char *name)
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
           " --scrollbar           display scrollbar. (always, autohide)\n"
-          " --ifne                only display menu if there are items.\n\n"
+          " --ifne                only display menu if there are items.\n"
+          " --fork                always fork. (bemenu-run)\n\n"
 
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
@@ -226,6 +227,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prefix",      required_argument, 0, 'P' },
         { "scrollbar",   required_argument, 0, 0x100 },
         { "ifne",        no_argument,       0, 0x115 },
+        { "fork",        required_argument, 0, 0x116 },
 
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
@@ -290,6 +292,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x115:
                 client->ifne = true;
+                break;
+            case 0x116:
+                client->force_fork = true;
                 break;
 
             case 'b':
@@ -376,11 +381,13 @@ parse_args(struct client *client, int *argc, char **argv[])
 }
 
 struct bm_menu*
-menu_with_options(const struct client *client)
+menu_with_options(struct client *client)
 {
     struct bm_menu *menu;
     if (!(menu = bm_menu_new(NULL)))
         return NULL;
+
+    client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL));
 
     bm_menu_set_font(menu, client->font);
     bm_menu_set_line_height(menu, client->line_height);
@@ -408,7 +415,7 @@ menu_with_options(const struct client *client)
 }
 
 enum bm_run_result
-run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(struct bm_item *item, const char *text))
+run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
@@ -427,10 +434,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(stru
     if (status == BM_RUN_RESULT_SELECTED) {
         uint32_t i, count;
         struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-        for (i = 0; i < count; ++i) {
-            const char *text = bm_item_get_text(items[i]);
-            item_cb(items[i], text);
-        }
+        for (i = 0; i < count; ++i) item_cb(client, items[i]);
     }
 
     return status;

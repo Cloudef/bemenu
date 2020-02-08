@@ -48,9 +48,10 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
 }
 
 static void
-item_cb(struct bm_item *item, const char *text)
+item_cb(const struct client *client, struct bm_item *item)
 {
-    (void)item; // may be null
+    (void)client;
+    const char *text = bm_item_get_text(item);
     printf("%s\n", (text ? text : ""));
 }
 

@@ -139,6 +139,13 @@ bm_menu_free_items(struct bm_menu *menu)
         free(menu->filter_item);
 }
 
+const struct bm_renderer*
+bm_menu_get_renderer(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->renderer;
+}
+
 void
 bm_menu_set_userdata(struct bm_menu *menu, void *userdata)
 {

@@ -130,15 +130,17 @@ read_items_to_menu_from_path(struct bm_menu *menu)
 static inline void ignore_ret(int useless, ...) { (void)useless; }
 
 static void
-launch(const char *bin)
+launch(const struct client *client, const char *bin)
 {
     if (!bin)
         return;
 
-    if (fork() == 0) {
-        setsid();
-        ignore_ret(0, freopen("/dev/null", "w", stdout));
-        ignore_ret(0, freopen("/dev/null", "w", stderr));
+    if (!client->fork || fork() == 0) {
+        if (client->fork) {
+            setsid();
+            ignore_ret(0, freopen("/dev/null", "w", stdout));
+            ignore_ret(0, freopen("/dev/null", "w", stderr));
+        }
 
         char **tokens;
         if (!(tokens = tokenize_quoted_to_argv(bin, NULL, NULL)))
@@ -150,10 +152,9 @@ launch(const char *bin)
 }
 
 static void
-item_cb(struct bm_item *item, const char *text)
+item_cb(const struct client *client, struct bm_item *item)
 {
-    (void)item; // may be null
-    launch(text);
+    launch(client, bm_item_get_text(item));
 }
 
 int
