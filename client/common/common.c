@@ -190,7 +190,7 @@ usage(FILE *out, const char *name)
           " -b, --bottom          appears at the bottom of the screen. (wx)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
-          " -m, --monitor         index of monitor where menu will appear. (x)\n"
+          " -m, --monitor         index of monitor where menu will appear. (wx)\n"
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"

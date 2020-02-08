@@ -347,8 +347,6 @@ bm_wl_registry_register(struct wayland *wayland)
     if (!(wayland->registry = wl_display_get_registry(wayland->display)))
         return false;
 
-    wl_list_init(&wayland->outputs);
-    wl_list_init(&wayland->windows);
     wl_registry_add_listener(wayland->registry, &registry_listener, wayland);
     wl_display_roundtrip(wayland->display); // trip 1, registry globals
     if (!wayland->compositor || !wayland->seat || !wayland->shm || !wayland->layer_shell)

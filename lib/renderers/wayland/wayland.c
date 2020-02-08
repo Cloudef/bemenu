@@ -226,6 +226,72 @@ set_overlap(const struct bm_menu *menu, bool overlap)
 }
 
 static void
+destroy_windows(struct wayland *wayland)
+{
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_destroy(window);
+    }
+    wl_list_init(&wayland->windows);
+}
+
+static void
+recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
+{
+    destroy_windows(wayland);
+
+    size_t monitors = 0;
+    struct output *output;
+    wl_list_for_each(output, &wayland->outputs, link)
+        monitors++;
+
+    size_t monitor = 0;
+    wl_list_for_each(output, &wayland->outputs, link) {
+        if (menu->monitor < monitors && monitor != menu->monitor) {
+            ++monitor;
+            continue;
+        }
+
+        struct wl_surface *surface;
+        if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+            goto fail;
+
+        wl_surface_set_buffer_scale(surface, output->scale);
+
+        struct window *window = calloc(1, sizeof(struct window));
+        window->bottom = menu->bottom;
+        window->scale = output->scale;
+
+        if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
+            free(window);
+
+        window->notify.render = bm_cairo_paint;
+        window->max_height = output->height;
+        window->render_pending = true;
+        wl_list_insert(&wayland->windows, &window->link);
+        break;
+    }
+
+    set_overlap(menu, menu->overlap);
+    grab_keyboard(menu, menu->grabbed);
+    return;
+
+fail:
+    // This is non handlable if fails on recreation
+    fprintf(stderr, "wayland window creation failed :/\n");
+    abort();
+}
+
+static void
+set_monitor(const struct bm_menu *menu, uint32_t monitor)
+{
+    (void)monitor;
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+    recreate_windows(menu, wayland);
+}
+
+static void
 destructor(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -233,10 +299,7 @@ destructor(struct bm_menu *menu)
     if (!wayland)
         return;
 
-    struct window *window;
-    wl_list_for_each(window, &wayland->windows, link) {
-        bm_wl_window_destroy(window);
-    }
+    destroy_windows(wayland);
     bm_wl_registry_destroy(wayland);
 
     xkb_context_unref(wayland->input.xkb.context);
@@ -263,6 +326,9 @@ constructor(struct bm_menu *menu)
     if (!(menu->renderer->internal = wayland = calloc(1, sizeof(struct wayland))))
         goto fail;
 
+    wl_list_init(&wayland->windows);
+    wl_list_init(&wayland->outputs);
+
     if (!(wayland->display = wl_display_connect(NULL)))
         goto fail;
 
@@ -275,25 +341,7 @@ constructor(struct bm_menu *menu)
     wayland->fds.display = wl_display_get_fd(wayland->display);
     wayland->fds.repeat = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
     wayland->input.repeat_fd = &wayland->fds.repeat;
-
-    struct output *output;
-    wl_list_for_each(output, &wayland->outputs, link) {
-        struct wl_surface *surface;
-        if (!(surface = wl_compositor_create_surface(wayland->compositor)))
-            goto fail;
-
-        wl_surface_set_buffer_scale(surface, output->scale);
-
-        struct window *window = calloc(1, sizeof(struct window));
-        window->bottom = menu->bottom;
-        window->scale = output->scale;
-        if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
-            goto fail;
-        window->notify.render = bm_cairo_paint;
-        window->max_height = output->height;
-        window->render_pending = true;
-        wl_list_insert(&wayland->windows, &window->link);
-    }
+    recreate_windows(menu, wayland);
 
     if (!efd && (efd = epoll_create1(EPOLL_CLOEXEC)) < 0)
         goto fail;
@@ -325,6 +373,7 @@ register_renderer(struct render_api *api)
     api->set_bottom = set_bottom;
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
+    api->set_monitor = set_monitor;
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";
