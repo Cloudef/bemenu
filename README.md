@@ -37,6 +37,9 @@ make install PREFIX=/usr
 
 # HTML API documentation (requires doxygen installed):
 make doxygen
+
+# To test from source, you have to point the LD_LIBRARY_PATH and BEMENU_RENDERERS variables:
+LD_LIBRARY_PATH=. BEMENU_RENDERERS=. ./bemenu-run
 ```
 
 ## OSX
