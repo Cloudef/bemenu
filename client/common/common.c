@@ -392,6 +392,7 @@ menu_with_options(const struct client *client)
     bm_menu_set_bottom(menu, client->bottom);
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_scrollbar(menu, client->scrollbar);
+    bm_menu_set_panel_overlap(menu, !client->no_overlap);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);
@@ -411,7 +412,6 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(stru
 {
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
-    bm_menu_set_panel_overlap(menu, !client->no_overlap);
 
     if (client->ifne && !bm_menu_get_items(menu, NULL))
         return BM_RUN_RESULT_CANCEL;
