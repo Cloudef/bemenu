@@ -61,8 +61,8 @@ bemenu-renderer-x11.so: private override LDLIBS += $(shell pkg-config --libs x11
 bemenu-renderer-x11.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I x11 xinerama cairo pango pangocairo)
 bemenu-renderer-x11.so: lib/renderers/cairo.h lib/renderers/x11/x11.c lib/renderers/x11/x11.h lib/renderers/x11/window.c lib/renderers/x11/xkb_unicode.c lib/renderers/x11/xkb_unicode.h
 
-lib/renderers/wayland/xdg-shell.c: $(shell pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml
-	wayland-scanner private-code < $^ > $@
+lib/renderers/wayland/xdg-shell.c:
+	wayland-scanner private-code < "$$(pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
 
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.h: lib/renderers/wayland/wlr-layer-shell-unstable-v1.xml
 	wayland-scanner client-header < $^ > $@
