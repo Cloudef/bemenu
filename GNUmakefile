@@ -113,8 +113,8 @@ doxygen:
 	cp -R doxygen/doxygen-qmi-style/search html/search
 
 clean:
-	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) *.a
-	$(RM) -r *.so.* # OSX generates .DSYM dirs with -g ...
+	$(RM) -r *.dSYM # OSX generates .dSYM dirs with -g ...
+	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) *.a *.so.*
 	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
