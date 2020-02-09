@@ -99,7 +99,7 @@ install-bins:
 	mkdir -p "$(DESTDIR)$(PREFIX)$(bindir)"
 	-cp $(bins) "$(DESTDIR)$(PREFIX)$(bindir)"
 	-chmod 0755 $(addprefix "$(DESTDIR)$(PREFIX)$(bindir)"/,$(bins))
-	
+
 install-man: man/bemenu.1 man/bemenu-run.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
 	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
