@@ -20,20 +20,30 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
     if (!(buffer = malloc((allocated = step))))
         return;
 
+    // TODO: do not read everything into memory
     size_t read;
     while ((read = fread(buffer + (allocated - step), 1, step, stdin)) == step) {
         void *tmp;
         if (!(tmp = realloc(buffer, (allocated += step)))) {
             free(buffer);
+            fprintf(stderr, "Out of memory\n");
             return;
         }
         buffer = tmp;
     }
-    buffer[allocated - step + read - 1] = 0;
+
+    // make sure we can null terminate the input
+    const size_t end = allocated - step + read;
+    if (end >= allocated && !(buffer = realloc(buffer, end + 1))) {
+        fprintf(stderr, "Out of memory\n");
+        return;
+    }
+
+    buffer[allocated - step + read] = 0;
 
     char *s = buffer;
     while ((size_t)(s - buffer) < allocated - step + read && *s != 0) {
-        size_t pos = strcspn(s, "\n");
+        const size_t pos = strcspn(s, "\n");
         s[pos] = 0;
 
         struct bm_item *item;
