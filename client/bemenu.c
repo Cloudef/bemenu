@@ -34,15 +34,16 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
 
     // make sure we can null terminate the input
     const size_t end = allocated - step + read;
+    assert(end != ~(size_t)0);
     if (end >= allocated && !(buffer = realloc(buffer, end + 1))) {
         fprintf(stderr, "Out of memory\n");
         return;
     }
 
-    buffer[allocated - step + read] = 0;
+    buffer[end] = 0;
 
     char *s = buffer;
-    while ((size_t)(s - buffer) < allocated - step + read && *s != 0) {
+    while ((size_t)(s - buffer) < end && *s != 0) {
         const size_t pos = strcspn(s, "\n");
         s[pos] = 0;
 
