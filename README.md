@@ -63,7 +63,7 @@ All dependencies are searched with `pkg-config`
 |----------|------------------------------------------------------------------------|
 | curses   | ncursesw                                                               |
 | x11      | x11, xinerama, cairo, pango, pangocairo                                |
-| Wayland  | wayland-client, wayland-protocols, cairo, pango, pangocairo, xbkcommon |
+| Wayland  | wayland-client, wayland-protocols, cairo, pango, pangocairo, xkbcommon |
 
 ## Environment variables
 
