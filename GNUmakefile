@@ -19,6 +19,7 @@ override CPPFLAGS += -D_DEFAULT_SOURCE -Ilib
 libs = libbemenu.so
 pkgconfigs = bemenu.pc
 bins = bemenu bemenu-run
+scripts = bemenu_path
 renderers = bemenu-renderer-x11.so bemenu-renderer-curses.so bemenu-renderer-wayland.so
 all: $(bins) $(renderers)
 clients: $(bins)
@@ -97,8 +98,9 @@ install-renderers:
 
 install-bins:
 	mkdir -p "$(DESTDIR)$(PREFIX)$(bindir)"
-	-cp $(bins) "$(DESTDIR)$(PREFIX)$(bindir)"
+	-cp $(bins) $(scripts) "$(DESTDIR)$(PREFIX)$(bindir)"
 	-chmod 0755 $(addprefix "$(DESTDIR)$(PREFIX)$(bindir)"/,$(bins))
+	-chmod 0755 $(addprefix "$(DESTDIR)$(PREFIX)$(bindir)"/,$(scripts))
 
 install-man: man/bemenu.1 man/bemenu-run.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
