@@ -21,6 +21,7 @@ struct client {
     bool ifne;
     bool no_overlap;
     bool force_fork, fork;
+    bool no_exec;
 };
 
 char* cstrcopy(const char *str, size_t size);

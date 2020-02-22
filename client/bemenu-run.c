@@ -154,7 +154,12 @@ launch(const struct client *client, const char *bin)
 static void
 item_cb(const struct client *client, struct bm_item *item)
 {
-    launch(client, bm_item_get_text(item));
+    if (client->no_exec) {
+        const char *text = bm_item_get_text(item);
+        printf("%s\n", (text ? text : ""));
+    } else {
+        launch(client, bm_item_get_text(item));
+    }
 }
 
 int
