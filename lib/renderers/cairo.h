@@ -214,7 +214,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     out_result->displayed = 1;
 
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
-    cairo_rectangle(cairo->cr, 0, 0, width, height);
+    cairo_set_operator(cairo->cr, CAIRO_OPERATOR_SOURCE);
     cairo_fill(cairo->cr);
 
     struct cairo_paint paint = {0};
