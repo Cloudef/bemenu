@@ -1,5 +1,6 @@
 VERSION ?= $(shell cat VERSION)
 PREFIX ?= /usr/local
+includedir ?= /include
 bindir ?= /bin
 libdir ?= /lib
 mandir ?= /share/man/man1
@@ -84,6 +85,10 @@ install-pkgconfig: $(pkgconfigs)
 	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/pkgconfig"
 	cp $^ "$(DESTDIR)$(PREFIX)$(libdir)/pkgconfig"
 
+install-include: lib/bemenu.h
+	mkdir -p "$(DESTDIR)$(PREFIX)$(includedir)"
+	cp $^ "$(DESTDIR)$(PREFIX)$(includedir)"
+
 install-libs: $(libs)
 	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)"
 	cp $(addsuffix .$(VERSION), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
@@ -104,7 +109,7 @@ install-man: man/bemenu.1 man/bemenu-run.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
 	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
 
-install: install-pkgconfig install-lib-symlinks install-renderers install-bins install-man
+install: install-pkgconfig install-include install-lib-symlinks install-renderers install-bins install-man
 	@echo "Install OK!"
 
 doxygen:
@@ -119,4 +124,4 @@ clean:
 	$(RM) -r html
 
 .DELETE_ON_ERROR:
-.PHONY: all clean install install-pkgconfig install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
+.PHONY: all clean install install-pkgconfig install-include install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
