@@ -200,7 +200,7 @@ bm_cairo_color_from_menu_color(const struct bm_menu *menu, enum bm_color color, 
     c->r = (float)menu->colors[color].r / 255.0f;
     c->g = (float)menu->colors[color].g / 255.0f;
     c->b = (float)menu->colors[color].b / 255.0f;
-    c->a = 1.0f;
+    c->a = (float)menu->colors[color].a / 255.0f;
 }
 
 static inline void
@@ -213,7 +213,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     memset(out_result, 0, sizeof(struct cairo_paint_result));
     out_result->displayed = 1;
 
-    cairo_set_source_rgb(cairo->cr, 0, 0, 0);
+    cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
     cairo_fill(cairo->cr);
 
