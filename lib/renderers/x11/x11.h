@@ -24,6 +24,7 @@ struct window {
     Drawable drawable;
     XIM xim;
     XIC xic;
+    Visual *visual;
 
     KeySym keysym;
     uint32_t mods;

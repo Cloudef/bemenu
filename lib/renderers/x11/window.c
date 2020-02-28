@@ -16,7 +16,7 @@ static bool
 create_buffer(struct window *window, struct buffer *buffer, int32_t width, int32_t height)
 {
     cairo_surface_t *surf;
-    if (!(surf = cairo_xlib_surface_create(window->display, window->drawable, DefaultVisual(window->display, window->screen), width, height)))
+    if (!(surf = cairo_xlib_surface_create(window->display, window->drawable, window->visual, width, height)))
         goto fail;
 
     cairo_xlib_surface_set_size(surf, width, height);
@@ -209,6 +209,7 @@ bm_x11_window_create(struct window *window, Display *display)
     window->screen = DefaultScreen(display);
     window->width = window->height = 1;
     window->monitor = -1;
+    window->visual = DefaultVisual(display, window->screen);
 
     XSetWindowAttributes wa = {
         .override_redirect = True,
@@ -217,15 +218,18 @@ bm_x11_window_create(struct window *window, Display *display)
 
     XVisualInfo vinfo;
     int depth = DefaultDepth(display, window->screen);
-    Visual *visual = DefaultVisual(display, window->screen);
+    unsigned long valuemask = CWOverrideRedirect | CWEventMask | CWBackPixel;
 
     if (XMatchVisualInfo(display, DefaultScreen(display), 32, TrueColor, &vinfo)) {
         depth = vinfo.depth;
-        visual = vinfo.visual;
-        wa.colormap = XCreateColormap(display, DefaultRootWindow(display), visual, AllocNone);
+        window->visual = vinfo.visual;
+        wa.background_pixmap = None;
+        wa.border_pixel = 0;
+        wa.colormap = XCreateColormap(display, DefaultRootWindow(display), window->visual, AllocNone);
+        valuemask = CWOverrideRedirect | CWEventMask | CWBackPixmap | CWColormap | CWBorderPixel;
     }
 
-    window->drawable = XCreateWindow(display, DefaultRootWindow(display), 0, 0, window->width, window->height, 0, depth, CopyFromParent, visual, CWOverrideRedirect | CWBackPixel | CWEventMask, &wa);
+    window->drawable = XCreateWindow(display, DefaultRootWindow(display), 0, 0, window->width, window->height, 0, depth, CopyFromParent, window->visual, valuemask, &wa);
     XSelectInput(display, window->drawable, ButtonPressMask | KeyPressMask);
     XMapRaised(display, window->drawable);
     window->xim = XOpenIM(display, NULL, NULL, NULL);
