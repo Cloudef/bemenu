@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <cairo-xlib.h>
 #include <X11/extensions/Xinerama.h>
+#include <X11/Xutil.h>
 
 static void
 destroy_buffer(struct buffer *buffer)
@@ -214,7 +215,17 @@ bm_x11_window_create(struct window *window, Display *display)
         .event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask
     };
 
-    window->drawable = XCreateWindow(display, DefaultRootWindow(display), 0, 0, window->width, window->height, 0, DefaultDepth(display, window->screen), CopyFromParent, DefaultVisual(display, window->screen), CWOverrideRedirect | CWBackPixel | CWEventMask, &wa);
+    XVisualInfo vinfo;
+    int depth = DefaultDepth(display, window->screen);
+    Visual *visual = DefaultVisual(display, window->screen);
+
+    if (XMatchVisualInfo(display, DefaultScreen(display), 32, TrueColor, &vinfo)) {
+        depth = vinfo.depth;
+        visual = vinfo.visual;
+        wa.colormap = XCreateColormap(display, DefaultRootWindow(display), visual, AllocNone);
+    }
+
+    window->drawable = XCreateWindow(display, DefaultRootWindow(display), 0, 0, window->width, window->height, 0, depth, CopyFromParent, visual, CWOverrideRedirect | CWBackPixel | CWEventMask, &wa);
     XSelectInput(display, window->drawable, ButtonPressMask | KeyPressMask);
     XMapRaised(display, window->drawable);
     window->xim = XOpenIM(display, NULL, NULL, NULL);
