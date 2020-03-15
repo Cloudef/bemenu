@@ -94,8 +94,11 @@ bm_x11_window_render(struct window *window, const struct bm_menu *menu)
     }
 
     if (buffer->created) {
+        cairo_save(buffer->cairo.cr);
+        cairo_set_operator(buffer->cairo.cr, CAIRO_OPERATOR_SOURCE);
         cairo_paint(buffer->cairo.cr);
         cairo_surface_flush(buffer->cairo.surface);
+        cairo_restore(buffer->cairo.cr);
     }
 }
 
