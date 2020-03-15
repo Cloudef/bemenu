@@ -36,7 +36,7 @@ wayland: bemenu-renderer-wayland.so
 	$(LINK.c) -c $(filter %.c,$^) $(LDLIBS) -o $@
 
 $(libs): %: VERSION .git/index
-	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@)
+	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@) -Wl,-soname
 	ln -fs $(addsuffix .$(VERSION), $@) $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 	ln -fs $(addsuffix .$(VERSION), $@) $@
 
