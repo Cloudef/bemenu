@@ -169,7 +169,7 @@ struct bm_hex_color {
     /**
      * RGB values.
      */
-    uint8_t r, g, b;
+    uint8_t r, g, b, a;
 };
 
 /**

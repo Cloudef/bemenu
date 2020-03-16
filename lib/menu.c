@@ -15,18 +15,18 @@ static const char *default_font = "monospace 10";
  * Default hexadecimal colors.
  */
 static const char *default_colors[BM_COLOR_LAST] = {
-    "#121212", // BM_COLOR_TITLE_BG
-    "#D81860", // BM_COLOR_TITLE_FG
-    "#121212", // BM_COLOR_FILTER_BG
-    "#CACACA", // BM_COLOR_FILTER_FG
-    "#121212", // BM_COLOR_ITEM_BG
-    "#CACACA", // BM_COLOR_ITEM_FG
-    "#121212", // BM_COLOR_HIGHLIGHTED_BG
-    "#D81860", // BM_COLOR_HIGHLIGHTED_FG
-    "#121212", // BM_COLOR_SELECTED_BG
-    "#D81860", // BM_COLOR_SELECTED_FG
-    "#121212", // BM_COLOR_SCROLLBAR_BG
-    "#D81860", // BM_COLOR_SCROLLBAR_FG
+    "#121212FF", // BM_COLOR_TITLE_BG
+    "#D81860FF", // BM_COLOR_TITLE_FG
+    "#121212FF", // BM_COLOR_FILTER_BG
+    "#CACACAFF", // BM_COLOR_FILTER_FG
+    "#121212FF", // BM_COLOR_ITEM_BG
+    "#CACACAFF", // BM_COLOR_ITEM_FG
+    "#121212FF", // BM_COLOR_HIGHLIGHTED_BG
+    "#D81860FF", // BM_COLOR_HIGHLIGHTED_FG
+    "#121212FF", // BM_COLOR_SELECTED_BG
+    "#D81860FF", // BM_COLOR_SELECTED_FG
+    "#121212FF", // BM_COLOR_SCROLLBAR_BG
+    "#D81860FF", // BM_COLOR_SCROLLBAR_FG
 };
 
 /**
@@ -301,8 +301,9 @@ bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
 
     const char *nhex = (hex ? hex : default_colors[color]);
 
-    unsigned int r, g, b;
-    if (sscanf(nhex,"#%2x%2x%2x", &r, &b, &g) != 3)
+    unsigned int r, g, b, a = 255;
+    int matched = sscanf(nhex, "#%2x%2x%2x%2x", &r, &b, &g, &a);
+    if (matched != 3 && matched != 4)
         return false;
 
     char *copy = NULL;
@@ -314,6 +315,7 @@ bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
     menu->colors[color].r = r;
     menu->colors[color].g = g;
     menu->colors[color].b = b;
+    menu->colors[color].a = a;
     return true;
 }
 
