@@ -35,10 +35,12 @@ wayland: bemenu-renderer-wayland.so
 %.a:
 	$(LINK.c) -c $(filter %.c,$^) $(LDLIBS) -o $@
 
+$(libs): private override full=$(addsuffix .$(VERSION), $@)
+$(libs): private override major=$(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 $(libs): %: VERSION .git/index
-	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(addsuffix .$(VERSION), $@) -Wl,-soname
-	ln -fs $(addsuffix .$(VERSION), $@) $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
-	ln -fs $(addsuffix .$(VERSION), $@) $@
+	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(full) -Wl,-soname=$(major)
+	ln -fs $(full) $(major)
+	ln -fs $(full) $@
 
 $(pkgconfigs): %: VERSION %.in
 	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir)," $(addsuffix .in, $@) > $@
