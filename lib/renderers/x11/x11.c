@@ -98,6 +98,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XK_Insert:
             return BM_KEY_SHIFT_RETURN;
 
+        case XK_KP_Enter:
         case XK_Return:
             return (mods & MOD_CTRL ? BM_KEY_CONTROL_RETURN : (mods & MOD_SHIFT ? BM_KEY_SHIFT_RETURN : BM_KEY_RETURN));
 
