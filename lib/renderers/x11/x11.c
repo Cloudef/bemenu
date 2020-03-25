@@ -176,7 +176,7 @@ set_monitor(const struct bm_menu *menu, uint32_t monitor)
 {
     struct x11 *x11 = menu->renderer->internal;
     assert(x11);
-    bm_x11_window_set_monitor(&x11->window, monitor);
+    bm_x11_window_set_monitor(&x11->window, (monitor != (uint32_t)-1 ? monitor : 0));
 }
 
 static void
