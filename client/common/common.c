@@ -309,7 +309,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->grab = true;
                 break;
             case 'm':
-                client->monitor = strtol(optarg, NULL, 10);
+                client->monitor = (!strcmp(optarg, "all") ? -1 : strtol(optarg, NULL, 10));
                 break;
             case 'n':
                 client->no_overlap = true;

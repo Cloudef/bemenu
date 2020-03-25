@@ -241,16 +241,18 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
 {
     destroy_windows(wayland);
 
-    size_t monitors = 0;
+    uint32_t monitors = 0;
     struct output *output;
     wl_list_for_each(output, &wayland->outputs, link)
         monitors++;
 
-    size_t monitor = 0;
+    uint32_t monitor = 0;
     wl_list_for_each(output, &wayland->outputs, link) {
-        if (menu->monitor < monitors && monitor != menu->monitor) {
-            ++monitor;
-            continue;
+        if (menu->monitor != (uint32_t)-1) {
+            if (menu->monitor < monitors && monitor != menu->monitor) {
+                ++monitor;
+                continue;
+            }
         }
 
         struct wl_surface *surface;
@@ -270,7 +272,7 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
         window->max_height = output->height;
         window->render_pending = true;
         wl_list_insert(&wayland->windows, &window->link);
-        break;
+        if (menu->monitor != (uint32_t)-1) break;
     }
 
     set_overlap(menu, menu->overlap);
