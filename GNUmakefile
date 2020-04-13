@@ -73,7 +73,9 @@ lib/renderers/wayland/wlr-layer-shell-unstable-v1.h: lib/renderers/wayland/wlr-l
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.c: lib/renderers/wayland/wlr-layer-shell-unstable-v1.xml
 	wayland-scanner private-code < $^ > $@
 
+xdg-shell.a: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client)
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
+wlr-layer-shell.a: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client)
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
 bemenu-renderer-wayland.so: private override LDLIBS += $(shell pkg-config --libs wayland-client cairo pango pangocairo xkbcommon)
 bemenu-renderer-wayland.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon)
