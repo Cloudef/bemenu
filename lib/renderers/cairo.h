@@ -155,11 +155,8 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
     pango_cairo_show_layout(cairo->cr, layout);
 
     if (paint->draw_cursor) {
-        size_t chr = 0;
-        for (size_t c = 0; c < paint->cursor; ++chr, c += bm_utf8_rune_next(buffer, c));
-
         PangoRectangle rect;
-        pango_layout_index_to_pos(layout, chr, &rect);
+        pango_layout_index_to_pos(layout, paint->cursor, &rect);
 
         if (!rect.width) {
             struct cairo_result result = {0};
