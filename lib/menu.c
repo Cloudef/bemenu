@@ -710,8 +710,11 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_DELETE:
-            if (menu->filter)
-                bm_utf8_rune_remove(menu->filter, menu->cursor + 1, NULL);
+            if (menu->filter) {
+                size_t width = bm_utf8_rune_next(menu->filter, menu->cursor);
+                if (width)
+                    bm_utf8_rune_remove(menu->filter, menu->cursor + width, NULL);
+            }
             break;
 
         case BM_KEY_LINE_DELETE_LEFT:
