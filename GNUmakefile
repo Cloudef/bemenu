@@ -100,10 +100,6 @@ install-libs: $(libs)
 install-lib-symlinks: $(libs) | install-libs
 	cp -RP $^ $(addsuffix .$(firstword $(subst ., ,$(VERSION))), $^) "$(DESTDIR)$(PREFIX)$(libdir)"
 
-install-renderers:
-	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
-	-cp $(renderers) "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
-
 install-bins:
 	mkdir -p "$(DESTDIR)$(PREFIX)$(bindir)"
 	-cp $(bins) "$(DESTDIR)$(PREFIX)$(bindir)"
@@ -113,7 +109,23 @@ install-man: man/bemenu.1 man/bemenu-run.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
 	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
 
-install: install-pkgconfig install-include install-lib-symlinks install-renderers install-bins install-man
+install-renderers: install-curses install-wayland install-x11
+
+install-curses: curses
+	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	install bemenu-renderer-curses.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+
+install-wayland: wayland
+	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	install bemenu-renderer-wayland.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+
+install-x11: x11
+	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	install bemenu-renderer-x11.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+
+install-base: install-pkgconfig install-include install-lib-symlinks install-bins install-man
+
+install: install-base install-renderers
 	@echo "Install OK!"
 
 doxygen:
@@ -128,4 +140,6 @@ clean:
 	$(RM) -r html
 
 .DELETE_ON_ERROR:
-.PHONY: all clean install install-pkgconfig install-include install-libs install-lib-symlinks install-man install-bins install-renderers doxygen clients curses x11 wayland
+.PHONY: all clean install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
+		install-man install-bins install-renderers install-curses install-wayland install-x11 \
+		doxygen clients curses x11 wayland
