@@ -38,7 +38,7 @@ wayland: bemenu-renderer-wayland.so
 $(libs): private override full=$(addsuffix .$(VERSION), $@)
 $(libs): private override major=$(addsuffix .$(firstword $(subst ., ,$(VERSION))), $@)
 $(libs): %: VERSION .git/index
-	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(full) -Wl,-soname=$(major)
+	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -o $(full) -Wl,-soname,$(major)
 	ln -fs $(full) $(major)
 	ln -fs $(full) $@
 
