@@ -50,9 +50,9 @@ brew install make pkg-config
 
 # You may need to setup your pkg-config to point to the brew version of the libraries
 # For example to build curses backend, you'd do:
-PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" gmake curses
+PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" sh build-osx.sh curses
 
-# Other than that, follow the normal build steps, but use gmake instead of make
+# Other than that, follow the normal build steps, but use `build-osx.sh` instead of make
 ```
 
 ## Dependencies
