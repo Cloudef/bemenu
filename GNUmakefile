@@ -111,17 +111,17 @@ install-man: man/bemenu.1 man/bemenu-run.1
 
 install-renderers: install-curses install-wayland install-x11
 
-install-curses: curses
-	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
-	install bemenu-renderer-curses.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+install-curses:
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	-cp bemenu-renderer-curses.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 
-install-wayland: wayland
-	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
-	install bemenu-renderer-wayland.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+install-wayland:
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	-cp bemenu-renderer-wayland.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 
-install-x11: x11
-	install -d "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
-	install bemenu-renderer-x11.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+install-x11:
+	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	-cp bemenu-renderer-x11.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 
 install-base: install-pkgconfig install-include install-lib-symlinks install-bins install-man
 
