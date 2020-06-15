@@ -137,7 +137,7 @@ enum bm_filter_mode {
 /**
  * Scrollbar display mode constants for bm_menu instance scrollbar.
  *
- * - @link ::bm_scrollbar_mode BM_SCROLLBAR_ALWAYS @endlink means that scrollbar is not displayed.
+ * - @link ::bm_scrollbar_mode BM_SCROLLBAR_NONE @endlink means that scrollbar is not displayed.
  * - @link ::bm_scrollbar_mode BM_SCROLLBAR_ALWAYS @endlink means that scrollbar is displayed always.
  * - @link ::bm_scrollbar_mode BM_SCROLLBAR_AUTOHIDE @endlink means that scrollbar is only displayed when there are more items than lines.
  *
