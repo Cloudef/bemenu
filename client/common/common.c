@@ -173,7 +173,7 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
-          " --scrollbar           display scrollbar. (always, autohide)\n"
+          " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
           " --no-exec             do not execute command. (bemenu-run)\n\n"
@@ -290,7 +290,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->selected = strtol(optarg, NULL, 10);
                 break;
             case 0x100:
-                client->scrollbar = (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE));
+                client->scrollbar = (!strcmp(optarg, "none") ? BM_SCROLLBAR_NONE : (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE)));
                 break;
             case 0x115:
                 client->ifne = true;
