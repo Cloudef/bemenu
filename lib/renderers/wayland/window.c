@@ -146,12 +146,13 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
     if (!(surf = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
         goto fail;
 
+    buffer->cairo.scale = scale;
+
     if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
         cairo_surface_destroy(surf);
         goto fail;
     }
 
-    buffer->cairo.scale = scale;
     buffer->width = width;
     buffer->height = height;
     return true;
@@ -232,7 +233,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
             break;
 
         struct cairo_paint_result result;
-        window->notify.render(&buffer->cairo, buffer->width, window->max_height * window->scale, menu, &result);
+        window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
         if (window->height == result.height)

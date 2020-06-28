@@ -21,12 +21,13 @@ create_buffer(struct window *window, struct buffer *buffer, int32_t width, int32
 
     cairo_xlib_surface_set_size(surf, width, height);
 
+    buffer->cairo.scale = 1;
+
     if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
         cairo_surface_destroy(surf);
         goto fail;
     }
 
-    buffer->cairo.scale = 1;
     buffer->width = width;
     buffer->height = height;
     buffer->created = true;

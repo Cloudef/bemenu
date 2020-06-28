@@ -63,6 +63,8 @@ bm_cairo_create_for_surface(struct cairo *cairo, cairo_surface_t *surface)
         goto fail;
 
     cairo->surface = surface;
+    assert(cairo->scale > 0);
+    cairo_surface_set_device_scale(surface, cairo->scale, cairo->scale);
     return true;
 
 fail:
@@ -131,9 +133,6 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
 
     if (!ret)
         return false;
-
-    assert(cairo->scale > 0);
-    cairo_scale(cairo->cr, cairo->scale, cairo->scale);
 
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
     pango_cairo_update_layout(cairo->cr, layout);
@@ -205,6 +204,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 {
     assert(cairo && menu && out_result);
 
+    max_height /= cairo->scale;
     uint32_t height = fmin(menu->line_height, max_height);
 
     memset(out_result, 0, sizeof(struct cairo_paint_result));
@@ -378,6 +378,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }
     }
+
+    out_result->height *= cairo->scale;
 }
 
 #endif /* _BM_CAIRO_H */
