@@ -263,7 +263,13 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
 
         struct window *window = calloc(1, sizeof(struct window));
         window->bottom = menu->bottom;
-        window->scale = output->scale;
+
+        const char *scale = getenv("BEMENU_SCALE");
+        if (scale) {
+            window->scale = fmax(strtof(scale, NULL), 1.0f);
+        } else {
+            window->scale = output->scale;
+        }
 
         if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
             free(window);

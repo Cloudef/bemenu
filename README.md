@@ -73,6 +73,7 @@ All dependencies are searched with `pkg-config`
 | BEMENU_BACKEND   | Force backend by name                   | x11, wayland, curses |
 | BEMENU_RENDERER  | Force backend by loading a .so file     | Path to the .so file |
 | BEMENU_RENDERERS | Override the backend search path        | Path to a directory  |
+| BEMENU_SCALE     | Override the rendering scale factor     | Float value          |
 
 ## About Wayland support
 
