@@ -150,6 +150,37 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XK_m:
             return (mods & MOD_CTRL ? BM_KEY_RETURN : BM_KEY_UNICODE);
 
+        case XK_1:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_1;
+            break;
+        case XK_2:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_2;
+            break;
+        case XK_3:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_3;
+            break;
+        case XK_4:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_4;
+            break;
+        case XK_5:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_5;
+            break;
+        case XK_6:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_6;
+            break;
+        case XK_7:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_7;
+            break;
+        case XK_8:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_8;
+            break;
+        case XK_9:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_9;
+            break;
+        case XK_0:
+            if ((mods & MOD_ALT)) return BM_KEY_CUSTOM_10;
+            break;
+
         default: break;
     }
 

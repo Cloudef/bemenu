@@ -777,6 +777,16 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
         case BM_KEY_CONTROL_RETURN:
         case BM_KEY_RETURN:
+        case BM_KEY_CUSTOM_1:
+        case BM_KEY_CUSTOM_2:
+        case BM_KEY_CUSTOM_3:
+        case BM_KEY_CUSTOM_4:
+        case BM_KEY_CUSTOM_5:
+        case BM_KEY_CUSTOM_6:
+        case BM_KEY_CUSTOM_7:
+        case BM_KEY_CUSTOM_8:
+        case BM_KEY_CUSTOM_9:
+        case BM_KEY_CUSTOM_10:
             {
                 struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
                 if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
@@ -795,13 +805,37 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
     bm_menu_filter(menu);
 
     switch (key) {
+        case BM_KEY_CUSTOM_1:
+        case BM_KEY_CUSTOM_2:
+        case BM_KEY_CUSTOM_3:
+        case BM_KEY_CUSTOM_4:
+        case BM_KEY_CUSTOM_5:
+        case BM_KEY_CUSTOM_6:
+        case BM_KEY_CUSTOM_7:
+        case BM_KEY_CUSTOM_8:
+        case BM_KEY_CUSTOM_9:
+        case BM_KEY_CUSTOM_10:
         case BM_KEY_SHIFT_RETURN:
         case BM_KEY_RETURN:
             if (!bm_menu_get_selected_items(menu, NULL)) {
                 bm_item_set_text(menu->filter_item, menu->filter);
                 list_add_item(&menu->selection, menu->filter_item);
             }
+            switch (key) {
+                case BM_KEY_CUSTOM_1: return BM_RUN_RESULT_CUSTOM_1;
+                case BM_KEY_CUSTOM_2: return BM_RUN_RESULT_CUSTOM_2;
+                case BM_KEY_CUSTOM_3: return BM_RUN_RESULT_CUSTOM_3;
+                case BM_KEY_CUSTOM_4: return BM_RUN_RESULT_CUSTOM_4;
+                case BM_KEY_CUSTOM_5: return BM_RUN_RESULT_CUSTOM_5;
+                case BM_KEY_CUSTOM_6: return BM_RUN_RESULT_CUSTOM_6;
+                case BM_KEY_CUSTOM_7: return BM_RUN_RESULT_CUSTOM_7;
+                case BM_KEY_CUSTOM_8: return BM_RUN_RESULT_CUSTOM_8;
+                case BM_KEY_CUSTOM_9: return BM_RUN_RESULT_CUSTOM_9;
+                case BM_KEY_CUSTOM_10: return BM_RUN_RESULT_CUSTOM_10;
+                default: break;
+            }
             return BM_RUN_RESULT_SELECTED;
+
         case BM_KEY_ESCAPE: return BM_RUN_RESULT_CANCEL;
         default: break;
     }

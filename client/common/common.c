@@ -436,10 +436,25 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
         key = bm_menu_poll_key(menu, &unicode);
     } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
 
-    if (status == BM_RUN_RESULT_SELECTED) {
-        uint32_t i, count;
-        struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-        for (i = 0; i < count; ++i) item_cb(client, items[i]);
+    switch (status) {
+        case BM_RUN_RESULT_SELECTED:
+        case BM_RUN_RESULT_CUSTOM_1:
+        case BM_RUN_RESULT_CUSTOM_2:
+        case BM_RUN_RESULT_CUSTOM_3:
+        case BM_RUN_RESULT_CUSTOM_4:
+        case BM_RUN_RESULT_CUSTOM_5:
+        case BM_RUN_RESULT_CUSTOM_6:
+        case BM_RUN_RESULT_CUSTOM_7:
+        case BM_RUN_RESULT_CUSTOM_8:
+        case BM_RUN_RESULT_CUSTOM_9:
+        case BM_RUN_RESULT_CUSTOM_10:
+            {
+            uint32_t i, count;
+            struct bm_item **items = bm_menu_get_selected_items(menu, &count);
+            for (i = 0; i < count; ++i) item_cb(client, items[i]);
+            }
+            break;
+        default: break;
     }
 
     return status;
