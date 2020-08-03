@@ -81,7 +81,24 @@ main(int argc, char **argv)
     read_items_to_menu_from_stdin(menu);
     const enum bm_run_result status = run_menu(&client, menu, item_cb);
     bm_menu_free(menu);
-    return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
+    switch (status) {
+        case BM_RUN_RESULT_SELECTED:
+            return EXIT_SUCCESS;
+
+        case BM_RUN_RESULT_CUSTOM_1: return 10;
+        case BM_RUN_RESULT_CUSTOM_2: return 11;
+        case BM_RUN_RESULT_CUSTOM_3: return 12;
+        case BM_RUN_RESULT_CUSTOM_4: return 13;
+        case BM_RUN_RESULT_CUSTOM_5: return 14;
+        case BM_RUN_RESULT_CUSTOM_6: return 15;
+        case BM_RUN_RESULT_CUSTOM_7: return 16;
+        case BM_RUN_RESULT_CUSTOM_8: return 17;
+        case BM_RUN_RESULT_CUSTOM_9: return 18;
+        case BM_RUN_RESULT_CUSTOM_10: return 19;
+
+        default:
+            return EXIT_FAILURE;
+    }
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

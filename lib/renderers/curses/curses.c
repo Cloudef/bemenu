@@ -290,11 +290,30 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
     assert(unicode);
     *unicode = 0;
     curses.polled_once = true;
+    bool alt = false;
 
     if (!curses.stdscreen || curses.should_terminate)
         return BM_KEY_NONE;
 
     get_wch((wint_t*)unicode);
+
+    // alt is sent as esc, so read another character to determine if this is alt+char.
+    if (*unicode == 27){
+        nodelay(curses.stdscreen, true);
+        int ch = getch();
+        if (ch != ERR){
+            printf("alt-%d\n", ch);
+            *unicode = ch;
+            alt = true;
+        }
+        nodelay(curses.stdscreen, false);
+    }
+
+    // some terminals set high ascii bit when pressing alt
+    if (*unicode & (1 << 7)) {
+        *unicode &= ~(1 << 7);
+        alt = true;
+    }
 
     switch (*unicode) {
 #if KEY_RESIZE
@@ -380,6 +399,37 @@ poll_key(const struct bm_menu *menu, uint32_t *unicode)
         case 13: /* C-m */
             terminate();
             return BM_KEY_RETURN;
+
+        case 49:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_1; }
+            break;
+        case 50:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_2; }
+            break;
+        case 51:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_3; }
+            break;
+        case 52:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_4; }
+            break;
+        case 53:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_5; }
+            break;
+        case 54:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_6; }
+            break;
+        case 55:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_7; }
+            break;
+        case 56:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_8; }
+            break;
+        case 57:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_9; }
+            break;
+        case 48:
+            if (alt) { terminate(); return BM_KEY_CUSTOM_10; }
+            break;
 
         case 7: /* C-g */
         case 27: /* Escape */
