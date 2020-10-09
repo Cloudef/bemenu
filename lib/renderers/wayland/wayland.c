@@ -72,6 +72,10 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     wayland->input.sym = XKB_KEY_NoSymbol;
     wayland->input.code = 0;
 
+    if (!wayland->input.key_pending)
+	    return BM_KEY_UNICODE;
+    wayland->input.key_pending = false;
+
     switch (sym) {
         case XKB_KEY_Up:
             return BM_KEY_UP;
@@ -381,6 +385,7 @@ constructor(struct bm_menu *menu)
     wayland->fds.display = wl_display_get_fd(wayland->display);
     wayland->fds.repeat = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK);
     wayland->input.repeat_fd = &wayland->fds.repeat;
+    wayland->input.key_pending = false;
     recreate_windows(menu, wayland);
 
     if (!efd && (efd = epoll_create1(EPOLL_CLOEXEC)) < 0)
