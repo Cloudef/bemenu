@@ -221,7 +221,14 @@ render(const struct bm_menu *menu)
         doffset -= (prev ? prev : 1);
     }
 
-    draw_line(0, 0, "%*s%s", title_len, "", (menu->filter ? menu->filter + doffset : ""));
+    char *filter_text = (menu->filter ? menu->filter : "");
+    size_t filter_len = strlen(filter_text);
+    if (menu->password) {
+        memset(filter_text, '*', filter_len);
+        filter_text[filter_len] = '\0';
+    }
+
+    draw_line(0, 0, "%*s%s", title_len, "", (filter_text + doffset));
 
     if (menu->title && title_len > 0) {
         attron(COLOR_PAIR(1));

@@ -174,6 +174,7 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
+          " -x, --password        hide input.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
@@ -228,6 +229,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
+        { "password",    no_argument,       0, 'x' },
         { "scrollbar",   required_argument, 0, 0x100 },
         { "ifne",        no_argument,       0, 0x115 },
         { "fork",        no_argument,       0, 0x116 },
@@ -262,7 +264,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
 
     for (optind = 0;;) {
         int32_t opt;
-        if ((opt = getopt_long(*argc, *argv, "hviwl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -305,6 +307,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x117:
                 client->no_exec = true;
+                break;
+            case 'x':
+                client->password = true;
                 break;
 
             case 'b':
@@ -410,6 +415,7 @@ menu_with_options(struct client *client)
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
+    bm_menu_set_password(menu, client->password);
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);

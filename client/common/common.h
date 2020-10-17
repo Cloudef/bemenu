@@ -23,6 +23,7 @@ struct client {
     bool no_overlap;
     bool force_fork, fork;
     bool no_exec;
+    bool password;
 };
 
 char* cstrcopy(const char *str, size_t size);

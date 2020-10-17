@@ -414,6 +414,24 @@ bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap)
         menu->renderer->api.set_overlap(menu, overlap);
 }
 
+void
+bm_menu_set_password(struct bm_menu *menu, bool password)
+{
+    assert(menu);
+
+    if (menu->password == password)
+        return;
+
+    menu->password = password;
+}
+
+bool
+bm_menu_get_password(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->password;
+}
+
 bool
 bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t index)
 {
