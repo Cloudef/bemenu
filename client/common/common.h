@@ -11,6 +11,7 @@ struct client {
     const char *title;
     const char *prefix;
     const char *font;
+    const char *initial_filter;
     uint32_t line_height;
     uint32_t lines;
     uint32_t selected;
