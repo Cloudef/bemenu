@@ -168,6 +168,7 @@ usage(FILE *out, const char *name)
           " -h, --help            display this help and exit.\n"
           " -v, --version         display version.\n"
           " -i, --ignorecase      match items case insensitively.\n"
+          " -F, --filter          filter entries for a given string.\n"
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
@@ -221,6 +222,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "version",     no_argument,       0, 'v' },
 
         { "ignorecase",  no_argument,       0, 'i' },
+        { "filter",      required_argument, 0, 'F' },
         { "wrap",        no_argument,       0, 'w' },
         { "list",        required_argument, 0, 'l' },
         { "prompt",      required_argument, 0, 'p' },
@@ -273,6 +275,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
 
             case 'i':
                 client->filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
+                break;
+            case 'F':
+                client->initial_filter = optarg;
                 break;
             case 'w':
                 client->wrap = true;
@@ -424,6 +429,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
 {
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
+    bm_menu_set_filter(menu, client->initial_filter);
 
     if (client->ifne && !bm_menu_get_items(menu, NULL))
         return BM_RUN_RESULT_CANCEL;
