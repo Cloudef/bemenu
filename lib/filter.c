@@ -88,7 +88,7 @@ fail:
  * @param out_nmemb uint32_t reference to filtered items count.
  * @return Pointer to array of bm_item pointers.
  */
-struct bm_item**
+static struct bm_item**
 filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), uint32_t *out_nmemb)
 {
     assert(menu && fstrstr && fstrncmp && out_nmemb);
