@@ -415,7 +415,7 @@ bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap)
 }
 
 bool
-bm_menu_add_items_at(struct bm_menu *menu, struct bm_item *item, uint32_t index)
+bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t index)
 {
     assert(menu);
     return list_add_item_at(&menu->items, item, index);
