@@ -474,7 +474,7 @@ constructor(struct bm_menu *menu)
     return true;
 }
 
-extern const char*
+BM_PUBLIC extern const char*
 register_renderer(struct render_api *api)
 {
     api->constructor = constructor;

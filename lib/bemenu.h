@@ -1,6 +1,22 @@
 #ifndef _BEMENU_H_
 #define _BEMENU_H_
 
+/*
+ * When using a compiler with support for GNU C extensions (GCC, Clang),
+ * explicitly mark functions shared across library boundaries as visible.
+ *
+ * This is the default visibility and has no effect when compiling with the
+ * default CFLAGS. When compiling with -fvisibility=hidden, however, this
+ * exports only functions marked BM_PUBLIC and hides all others.
+ *
+ * https://gcc.gnu.org/wiki/Visibility
+ */
+#if __GNUC__ >= 4
+#  define BM_PUBLIC __attribute__((visibility ("default")))
+#else
+#  define BM_PUBLIC
+#endif
+
 /**
  * @file bemenu.h
  *
@@ -51,7 +67,7 @@ struct bm_item;
  *
  * @return true on success, false on failure.
  */
-bool bm_init(void);
+BM_PUBLIC bool bm_init(void);
 
 /**
  * Get list of available renderers.
@@ -59,7 +75,7 @@ bool bm_init(void);
  * @param out_nmemb Reference to uint32_t where total count of returned renderers will be stored.
  * @return Pointer to array of bm_renderer instances.
  */
-const struct bm_renderer** bm_get_renderers(uint32_t *out_nmemb);
+BM_PUBLIC const struct bm_renderer** bm_get_renderers(uint32_t *out_nmemb);
 
 /** @} Library Initialization */
 
@@ -74,7 +90,7 @@ const struct bm_renderer** bm_get_renderers(uint32_t *out_nmemb);
  *
  * @return Null terminated C "string" to version string.
  */
-const char* bm_version(void);
+BM_PUBLIC const char* bm_version(void);
 
 /**  @} Library Version */
 
@@ -105,7 +121,7 @@ enum bm_priorty {
  * @param renderer bm_renderer instance.
  * @return Null terminated C "string" to renderer's name.
  */
-const char* bm_renderer_get_name(const struct bm_renderer *renderer);
+BM_PUBLIC const char* bm_renderer_get_name(const struct bm_renderer *renderer);
 
 /**
  * Get priorty of the renderer.
@@ -113,7 +129,7 @@ const char* bm_renderer_get_name(const struct bm_renderer *renderer);
  * @param renderer bm_renderer instance.
  * @return bm_priorty enum value.
  */
-enum bm_priorty bm_renderer_get_priorty(const struct bm_renderer *renderer);
+BM_PUBLIC enum bm_priorty bm_renderer_get_priorty(const struct bm_renderer *renderer);
 
 /**
  * @} Renderer */
@@ -250,21 +266,21 @@ enum bm_color {
  * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
  * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-struct bm_menu* bm_menu_new(const char *renderer);
+BM_PUBLIC struct bm_menu* bm_menu_new(const char *renderer);
 
 /**
  * Release bm_menu instance.
  *
  * @param menu bm_menu instance to be freed from memory.
  */
-void bm_menu_free(struct bm_menu *menu);
+BM_PUBLIC void bm_menu_free(struct bm_menu *menu);
 
 /**
  * Release items inside bm_menu instance.
  *
  * @param menu bm_menu instance which items will be freed from memory.
  */
-void bm_menu_free_items(struct bm_menu *menu);
+BM_PUBLIC void bm_menu_free_items(struct bm_menu *menu);
 
 /**  @} Menu Memory */
 
@@ -278,7 +294,7 @@ void bm_menu_free_items(struct bm_menu *menu);
  * @param menu bm_menu instance which renderer to get.
  * @return Pointer to bm_renderer instance.
  */
-const struct bm_renderer* bm_menu_get_renderer(struct bm_menu *menu);
+BM_PUBLIC const struct bm_renderer* bm_menu_get_renderer(struct bm_menu *menu);
 
 /**
  * Set userdata pointer to bm_menu instance.
@@ -287,7 +303,7 @@ const struct bm_renderer* bm_menu_get_renderer(struct bm_menu *menu);
  * @param menu bm_menu instance where to set userdata pointer.
  * @param userdata Pointer to userdata.
  */
-void bm_menu_set_userdata(struct bm_menu *menu, void *userdata);
+BM_PUBLIC void bm_menu_set_userdata(struct bm_menu *menu, void *userdata);
 
 /**
  * Get userdata pointer from bm_menu instance.
@@ -295,7 +311,7 @@ void bm_menu_set_userdata(struct bm_menu *menu, void *userdata);
  * @param menu bm_menu instance which userdata pointer to get.
  * @return Pointer for unmodified userdata.
  */
-void* bm_menu_get_userdata(struct bm_menu *menu);
+BM_PUBLIC void* bm_menu_get_userdata(struct bm_menu *menu);
 
 /**
  * Set highlight prefix.
@@ -304,7 +320,7 @@ void* bm_menu_get_userdata(struct bm_menu *menu);
  * @param menu bm_menu instance where to set highlight prefix.
  * @param prefix Null terminated C "string" to act as prefix for highlighted item. May be set **NULL** for none.
  */
-void bm_menu_set_prefix(struct bm_menu *menu, const char *prefix);
+BM_PUBLIC void bm_menu_set_prefix(struct bm_menu *menu, const char *prefix);
 
 /**
  * Get highlight prefix.
@@ -312,7 +328,7 @@ void bm_menu_set_prefix(struct bm_menu *menu, const char *prefix);
  * @param menu bm_menu instance where to get highlight prefix.
  * @param Const pointer to current highlight prefix, may be **NULL** if empty.
  */
-const char* bm_menu_get_prefix(struct bm_menu *menu);
+BM_PUBLIC const char* bm_menu_get_prefix(struct bm_menu *menu);
 
 /**
  * Set filter text to bm_menu instance.
@@ -322,7 +338,7 @@ const char* bm_menu_get_prefix(struct bm_menu *menu);
  * @param menu bm_menu instance where to set filter.
  * @param filter Null terminated C "string" to act as filter. May be set **NULL** for none.
  */
-void bm_menu_set_filter(struct bm_menu *menu, const char *filter);
+BM_PUBLIC void bm_menu_set_filter(struct bm_menu *menu, const char *filter);
 
 /**
  * Get filter text from bm_menu instance.
@@ -330,7 +346,7 @@ void bm_menu_set_filter(struct bm_menu *menu, const char *filter);
  * @param menu bm_menu instance where to get filter.
  * @return Const pointer to current filter text, may be **NULL** if empty.
  */
-const char* bm_menu_get_filter(struct bm_menu *menu);
+BM_PUBLIC const char* bm_menu_get_filter(struct bm_menu *menu);
 
 /**
  * Set active filter mode to bm_menu instance.
@@ -338,7 +354,7 @@ const char* bm_menu_get_filter(struct bm_menu *menu);
  * @param menu bm_menu instance where to set filter mode.
  * @param mode bm_filter_mode constant.
  */
-void bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode);
+BM_PUBLIC void bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode);
 
 /**
  * Get active filter mode from bm_menu instance.
@@ -346,7 +362,7 @@ void bm_menu_set_filter_mode(struct bm_menu *menu, enum bm_filter_mode mode);
  * @param menu bm_menu instance where to get filter mode.
  * @return bm_filter_mode constant.
  */
-enum bm_filter_mode bm_menu_get_filter_mode(const struct bm_menu *menu);
+BM_PUBLIC enum bm_filter_mode bm_menu_get_filter_mode(const struct bm_menu *menu);
 
 /**
  * Set amount of max vertical lines to be shown.
@@ -355,7 +371,7 @@ enum bm_filter_mode bm_menu_get_filter_mode(const struct bm_menu *menu);
  * @param menu bm_menu instance where to set max vertical line amount.
  * @param lines 0 for single line layout, > 0 to show that many lines.
  */
-void bm_menu_set_lines(struct bm_menu *menu, uint32_t lines);
+BM_PUBLIC void bm_menu_set_lines(struct bm_menu *menu, uint32_t lines);
 
 /**
  * Get amount of max vertical lines to be shown.
@@ -363,7 +379,7 @@ void bm_menu_set_lines(struct bm_menu *menu, uint32_t lines);
  * @param menu bm_menu instance where to get max vertical line amount.
  * @return uint32_t for max amount of vertical lines to be shown.
  */
-uint32_t bm_menu_get_lines(struct bm_menu *menu);
+BM_PUBLIC uint32_t bm_menu_get_lines(struct bm_menu *menu);
 
 /**
  * Set selection wrapping on/off.
@@ -371,7 +387,7 @@ uint32_t bm_menu_get_lines(struct bm_menu *menu);
  * @param menu bm_menu instance where to toggle selection wrapping.
  * @param wrap true/false.
  */
-void bm_menu_set_wrap(struct bm_menu *menu, bool wrap);
+BM_PUBLIC void bm_menu_set_wrap(struct bm_menu *menu, bool wrap);
 
 /**
  * Get selection wrapping state.
@@ -379,7 +395,7 @@ void bm_menu_set_wrap(struct bm_menu *menu, bool wrap);
  * @param menu bm_menu instance where to get selection wrapping state.
  * @return int for wrap state.
  */
-bool bm_menu_get_wrap(const struct bm_menu *menu);
+BM_PUBLIC bool bm_menu_get_wrap(const struct bm_menu *menu);
 
 /**
  * Set title to bm_menu instance.
@@ -388,7 +404,7 @@ bool bm_menu_get_wrap(const struct bm_menu *menu);
  * @param title C "string" to set as title, can be **NULL** for empty title.
  * @return true if set was succesful, false if out of memory.
  */
-bool bm_menu_set_title(struct bm_menu *menu, const char *title);
+BM_PUBLIC bool bm_menu_set_title(struct bm_menu *menu, const char *title);
 
 /**
  * Get title from bm_menu instance.
@@ -396,7 +412,7 @@ bool bm_menu_set_title(struct bm_menu *menu, const char *title);
  * @param menu bm_menu instance where to get title from.
  * @return Pointer to null terminated C "string", can be **NULL** for empty title.
  */
-const char* bm_menu_get_title(const struct bm_menu *menu);
+BM_PUBLIC const char* bm_menu_get_title(const struct bm_menu *menu);
 
 /**
  * Set font description to bm_menu instance.
@@ -405,7 +421,7 @@ const char* bm_menu_get_title(const struct bm_menu *menu);
  * @param font C "string" for a **pango style font description**, can be **NULL** for default (Terminus 9).
  * @return true if set was succesful, false if out of memory.
  */
-bool bm_menu_set_font(struct bm_menu *menu, const char *font);
+BM_PUBLIC bool bm_menu_set_font(struct bm_menu *menu, const char *font);
 
 /**
  * Get font description from bm_menu instance.
@@ -413,7 +429,7 @@ bool bm_menu_set_font(struct bm_menu *menu, const char *font);
  * @param menu bm_menu instance where to get font description from.
  * @return Pointer to null terminated C "string".
  */
-const char* bm_menu_get_font(const struct bm_menu *menu);
+BM_PUBLIC const char* bm_menu_get_font(const struct bm_menu *menu);
 
 /**
  * Set size of line in pixels.
@@ -422,7 +438,7 @@ const char* bm_menu_get_font(const struct bm_menu *menu);
  * @param menu bm_menu instance where to set line height.
  * @param line_height 0 for default line height, > 0 for that many pixels.
  */
-void bm_menu_set_line_height(struct bm_menu *menu, uint32_t line_height);
+BM_PUBLIC void bm_menu_set_line_height(struct bm_menu *menu, uint32_t line_height);
 
 /**
  * Get size of line in pixels.
@@ -430,7 +446,7 @@ void bm_menu_set_line_height(struct bm_menu *menu, uint32_t line_height);
  * @param menu bm_menu instance where to get line height.
  * @return uint32_t for max amount of vertical lines to be shown.
  */
-uint32_t bm_menu_get_line_height(struct bm_menu *menu);
+BM_PUBLIC uint32_t bm_menu_get_line_height(struct bm_menu *menu);
 
 /**
  * Set a hexadecimal color for element.
@@ -440,7 +456,7 @@ uint32_t bm_menu_get_line_height(struct bm_menu *menu);
  * @param hex Color in hexadecimal format starting with '#'.
  * @return true if set was succesful, false if out of memory.
  */
-bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex);
+BM_PUBLIC bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex);
 
 /**
  * Get hexadecimal color for element.
@@ -449,7 +465,7 @@ bool bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *he
  * @param color bm_color type.
  * @return Pointer to null terminated C "string".
  */
-const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
+BM_PUBLIC const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
 
 /**
  * Set scrollbar display mode.
@@ -457,7 +473,7 @@ const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color);
  * @param menu bm_menu instance to set scrollbar for.
  * @param mode bm_scrollbar_mode constant.
  */
-void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode);
+BM_PUBLIC void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode);
 
 /**
  * Return current scrollbar display mode.
@@ -465,7 +481,7 @@ void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode);
  * @param menu bm_menu instance where to get scrollbar display state from.
  * @return bm_scrollbar_mode constant.
  */
-enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
+BM_PUBLIC enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
 
 /**
  * Display menu at bottom of the screen.
@@ -474,7 +490,7 @@ enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
  * @param menu bm_menu instance to set bottom mode for.
  * @param bottom true for bottom mode, false for top mode.
  */
-void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
+BM_PUBLIC void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
 
 /**
  * Is menu being displayed at bottom of the screen?
@@ -482,7 +498,7 @@ void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
  * @param menu bm_menu instance where to get bottom mode from.
  * @return true if bottom mode, false otherwise.
  */
-bool bm_menu_get_bottom(struct bm_menu *menu);
+BM_PUBLIC bool bm_menu_get_bottom(struct bm_menu *menu);
 
 /**
  * Display menu at monitor index.
@@ -492,7 +508,7 @@ bool bm_menu_get_bottom(struct bm_menu *menu);
  * @param menu bm_menu instance to set monitor for.
  * @param monitor Monitor index starting from 1.
  */
-void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
+BM_PUBLIC void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
 
 /**
  * Return index for current monitor.
@@ -500,7 +516,7 @@ void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
  * @param menu bm_menu instance where to get current monitor from.
  * @return Monitor index starting from 1.
  */
-uint32_t bm_menu_get_monitor(struct bm_menu *menu);
+BM_PUBLIC uint32_t bm_menu_get_monitor(struct bm_menu *menu);
 
 /**
  * Tell renderer to grab keyboard.
@@ -509,7 +525,7 @@ uint32_t bm_menu_get_monitor(struct bm_menu *menu);
  * @param menu bm_menu instance to set grab for.
  * @param grab true for grab, false for ungrab.
  */
-void bm_menu_grab_keyboard(struct bm_menu *menu, bool grab);
+BM_PUBLIC void bm_menu_grab_keyboard(struct bm_menu *menu, bool grab);
 
 /**
  * Is keyboard grabbed for bm_menu?
@@ -517,12 +533,12 @@ void bm_menu_grab_keyboard(struct bm_menu *menu, bool grab);
  * @param menu bm_menu instance where to check grab status from.
  * @return true if grabbed, false if not.
  */
-bool bm_menu_is_keyboard_grabbed(struct bm_menu *menu);
+BM_PUBLIC bool bm_menu_is_keyboard_grabbed(struct bm_menu *menu);
 
 /**
  * Tell the renderer to position the menu that it can overlap panels.
  */
-void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
+BM_PUBLIC void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
 
 /**  @} Properties */
 
@@ -538,7 +554,7 @@ void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
  * @param index Index where item will be added.
  * @return true on successful add, false on failure.
  */
-bool bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t index);
+BM_PUBLIC bool bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t index);
 
 /**
  * Add item to bm_menu instance.
@@ -547,7 +563,7 @@ bool bm_menu_add_item_at(struct bm_menu *menu, struct bm_item *item, uint32_t in
  * @param item bm_item instance to add.
  * @return true on successful add, false on failure.
  */
-bool bm_menu_add_item(struct bm_menu *menu, struct bm_item *item);
+BM_PUBLIC bool bm_menu_add_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
  * Remove item from bm_menu instance at specific index.
@@ -558,7 +574,7 @@ bool bm_menu_add_item(struct bm_menu *menu, struct bm_item *item);
  * @param index Index of item to remove.
  * @return true on successful add, false on failure.
  */
-bool bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index);
+BM_PUBLIC bool bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index);
 
 /**
  * Remove item from bm_menu instance.
@@ -569,7 +585,7 @@ bool bm_menu_remove_item_at(struct bm_menu *menu, uint32_t index);
  * @param item bm_item instance to remove.
  * @return true on successful add, false on failure.
  */
-bool bm_menu_remove_item(struct bm_menu *menu, struct bm_item *item);
+BM_PUBLIC bool bm_menu_remove_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
  * Highlight item in menu by index.
@@ -578,7 +594,7 @@ bool bm_menu_remove_item(struct bm_menu *menu, struct bm_item *item);
  * @param index Index of item to highlight.
  * @return true on successful highlight, false on failure.
  */
-bool bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index);
+BM_PUBLIC bool bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index);
 
 /**
  * Highlight item in menu.
@@ -587,7 +603,7 @@ bool bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index);
  * @param item bm_item instance to highlight.
  * @return true on successful highlight, false on failure.
  */
-bool bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item);
+BM_PUBLIC bool bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item);
 
 /**
  * Get highlighted item from bm_menu instance.
@@ -597,7 +613,7 @@ bool bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item);
  * @param menu bm_menu instance from where to get highlighted item.
  * @return Selected bm_item instance, **NULL** if none highlighted.
  */
-struct bm_item* bm_menu_get_highlighted_item(const struct bm_menu *menu);
+BM_PUBLIC struct bm_item* bm_menu_get_highlighted_item(const struct bm_menu *menu);
 
 /**
  * Set selected items to bm_menu instance.
@@ -607,7 +623,7 @@ struct bm_item* bm_menu_get_highlighted_item(const struct bm_menu *menu);
  * @param nmemb Total count of items in array.
  * @return true on successful set, false on failure.
  */
-bool bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_t nmemb);
+BM_PUBLIC bool bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_t nmemb);
 
 /**
  * Get selected items from bm_menu instance.
@@ -618,7 +634,7 @@ bool bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, ui
  * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
  * @return Pointer to array of bm_item pointers.
  */
-struct bm_item** bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t *out_nmemb);
+BM_PUBLIC struct bm_item** bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**
  * Set items to bm_menu instance.
@@ -631,7 +647,7 @@ struct bm_item** bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t
  * @param nmemb Total count of items in array.
  * @return true on successful set, false on failure.
  */
-bool bm_menu_set_items(struct bm_menu *menu, const struct bm_item **items, uint32_t nmemb);
+BM_PUBLIC bool bm_menu_set_items(struct bm_menu *menu, const struct bm_item **items, uint32_t nmemb);
 
 /**
  * Get items from bm_menu instance.
@@ -642,7 +658,7 @@ bool bm_menu_set_items(struct bm_menu *menu, const struct bm_item **items, uint3
  * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
  * @return Pointer to array of bm_item pointers.
  */
-struct bm_item** bm_menu_get_items(const struct bm_menu *menu, uint32_t *out_nmemb);
+BM_PUBLIC struct bm_item** bm_menu_get_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**
  * Get filtered (displayed) items from bm_menu instance.
@@ -654,7 +670,7 @@ struct bm_item** bm_menu_get_items(const struct bm_menu *menu, uint32_t *out_nme
  * @param out_nmemb Reference to uint32_t where total count of returned items will be stored.
  * @return Pointer to array of bm_item pointers.
  */
-struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb);
+BM_PUBLIC struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb);
 
 /**  @} Menu Items */
 
@@ -669,7 +685,7 @@ struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t
  *
  * @param menu bm_menu instance to be rendered.
  */
-void bm_menu_render(const struct bm_menu *menu);
+BM_PUBLIC void bm_menu_render(const struct bm_menu *menu);
 
 /**
  * Trigger filtering of menu manually.
@@ -680,7 +696,7 @@ void bm_menu_render(const struct bm_menu *menu);
  *
  * @param menu bm_menu instance which to filter.
  */
-void bm_menu_filter(struct bm_menu *menu);
+BM_PUBLIC void bm_menu_filter(struct bm_menu *menu);
 
 /**
  * Poll key and unicode from underlying UI toolkit.
@@ -691,7 +707,7 @@ void bm_menu_filter(struct bm_menu *menu);
  * @param out_unicode Reference to uint32_t.
  * @return bm_key for polled key.
  */
-enum bm_key bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode);
+BM_PUBLIC enum bm_key bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode);
 
 /**
  * Advances menu logic with key and unicode as input.
@@ -701,7 +717,7 @@ enum bm_key bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode);
  * @param unicode Unicode input that will advance menu logic.
  * @return bm_run_result for menu state.
  */
-enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode);
+BM_PUBLIC enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode);
 
 /**  @} Menu Logic */
 
@@ -721,14 +737,14 @@ enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, u
  * @param text Pointer to null terminated C "string", can be **NULL** for empty text.
  * @return bm_item for new item instance, **NULL** if creation failed.
  */
-struct bm_item* bm_item_new(const char *text);
+BM_PUBLIC struct bm_item* bm_item_new(const char *text);
 
 /**
  * Release bm_item instance.
  *
  * @param item bm_item instance to be freed from memory.
  */
-void bm_item_free(struct bm_item *item);
+BM_PUBLIC void bm_item_free(struct bm_item *item);
 
 /**  @} Item Memory */
 
@@ -743,7 +759,7 @@ void bm_item_free(struct bm_item *item);
  * @param item bm_item instance where to set userdata pointer.
  * @param userdata Pointer to userdata.
  */
-void bm_item_set_userdata(struct bm_item *item, void *userdata);
+BM_PUBLIC void bm_item_set_userdata(struct bm_item *item, void *userdata);
 
 /**
  * Get userdata pointer from bm_item instance.
@@ -751,7 +767,7 @@ void bm_item_set_userdata(struct bm_item *item, void *userdata);
  * @param item bm_item instance which userdata pointer to get.
  * @return Pointer for unmodified userdata.
  */
-void* bm_item_get_userdata(struct bm_item *item);
+BM_PUBLIC void* bm_item_get_userdata(struct bm_item *item);
 
 /**
  * Set text to bm_item instance.
@@ -760,7 +776,7 @@ void* bm_item_get_userdata(struct bm_item *item);
  * @param text C "string" to set as text, can be **NULL** for empty text.
  * @return true if set was succesful, false if out of memory.
  */
-bool bm_item_set_text(struct bm_item *item, const char *text);
+BM_PUBLIC bool bm_item_set_text(struct bm_item *item, const char *text);
 
 /**
  * Get text from bm_item instance.
@@ -768,7 +784,7 @@ bool bm_item_set_text(struct bm_item *item, const char *text);
  * @param item bm_item instance where to get text from.
  * @return Pointer to null terminated C "string", can be **NULL** for empty text.
  */
-const char* bm_item_get_text(const struct bm_item *item);
+BM_PUBLIC const char* bm_item_get_text(const struct bm_item *item);
 
 /**  @} Item Properties */
 
