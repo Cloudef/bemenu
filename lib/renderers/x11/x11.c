@@ -276,7 +276,7 @@ fail:
     return false;
 }
 
-extern const char*
+BM_PUBLIC extern const char*
 register_renderer(struct render_api *api)
 {
     api->constructor = constructor;
