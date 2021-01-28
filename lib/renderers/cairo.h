@@ -248,8 +248,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance, vpadding };
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
 
-    char *filter_text = (menu->filter ? menu->filter : "");
-    size_t filter_len = strlen(filter_text);
+    const char *filter_text = (menu->filter ? menu->filter : "");
     if (menu->password) {
         bm_cairo_draw_line(cairo, &paint, &result, "");
     } else {

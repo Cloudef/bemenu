@@ -221,12 +221,11 @@ render(const struct bm_menu *menu)
         doffset -= (prev ? prev : 1);
     }
 
-    char *filter_text = (menu->filter ? menu->filter : "");
-    size_t filter_len = strlen(filter_text);
+    const char *filter_text = (menu->filter ? menu->filter + doffset : "");
     if (menu->password) {
         draw_line(0, 0, "%*s%s", title_len, "");
     } else {
-        draw_line(0, 0, "%*s%s", title_len, "", (filter_text + doffset));
+        draw_line(0, 0, "%*s%s", title_len, "", filter_text);
     }
 
     if (menu->title && title_len > 0) {
