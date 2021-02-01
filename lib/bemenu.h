@@ -546,7 +546,7 @@ BM_PUBLIC void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
  * @param menu bm_menu instance to set password mode for.
  * @param password true for password mode, false for deafault behavior.
  */
-void bm_menu_set_password(struct bm_menu *menu, bool password);
+BM_PUBLIC void bm_menu_set_password(struct bm_menu *menu, bool password);
 
 /**
  * Is password mode activated and input hidden?
@@ -554,7 +554,7 @@ void bm_menu_set_password(struct bm_menu *menu, bool password);
  * @param menu bm_menu instance where to get password mode from.
  * @return true if password mode, false otherwise.
  */
-bool bm_menu_get_password(struct bm_menu *menu);
+BM_PUBLIC bool bm_menu_get_password(struct bm_menu *menu);
 
 
 /**  @} Properties */
