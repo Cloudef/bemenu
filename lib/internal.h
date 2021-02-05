@@ -315,6 +315,11 @@ struct bm_menu {
      * Should the menu overlap panels
      */
     bool overlap;
+
+    /**
+     * Should the input be hidden
+     */
+    bool password;
 };
 
 /* library.c */
