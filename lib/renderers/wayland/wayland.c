@@ -283,11 +283,16 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
 
     uint32_t monitor = 0;
     wl_list_for_each(output, &wayland->outputs, link) {
-        if (menu->monitor != (uint32_t)-1) {
-            if (menu->monitor < monitors && monitor != menu->monitor) {
-                ++monitor;
-                continue;
+
+        if (!menu->monitor_name) {
+            if (menu->monitor != (uint32_t)-1) {
+                 if (menu->monitor < monitors && monitor != menu->monitor) {
+                    ++monitor;
+                    continue;
+                }
             }
+        } else if (strcmp(menu->monitor_name, output->name)) {
+            continue;
         }
 
         struct wl_surface *surface;
@@ -330,6 +335,15 @@ static void
 set_monitor(const struct bm_menu *menu, uint32_t monitor)
 {
     (void)monitor;
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+    recreate_windows(menu, wayland);
+}
+
+static void
+set_monitor_name(const struct bm_menu *menu, char *monitor_name)
+{
+    (void)monitor_name;
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
     recreate_windows(menu, wayland);
@@ -419,6 +433,7 @@ register_renderer(struct render_api *api)
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
     api->set_monitor = set_monitor;
+    api->set_monitor_name = set_monitor_name;    
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";

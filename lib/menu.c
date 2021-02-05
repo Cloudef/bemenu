@@ -120,6 +120,8 @@ bm_menu_free(struct bm_menu *menu)
     free(menu->old_filter);
     free(menu->font.name);
 
+    free(menu->monitor_name);
+
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         free(menu->colors[i].hex);
 
@@ -371,6 +373,23 @@ bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor)
 
     if (menu->renderer->api.set_monitor)
         menu->renderer->api.set_monitor(menu, monitor);
+}
+
+void
+bm_menu_set_monitor_name(struct bm_menu *menu, char *monitor_name)
+{
+    assert(menu);
+
+    if (!monitor_name)
+        return;
+
+    if (menu->monitor_name && !strcmp(menu->monitor_name, monitor_name))
+        return;
+
+    menu->monitor_name = bm_strdup(monitor_name);
+
+    if (menu->renderer->api.set_monitor_name)
+        menu->renderer->api.set_monitor_name(menu, monitor_name);
 }
 
 uint32_t

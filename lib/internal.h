@@ -85,6 +85,11 @@ struct render_api {
     void (*set_monitor)(const struct bm_menu *menu, uint32_t monitor);
 
     /**
+     * Set monitor name where menu will appear
+     */
+    void (*set_monitor_name)(const struct bm_menu *menu, char *monitor_name);
+
+    /**
      * Grab/Ungrab keyboard
      */
     void (*grab_keyboard)(const struct bm_menu *menu, bool grab);
@@ -285,6 +290,11 @@ struct bm_menu {
      * Current monitor.
      */
     uint32_t monitor;
+
+    /**
+     * Current monitor name. Wayland only.
+     */
+    char *monitor_name;
 
     /**
      * Current filtering method in menu instance.
