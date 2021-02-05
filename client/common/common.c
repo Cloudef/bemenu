@@ -214,6 +214,22 @@ usage(FILE *out, const char *name)
 }
 
 static void
+set_monitor(struct client *client, char *arg)
+{
+    char *endptr = NULL;
+    long num = strtol(arg, &endptr, 10);
+    if (arg == endptr) { // No digits found
+        if (!strcmp(arg, "all")) {
+            client->monitor = -1;
+        } else {
+            client->monitor_name = arg;
+        }
+    } else {
+        client->monitor = num;
+    }
+}
+
+static void
 do_getopt(struct client *client, int *argc, char **argv[])
 {
     assert(client && argc && argv);
@@ -264,6 +280,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
 
     for (optind = 0;;) {
         int32_t opt;
+
         if ((opt = getopt_long(*argc, *argv, "hviwxl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
             break;
 
@@ -319,7 +336,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->grab = true;
                 break;
             case 'm':
-                client->monitor = (!strcmp(optarg, "all") ? -1 : strtol(optarg, NULL, 10));
+                set_monitor(client, optarg);
                 break;
             case 'n':
                 client->no_overlap = true;
@@ -402,7 +419,7 @@ menu_with_options(struct client *client)
     if (!(menu = bm_menu_new(NULL)))
         return NULL;
 
-    client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL));
+    client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL)); 
 
     bm_menu_set_font(menu, client->font);
     bm_menu_set_line_height(menu, client->line_height);
@@ -413,6 +430,7 @@ menu_with_options(struct client *client)
     bm_menu_set_wrap(menu, client->wrap);
     bm_menu_set_bottom(menu, client->bottom);
     bm_menu_set_monitor(menu, client->monitor);
+    bm_menu_set_monitor_name(menu, client->monitor_name);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_password(menu, client->password);

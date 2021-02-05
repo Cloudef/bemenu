@@ -24,6 +24,7 @@ struct client {
     bool force_fork, fork;
     bool no_exec;
     bool password;
+    char *monitor_name;
 };
 
 char* cstrcopy(const char *str, size_t size);

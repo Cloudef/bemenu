@@ -511,6 +511,15 @@ BM_PUBLIC bool bm_menu_get_bottom(struct bm_menu *menu);
 BM_PUBLIC void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
 
 /**
+ * Display menu with monitor_name.
+ * Only works for Wayland.
+ *
+ * @param menu bm_menu instance to set monitor for.
+ * @param monitor_name Monitor name passed in.
+ */
+BM_PUBLIC void bm_menu_set_monitor_name(struct bm_menu *menu, char *monitor_name);
+
+/**
  * Return index for current monitor.
  *
  * @param menu bm_menu instance where to get current monitor from.

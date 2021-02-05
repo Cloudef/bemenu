@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/timerfd.h>
+#include <string.h>
 
 const char *BM_XKB_MASK_NAMES[MASK_LAST] = {
     XKB_MOD_NAME_SHIFT,
@@ -107,14 +108,13 @@ keyboard_handle_leave(void *data, struct wl_keyboard *keyboard, uint32_t serial,
 static void
 press(struct input *input, xkb_keysym_t sym, uint32_t key, enum wl_keyboard_key_state state)
 {
-
     if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-	    input->sym = sym;
-	    input->code = key + 8;
-	    input->key_pending = true;
+        input->sym = sym;
+        input->code = key + 8;
+        input->key_pending = true;
     } else if (!input->key_pending) {
-	    input->sym = XKB_KEY_NoSymbol;
-	    input->code = 0;
+        input->sym = XKB_KEY_NoSymbol;
+        input->code = 0;
     }
 
     if (input->notify.key)
@@ -236,6 +236,46 @@ static const struct wl_seat_listener seat_listener = {
 };
 
 static void
+xdg_output_handle_logical_position(void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y)
+{
+    (void)data, (void)xdg_output, (void)x, (void)y;
+}
+
+static void
+xdg_output_handle_logical_size(void *data, struct zxdg_output_v1 *xdg_output, int32_t width, int32_t height)
+{
+    (void)data, (void)xdg_output, (void)width, (void)height;
+}
+
+static void
+xdg_output_handle_done(void *data, struct zxdg_output_v1 *xdg_output)
+{
+    (void)data, (void)xdg_output;
+}
+
+static void
+xdg_output_handle_name(void *data, struct zxdg_output_v1 *xdg_output, const char *name)
+{
+    (void)xdg_output;
+    struct output *output = data;
+    output->name = bm_strdup(name);
+}
+
+static void
+xdg_output_handle_description(void *data, struct zxdg_output_v1 *xdg_output, const char *description)
+{
+    (void)data, (void)xdg_output, (void)description;
+}   
+
+static const struct zxdg_output_v1_listener xdg_output_listener = {
+    .logical_position = xdg_output_handle_logical_position,
+    .logical_size = xdg_output_handle_logical_size,
+    .done = xdg_output_handle_done,
+    .name = xdg_output_handle_name,
+    .description = xdg_output_handle_description,
+};
+
+static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
 {
     (void)data, (void)wl_output, (void)x, (void)y, (void)physical_width, (void)physical_height, (void)subpixel, (void)make, (void)model, (void)transform;
@@ -298,6 +338,8 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         output->scale = 1;
         wl_list_insert(&wayland->outputs, &output->link);
         wl_output_add_listener(wl_output, &output_listener, output);
+    } else if (!strcmp(interface, zxdg_output_manager_v1_interface.name)) {
+        wayland->xdg_output_manager = wl_registry_bind(registry, id, &zxdg_output_manager_v1_interface, 2);
     }
 }
 
@@ -358,6 +400,14 @@ bm_wl_registry_register(struct wayland *wayland)
     wl_display_roundtrip(wayland->display); // trip 1, registry globals
     if (!wayland->compositor || !wayland->seat || !wayland->shm || !wayland->layer_shell)
         return false;
+
+    struct output *output;
+    wl_list_for_each(output, &wayland->outputs, link) {
+        output->xdg_output = zxdg_output_manager_v1_get_xdg_output(
+            wayland->xdg_output_manager, output->output);
+        zxdg_output_v1_add_listener(
+            output->xdg_output, &xdg_output_listener, output);
+    }
 
     wl_display_roundtrip(wayland->display); // trip 2, global listeners
     if (!wayland->input.keyboard || !(wayland->formats & (1 << WL_SHM_FORMAT_ARGB8888)))
