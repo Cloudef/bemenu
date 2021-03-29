@@ -41,6 +41,55 @@ is a special-case invocation of
 where the input is a list of executables in the $PATH directories,
 and the selection gets executed.
 
+.SH USAGE
+
+.SS Keybindings
+.TS
+l l .
+Left Arrow	Move cursor left
+Right Arrow	Move cursor right
+Up Arrow	Move to previous item
+Down Arrow	Move to next item
+Shift + Left Arrow	Select previous item
+Shift + Right Arrow	Select next item
+Shift + Alt + <	Select first item in actual list
+Shift + Alt + >	Select last item in actual list
+Shift + Page Up	Select first item in actual list
+Shift + Page Down	Select last item in actual list
+Page Up	Select first item in displayed list
+Page Down	Select last item in displayed list
+Tab	Move to next item
+Shift + Tab	Select item and place it in filter
+Esc	Exit bemenu
+Insert	Return filter text or selected items if multi selection
+Shift + Return	Return filter text or selected items if multi selection
+Return	Execute selected item
+Home	Curses cursor set to 0
+End	Cursor set to end of filter text
+Backspace	Delete character at cursor
+Delete	Delete character at cursor
+Delete Left	Delete text before cursor
+Delete Right	Delete text after cursor
+Word Delete	Delete all text in filter
+Alt + v	Select last item in displayed list
+Alt + j	Select next item
+Alt + d	Select last item in display list
+Alt + l	Select previous item
+Alt + f	Select next item
+Alt + 0-9	Execute selected item with custom exit code
+Ctrl + Return	Select item but don't quit to select multiple items
+Ctrl + g	Exit bemenu
+Ctrl + n	Select next item
+Ctrl + p	Select previous item
+Ctrl + a	Move cursor to beginning of text in filter
+Ctrl + e	Move cursor to end of text in filter
+Ctrl + h	Delete character at cursor
+Ctrl + u	Kill text behind cursor
+Ctrl + k	Kill text after cursor
+Ctrl + w	Kill all text in filter
+Ctrl + m	Execute selected item
+.TE
+
 .SH OPTIONS
 .TP
 .B \-h, \-\-help
