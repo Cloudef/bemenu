@@ -20,8 +20,9 @@ override CPPFLAGS += -D_DEFAULT_SOURCE -Ilib
 libs = libbemenu.so
 pkgconfigs = bemenu.pc
 bins = bemenu bemenu-run
+mans = bemenu.1
 renderers = bemenu-renderer-x11.so bemenu-renderer-curses.so bemenu-renderer-wayland.so
-all: $(bins) $(renderers)
+all: $(bins) $(renderers) $(mans)
 clients: $(bins)
 curses: bemenu-renderer-curses.so
 x11: bemenu-renderer-x11.so
@@ -44,6 +45,9 @@ $(libs): %: VERSION .git/index
 
 $(pkgconfigs): %: VERSION %.in
 	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir)," $(addsuffix .in, $@) > $@
+
+bemenu.1: man/bemenu.1.in
+	sed 's,@LIBDIR@,$(PREFIX)$(libdir),' $< > $@
 
 $(renderers): %: VERSION .git/index | $(libs)
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -L. -lbemenu -o $@
@@ -113,9 +117,9 @@ install-bins:
 	-cp $(bins) "$(DESTDIR)$(PREFIX)$(bindir)"
 	-chmod 0755 $(addprefix "$(DESTDIR)$(PREFIX)$(bindir)"/,$(bins))
 
-install-man: man/bemenu.1 man/bemenu-run.1
+install-man: bemenu.1
 	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
-	cp $^ "$(DESTDIR)$(PREFIX)$(mandir)"
+	cp $< "$(DESTDIR)$(PREFIX)$(mandir)"
 
 install-renderers: install-curses install-wayland install-x11
 
@@ -143,7 +147,7 @@ doxygen:
 
 clean:
 	$(RM) -r *.dSYM # OSX generates .dSYM dirs with -g ...
-	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) *.a *.so.*
+	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) $(mans) *.a *.so.*
 	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
