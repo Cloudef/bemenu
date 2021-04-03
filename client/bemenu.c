@@ -14,48 +14,27 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
 {
     assert(menu);
 
-    size_t step = 1024, allocated;
-    char *buffer;
+    ssize_t n;
+    size_t llen = 0;
+    char *line = NULL;
 
-    if (!(buffer = malloc((allocated = step))))
-        return;
-
-    // TODO: do not read everything into memory
-    size_t read;
-    while ((read = fread(buffer + (allocated - step), 1, step, stdin)) == step) {
-        void *tmp;
-        if (!(tmp = realloc(buffer, (allocated += step)))) {
-            free(buffer);
-            fprintf(stderr, "Out of memory\n");
-            return;
-        }
-        buffer = tmp;
-    }
-
-    // make sure we can null terminate the input
-    const size_t end = allocated - step + read;
-    assert(end != ~(size_t)0);
-    if (end >= allocated && !(buffer = realloc(buffer, end + 1))) {
-        fprintf(stderr, "Out of memory\n");
-        return;
-    }
-
-    buffer[end] = 0;
-
-    char *s = buffer;
-    while ((size_t)(s - buffer) < end && *s != 0) {
-        const size_t pos = strcspn(s, "\n");
-        s[pos] = 0;
+    while ((n = getline(&line, &llen, stdin)) != -1) {
+        // Remove trailing newline
+        assert(n >= 1);
+        line[n - 1] = '\0';
 
         struct bm_item *item;
-        if (!(item = bm_item_new(s)))
+        if (!(item = bm_item_new(line)))
             break;
 
         bm_menu_add_item(menu, item);
-        s += pos + 1;
     }
+    free(line);
 
-    free(buffer);
+    if (ferror(stdin)) {
+        fprintf(stderr, "getline failed");
+        return;
+    }
 }
 
 static void
