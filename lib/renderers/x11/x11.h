@@ -33,7 +33,7 @@ struct window {
     uint32_t x, y, width, height, max_height;
     uint32_t displayed;
 
-    uint32_t monitor;
+    int32_t monitor;
     bool bottom;
 
     struct {
@@ -48,7 +48,7 @@ struct x11 {
 
 void bm_x11_window_render(struct window *window, const struct bm_menu *menu);
 void bm_x11_window_key_press(struct window *window, XKeyEvent *ev);
-void bm_x11_window_set_monitor(struct window *window, uint32_t monitor);
+void bm_x11_window_set_monitor(struct window *window, int32_t monitor);
 void bm_x11_window_set_bottom(struct window *window, bool bottom);
 bool bm_x11_window_create(struct window *window, Display *display);
 void bm_x11_window_destroy(struct window *window);
