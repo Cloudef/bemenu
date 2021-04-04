@@ -18,10 +18,10 @@ read_items_to_menu_from_stdin(struct bm_menu *menu)
     size_t llen = 0;
     char *line = NULL;
 
-    while ((n = getline(&line, &llen, stdin)) != -1) {
-        // Remove trailing newline
-        assert(n >= 1);
-        line[n - 1] = '\0';
+    while ((n = getline(&line, &llen, stdin)) > 0) {
+        // Remove trailing newline (if any)
+        if (line[n - 1] == '\n')
+            line[n - 1] = '\0';
 
         struct bm_item *item;
         if (!(item = bm_item_new(line)))
