@@ -204,11 +204,11 @@ set_bottom(const struct bm_menu *menu, bool bottom)
 }
 
 static void
-set_monitor(const struct bm_menu *menu, uint32_t monitor)
+set_monitor(const struct bm_menu *menu, int32_t monitor)
 {
     struct x11 *x11 = menu->renderer->internal;
     assert(x11);
-    bm_x11_window_set_monitor(&x11->window, (monitor != (uint32_t)-1 ? monitor : 0));
+    bm_x11_window_set_monitor(&x11->window, monitor);
 }
 
 static void

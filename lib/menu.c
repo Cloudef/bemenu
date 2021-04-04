@@ -362,7 +362,7 @@ bm_menu_get_bottom(struct bm_menu *menu)
 }
 
 void
-bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor)
+bm_menu_set_monitor(struct bm_menu *menu, int32_t monitor)
 {
     assert(menu);
 

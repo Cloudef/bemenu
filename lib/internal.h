@@ -82,7 +82,7 @@ struct render_api {
     /**
      * Set monitor indeax where menu will appear
      */
-    void (*set_monitor)(const struct bm_menu *menu, uint32_t monitor);
+    void (*set_monitor)(const struct bm_menu *menu, int32_t monitor);
 
     /**
      * Set monitor name where menu will appear
@@ -289,7 +289,7 @@ struct bm_menu {
     /**
      * Current monitor.
      */
-    uint32_t monitor;
+    int32_t monitor;
 
     /**
      * Current monitor name. Wayland only.

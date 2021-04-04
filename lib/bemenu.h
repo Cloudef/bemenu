@@ -502,13 +502,13 @@ BM_PUBLIC bool bm_menu_get_bottom(struct bm_menu *menu);
 
 /**
  * Display menu at monitor index.
- * Indices start from 1, pass 0 for active monitor (default).
+ * Indices start at 0, a value of -1 can be passed for the active monitor (default).
  * If index is more than amount of monitors, the monitor with highest index will be selected.
  *
  * @param menu bm_menu instance to set monitor for.
- * @param monitor Monitor index starting from 1.
+ * @param monitor Monitor index starting from 0, or -1 for the active monitor.
  */
-BM_PUBLIC void bm_menu_set_monitor(struct bm_menu *menu, uint32_t monitor);
+BM_PUBLIC void bm_menu_set_monitor(struct bm_menu *menu, int32_t monitor);
 
 /**
  * Display menu with monitor_name.

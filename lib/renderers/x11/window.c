@@ -131,7 +131,7 @@ bm_x11_window_destroy(struct window *window)
 }
 
 void
-bm_x11_window_set_monitor(struct window *window, uint32_t monitor)
+bm_x11_window_set_monitor(struct window *window, int32_t monitor)
 {
     if (window->monitor == monitor)
         return;
@@ -151,10 +151,9 @@ bm_x11_window_set_monitor(struct window *window, uint32_t monitor)
             XWindowAttributes wa;
 
             XGetInputFocus(window->display, &w, &di);
-            if (monitor > 0)
-                i = ((int32_t)monitor > n ? n : (int32_t)monitor) - 1;
-
-            if (monitor == 0 && w != root && w != PointerRoot && w != None) {
+            if (monitor >= 0 && monitor < n)
+                i = monitor;
+            else if (w != root && w != PointerRoot && w != None) {
                 /* find top-level window containing current input focus */
                 do {
                     if (XQueryTree(window->display, (pw = w), &dw, &w, &dws, &du) && dws)
@@ -172,7 +171,7 @@ bm_x11_window_set_monitor(struct window *window, uint32_t monitor)
             }
 
             /* no focused window is on screen, so use pointer location instead */
-            if (monitor == 0 && !area && XQueryPointer(window->display, root, &dw, &dw, &x, &y, &di, &di, &du)) {
+            if (monitor < 0 && !area && XQueryPointer(window->display, root, &dw, &dw, &x, &y, &di, &di, &du)) {
                 for (i = 0; i < n; i++) {
                     if (INTERSECT(x, y, 1, 1, info[i]) > 0)
                         break;
