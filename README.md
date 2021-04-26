@@ -128,6 +128,10 @@ Typically [wlroots](https://github.com/swaywm/wlroots)-based compositors.
 | Ctrl + w            |  Kill all text in filter                                       |
 | Ctrl + m            |  Execute selected item                                         |
 
+## Projects using bemenu
+
+* [pinentry-bemenu](https://github.com/t-8ch/pinentry-bemenu)
+
 ## License
 
 * [GNU GPLv3 (or any later version)](LICENSE-CLIENT) for client program[s] and
