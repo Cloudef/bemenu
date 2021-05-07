@@ -223,7 +223,7 @@ render(const struct bm_menu *menu)
 
     const char *filter_text = (menu->filter ? menu->filter + doffset : "");
     if (menu->password) {
-        draw_line(0, 0, "%*s%s", title_len, "");
+        draw_line(0, 0, "%*s", title_len, "");
     } else {
         draw_line(0, 0, "%*s%s", title_len, "", filter_text);
     }
