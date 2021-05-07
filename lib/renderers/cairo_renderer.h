@@ -5,7 +5,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <pango/pangocairo.h>
 
 struct cairo {

@@ -6,7 +6,7 @@
 
 #include "wlr-layer-shell-unstable-v1.h"
 #include "xdg-output-unstable-v1.h"
-#include "renderers/cairo.h"
+#include "renderers/cairo_renderer.h"
 
 struct bm_menu;
 

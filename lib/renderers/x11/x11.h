@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-#include "renderers/cairo.h"
+#include "renderers/cairo_renderer.h"
 
 enum mod_bit {
     MOD_SHIFT = 1<<0,
