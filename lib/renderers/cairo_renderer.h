@@ -120,20 +120,9 @@ bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct
     return true;
 }
 
-BM_LOG_ATTR(4, 5) static inline bool
-bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *fmt, ...)
+static inline bool
+bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *buffer)
 {
-    assert(cairo && paint && result && fmt);
-    memset(result, 0, sizeof(struct cairo_result));
-
-    va_list args;
-    va_start(args, fmt);
-    bool ret = bm_vrprintf(&buffer, &blen, fmt, args);
-    va_end(args);
-
-    if (!ret)
-        return false;
-
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
     pango_cairo_update_layout(cairo->cr, layout);
 
@@ -187,6 +176,23 @@ bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_
 
     cairo_identity_matrix(cairo->cr);
     return true;
+}
+
+BM_LOG_ATTR(4, 5) static inline bool
+bm_cairo_draw_line(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *fmt, ...)
+{
+    assert(cairo && paint && result && fmt);
+    memset(result, 0, sizeof(struct cairo_result));
+
+    va_list args;
+    va_start(args, fmt);
+    bool ret = bm_vrprintf(&buffer, &blen, fmt, args);
+    va_end(args);
+
+    if (!ret)
+        return false;
+
+    return bm_cairo_draw_line_str(cairo, paint, result, buffer);
 }
 
 static inline void
@@ -250,7 +256,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
     const char *filter_text = (menu->filter ? menu->filter : "");
     if (menu->password) {
-        bm_cairo_draw_line(cairo, &paint, &result, "");
+        bm_cairo_draw_line_str(cairo, &paint, &result, "");
     } else {
         bm_cairo_draw_line(cairo, &paint, &result, "%s", filter_text);
     }
