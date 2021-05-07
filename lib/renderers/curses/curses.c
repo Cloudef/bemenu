@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <math.h>
 
+#define _XOPEN_SOURCE_EXTENDED
 #define NCURSES_WIDECHAR 1
 #include <curses.h>
 
