@@ -6,12 +6,13 @@ libdir ?= /lib
 mandir ?= /share/man/man1
 
 GIT_SHA1 = $(shell git rev-parse HEAD 2>/dev/null || printf 'nogit')
+GIT_TAG = $(shell git tag --points-at HEAD 2>/dev/null || cat VERSION)
 MAKEFLAGS += --no-builtin-rules
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
 	-Wfloat-equal -Wcast-align -Wpointer-arith -Wchar-subscripts -Warray-bounds=2 -Wno-unknown-warning-option
 
-override CFLAGS ?= -g -O2 $(WARNINGS)
+override CFLAGS ?= -g -O2 $(WARNINGS) $(EXTRA_WARNINGS)
 override CFLAGS += -std=c99
 override CPPFLAGS ?= -D_FORTIFY_SOURCE=2
 override CPPFLAGS += -DBM_VERSION=\"$(VERSION)\" -DBM_PLUGIN_VERSION=\"$(VERSION)-$(GIT_SHA1)\" -DINSTALL_LIBDIR=\"$(PREFIX)$(libdir)\"
@@ -145,6 +146,11 @@ doxygen:
 	cp -R doxygen/doxygen-qmi-style/navtree html
 	cp -R doxygen/doxygen-qmi-style/search html/search
 
+sign:
+	test "x$(GIT_TAG)" = "x$(VERSION)"
+	git archive --prefix="$(VERSION)/" -o "bemenu-$(VERSION).tar.gz" "$(GIT_TAG)"
+	gpg --default-key "$(GPG_KEY_ID)" --armor --detach-sign "bemenu-$(VERSION).tar.gz"
+
 clean:
 	$(RM) -r *.dSYM # OSX generates .dSYM dirs with -g ...
 	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) $(mans) *.a *.so.*
@@ -154,4 +160,4 @@ clean:
 .DELETE_ON_ERROR:
 .PHONY: all clean install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
 		install-man install-bins install-renderers install-curses install-wayland install-x11 \
-		doxygen clients curses x11 wayland
+		doxygen sign clients curses x11 wayland
