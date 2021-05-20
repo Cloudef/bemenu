@@ -124,14 +124,18 @@ Specify the monitor
 where the list should appear.
 Monitor indices start at zero.
 The interpretation of the given argument depends on the utilized backend.
-With X11, a value of
+With X11 and Wayland, a value of
 .Ql -1
+or
+.Cm focused
 indicates that the current monitor should be used (the default).
 With Wayland, the
 .Ar index
 should be a string specifying a specific monitor name. The value
+.Ql -2
+or
 .Cm all
-indicates that the list should appear on all monitors (the default).
+indicates that the list should appear on all monitors.
 .It Fl n , -no-overlap Pq Wayland
 Set the
 .Nm
