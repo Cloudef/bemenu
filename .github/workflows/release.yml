@@ -1,0 +1,26 @@
+name: Release CI
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+sign:
+   runs-on: ubuntu-latest
+   steps:
+      - uses: actions/checkout@v2
+      - name: import pgp key
+        run: echo -n "$GPG_KEY" | base64 --decode | gpg --import
+        env:
+           GPG_KEY: ${{ secrets.GPG_KEY }}
+      - name: make sign
+        run: make sign
+        env:
+           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+           files: bemenu-*.tar.gz.asc
+           fail_on_unmatched_files: true
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
