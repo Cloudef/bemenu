@@ -5,6 +5,10 @@ Dynamic menu library and client program inspired by dmenu
 
 ![preview](.github/preview.svg)
 
+## Releases
+
+Releases are signed with [29317348D687B86B](http://pgp.mit.edu/pks/lookup?op=vindex&search=0x29317348D687B86B) and published [on GitHub](https://github.com/Cloudef/bemenu/releases).
+
 ## Building
 
 ```sh
