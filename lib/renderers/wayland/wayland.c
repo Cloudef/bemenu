@@ -285,7 +285,7 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
     wl_list_for_each(output, &wayland->outputs, link) {
 
         if (!menu->monitor_name) {
-            if (menu->monitor != -1) {
+            if (menu->monitor > -1) {
                  if (menu->monitor < monitors && monitor != menu->monitor) {
                     ++monitor;
                     continue;
@@ -311,14 +311,14 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
             window->scale = output->scale;
         }
 
-        if (!bm_wl_window_create(window, wayland->display, wayland->shm, output->output, wayland->layer_shell, surface))
+        if (!bm_wl_window_create(window, wayland->display, wayland->shm, (menu->monitor == -1) ? NULL : output->output, wayland->layer_shell, surface))
             free(window);
 
         window->notify.render = bm_cairo_paint;
         window->max_height = output->height;
         window->render_pending = true;
         wl_list_insert(&wayland->windows, &window->link);
-        if (menu->monitor != -1) break;
+        if (menu->monitor != -2) break;
     }
 
     set_overlap(menu, menu->overlap);

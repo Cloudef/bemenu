@@ -219,8 +219,10 @@ set_monitor(struct client *client, char *arg)
     char *endptr = NULL;
     long num = strtol(arg, &endptr, 10);
     if (arg == endptr) { // No digits found
-        if (!strcmp(arg, "all")) {
+        if (!strcmp(arg, "focused")) {
             client->monitor = -1;
+        } else if (!strcmp(arg, "all")) {
+            client->monitor = -2;
         } else {
             client->monitor_name = arg;
         }
