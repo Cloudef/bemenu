@@ -148,7 +148,7 @@ doxygen:
 
 sign:
 	test "x$(GIT_TAG)" = "x$(VERSION)"
-	git archive --prefix="$(VERSION)/" -o "bemenu-$(VERSION).tar.gz" "$(GIT_TAG)"
+	git archive --prefix="bemenu-$(VERSION)/" -o "bemenu-$(VERSION).tar.gz" "$(GIT_TAG)"
 	gpg --default-key "$(GPG_KEY_ID)" --armor --detach-sign "bemenu-$(VERSION).tar.gz"
 
 clean:
