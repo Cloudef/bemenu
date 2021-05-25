@@ -45,7 +45,7 @@ $(libs): %: VERSION .git/index
 	ln -fs $(full) $@
 
 $(pkgconfigs): %: VERSION %.in
-	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir)," $(addsuffix .in, $@) > $@
+	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir),;s,@INCLUDEDIR@,$(includedir)," $(addsuffix .in, $@) > $@
 
 bemenu.1: man/bemenu.1.in
 	sed 's,@LIBDIR@,$(PREFIX)$(libdir),' $< > $@
