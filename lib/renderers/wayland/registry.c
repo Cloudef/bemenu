@@ -215,11 +215,13 @@ seat_handle_capabilities(void *data, struct wl_seat *seat, enum wl_seat_capabili
 {
     struct input *input = data;
 
-    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !input->keyboard) {
+    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !input->seat) {
+        input->seat = seat;
         input->keyboard = wl_seat_get_keyboard(seat);
         wl_keyboard_add_listener(input->keyboard, &keyboard_listener, data);
-    } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && input->keyboard) {
+    } else if (seat == input->seat && !(caps & WL_SEAT_CAPABILITY_KEYBOARD)) {
         wl_keyboard_destroy(input->keyboard);
+        input->seat = NULL;
         input->keyboard = NULL;
     }
 }

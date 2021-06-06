@@ -46,6 +46,7 @@ struct xkb {
 struct input {
     int *repeat_fd;
 
+    struct wl_seat *seat;
     struct wl_keyboard *keyboard;
     struct xkb xkb;
 
