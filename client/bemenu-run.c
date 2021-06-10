@@ -90,7 +90,7 @@ read_items_to_menu_from_dir(struct bm_menu *menu, const char *path)
 
     struct dirent *file;
     while ((file = readdir(dir))) {
-        if (file->d_type != DT_DIR && strlen(file->d_name)) {
+        if (file->d_type != DT_DIR && strlen(file->d_name) && file->d_name[0] != '.') {
             struct bm_item *item;
             if (!(item = bm_item_new(file->d_name)))
                 break;
