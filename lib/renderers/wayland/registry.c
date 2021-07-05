@@ -267,7 +267,7 @@ static void
 xdg_output_handle_description(void *data, struct zxdg_output_v1 *xdg_output, const char *description)
 {
     (void)data, (void)xdg_output, (void)description;
-}   
+}
 
 static const struct zxdg_output_v1_listener xdg_output_listener = {
     .logical_position = xdg_output_handle_logical_position,
@@ -328,7 +328,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
         wayland->layer_shell = wl_registry_bind(registry, id, &zwlr_layer_shell_v1_interface, 1);
     } else if (strcmp(interface, "wl_seat") == 0) {
-        wayland->seat = wl_registry_bind(registry, id, &wl_seat_interface, 1);
+        wayland->seat = wl_registry_bind(registry, id, &wl_seat_interface, 7);
         wl_seat_add_listener(wayland->seat, &seat_listener, &wayland->input);
     } else if (strcmp(interface, "wl_shm") == 0) {
         wayland->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
