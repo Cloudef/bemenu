@@ -1,0 +1,18 @@
+app-id: pw.cloudef.bemenu
+runtime: org.freedesktop.Platform
+runtime-version: '20.08'
+sdk: org.freedesktop.Sdk
+command: bemenu
+modules:
+  - name: bemenu
+    buildsystem: simple
+    build-commands:
+      - make bemenu x11 wayland curses PREFIX=/app
+      - make install PREFIX=/app
+    sources:
+      - type: git
+        url: https://github.com/Cloudef/bemenu.git
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
