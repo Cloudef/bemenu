@@ -24,11 +24,3 @@ jobs:
              bundle: pw.cloudef.bemenu-run.flatpak
              manifest-path: pw.cloudef.bemenu-run.yml
              cache-key: flatpak-builder-bemenu-run-${{ github.sha }}
-         - uses: actions/upload-artifact@v2
-           with:
-              name: pw.cloudef.bemenu
-              path: pw.cloudef.bemenu.flatpak
-         - uses: actions/upload-artifact@v2
-           with:
-              name: pw.cloudef.bemenu-run
-              path: pw.cloudef.bemenu-run.flatpak
