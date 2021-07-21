@@ -129,6 +129,9 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XKB_KEY_g:
             if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
             // fall through
+        case XKB_KEY_c:
+            if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
+            // fall through
         case XKB_KEY_bracketleft:
             if (!(mods & MOD_CTRL)) return BM_KEY_UNICODE;
             // fall through
@@ -433,7 +436,7 @@ register_renderer(struct render_api *api)
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
     api->set_monitor = set_monitor;
-    api->set_monitor_name = set_monitor_name;    
+    api->set_monitor_name = set_monitor_name;
     api->priorty = BM_PRIO_GUI;
     api->version = BM_PLUGIN_VERSION;
     return "wayland";
