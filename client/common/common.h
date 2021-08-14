@@ -17,6 +17,7 @@ struct client {
     uint32_t selected;
     uint32_t monitor;
     bool bottom;
+    bool center;
     bool grab;
     bool wrap;
     bool ifne;

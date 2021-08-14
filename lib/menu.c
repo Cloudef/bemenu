@@ -341,6 +341,20 @@ bm_menu_get_scrollbar(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_center(struct bm_menu *menu, bool center)
+{
+    assert(menu);
+
+    if (menu->center == center)
+        return;
+
+    menu->center = center;
+
+    if (menu->renderer->api.set_center)
+        menu->renderer->api.set_center(menu, center);
+}
+
+void
 bm_menu_set_bottom(struct bm_menu *menu, bool bottom)
 {
     assert(menu);

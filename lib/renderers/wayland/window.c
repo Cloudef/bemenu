@@ -240,7 +240,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
             break;
 
         window->height = result.height / window->scale;
-        zwlr_layer_surface_v1_set_size(window->layer_surface, 0, window->height);
+        zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
         wl_surface_commit(window->surface);
         wl_display_roundtrip(display);
         destroy_buffer(buffer);
@@ -300,6 +300,20 @@ bm_wl_window_set_bottom(struct window *window, struct wl_display *display, bool 
     window->bottom = bottom;
 
     zwlr_layer_surface_v1_set_anchor(window->layer_surface, (window->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) | ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+    wl_surface_commit(window->surface);
+    wl_display_roundtrip(display);
+}
+
+void
+bm_wl_window_set_center(struct window *window, struct wl_display *display, bool center)
+{
+    if (window->center == center)
+        return;
+
+    window->center = center;
+
+    zwlr_layer_surface_v1_set_anchor(window->layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM | ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP | ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+    zwlr_layer_surface_v1_set_size(window->layer_surface, 3 * window->width / 4, window->height);
     wl_surface_commit(window->surface);
     wl_display_roundtrip(display);
 }

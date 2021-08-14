@@ -241,6 +241,18 @@ set_bottom(const struct bm_menu *menu, bool bottom)
 }
 
 static void
+set_center(const struct bm_menu *menu, bool center)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_set_center(window, wayland->display, center);
+    }
+}
+
+static void
 grab_keyboard(const struct bm_menu *menu, bool grab)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -432,6 +444,7 @@ register_renderer(struct render_api *api)
     api->get_displayed_count = get_displayed_count;
     api->poll_key = poll_key;
     api->render = render;
+    api->set_center = set_center;
     api->set_bottom = set_bottom;
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
