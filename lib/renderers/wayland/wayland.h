@@ -5,6 +5,7 @@
 
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
+#include <linux/input-event-codes.h>
 
 #include "wlr-layer-shell-unstable-v1.h"
 #include "xdg-output-unstable-v1.h"
@@ -45,11 +46,46 @@ struct xkb {
     xkb_mod_mask_t masks[MASK_LAST];
 };
 
+struct pointer_event {
+    uint32_t event_mask;
+    wl_fixed_t surface_x, surface_y;
+    uint32_t button, state;
+    uint32_t time;
+    uint32_t serial;
+    struct {
+        bool valid;
+        wl_fixed_t value;
+        int32_t discrete;
+    } axes[2];
+    uint32_t axis_source;
+};
+
+struct touch_point {
+    bool valid;
+    int32_t id;
+    uint32_t event_mask;
+    wl_fixed_t surface_x, surface_y;
+    wl_fixed_t surface_start_x, surface_start_y;
+    wl_fixed_t major, minor;
+    wl_fixed_t orientation;
+};
+
+struct touch_event {
+    uint32_t time;
+    uint32_t serial;
+    uint16_t active;
+    struct touch_point points[2];
+};
+
 struct input {
     int *repeat_fd;
 
     struct wl_seat *seat;
     struct wl_keyboard *keyboard;
+    struct wl_pointer *pointer;
+    struct wl_touch *touch;
+    struct pointer_event pointer_event;
+    struct touch_event touch_event;
     struct xkb xkb;
 
     xkb_keysym_t sym;

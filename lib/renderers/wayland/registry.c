@@ -201,6 +201,258 @@ keyboard_handle_repeat_info(void *data, struct wl_keyboard *keyboard, int32_t ra
     set_repeat_info(data, rate, delay);
 }
 
+static void
+pointer_handle_enter(void *data, struct wl_pointer *wl_pointer,
+               uint32_t serial, struct wl_surface *surface,
+               wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+    (void)wl_pointer, (void)surface;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_ENTER;
+    input->pointer_event.serial = serial;
+    input->pointer_event.surface_x = surface_x,
+    input->pointer_event.surface_y = surface_y;
+}
+
+static void
+pointer_handle_leave(void *data, struct wl_pointer *wl_pointer,
+               uint32_t serial, struct wl_surface *surface)
+{
+    (void)wl_pointer, (void)surface;
+    struct input *input = data;
+    input->pointer_event.serial = serial;
+    input->pointer_event.event_mask |= POINTER_EVENT_LEAVE;
+}
+
+static void
+pointer_handle_motion(void *data, struct wl_pointer *wl_pointer, uint32_t time,
+               wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_MOTION;
+    input->pointer_event.time = time;
+    input->pointer_event.surface_x = surface_x,
+    input->pointer_event.surface_y = surface_y;
+}
+
+static void
+pointer_handle_button(void *data, struct wl_pointer *wl_pointer, uint32_t serial,
+               uint32_t time, uint32_t button, uint32_t state)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_BUTTON;
+    input->pointer_event.time = time;
+    input->pointer_event.serial = serial;
+    input->pointer_event.button = button,
+    input->pointer_event.state |= state;
+}
+
+static void
+pointer_handle_axis(void *data, struct wl_pointer *wl_pointer, uint32_t time,
+               uint32_t axis, wl_fixed_t value)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_AXIS;
+    input->pointer_event.time = time;
+    input->pointer_event.axes[axis].valid = true;
+    input->pointer_event.axes[axis].value = value;
+}
+
+static void
+pointer_handle_axis_source(void *data, struct wl_pointer *wl_pointer,
+               uint32_t axis_source)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_AXIS_SOURCE;
+    input->pointer_event.axis_source = axis_source;
+}
+
+static void
+pointer_handle_axis_stop(void *data, struct wl_pointer *wl_pointer,
+               uint32_t time, uint32_t axis)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.time = time;
+    input->pointer_event.event_mask |= POINTER_EVENT_AXIS_STOP;
+    input->pointer_event.axes[axis].valid = true;
+}
+
+static void
+pointer_handle_axis_discrete(void *data, struct wl_pointer *wl_pointer,
+               uint32_t axis, int32_t discrete)
+{
+    (void)wl_pointer;
+    struct input *input = data;
+    input->pointer_event.event_mask |= POINTER_EVENT_AXIS_DISCRETE;
+    input->pointer_event.axes[axis].valid = true;
+    input->pointer_event.axes[axis].discrete = discrete;
+}
+
+
+static void
+pointer_handle_frame(void *data, struct wl_pointer *wl_pointer)
+{
+    (void) data, (void) wl_pointer;
+}
+
+static struct touch_point *
+get_touch_point(struct input *input, int32_t id)
+{
+    struct touch_event *touch = &input->touch_event;
+    int invalid = -1;
+    for (size_t i = 0; i < 2; ++i) {
+        if (touch->points[i].id == id) {
+            invalid = i;
+        }
+        if (invalid == -1 && !touch->points[i].valid) {
+            invalid = i;
+        }
+    }
+    if (invalid == -1) {
+        return NULL;
+    }
+    touch->points[invalid].id = id;
+    return &touch->points[invalid];
+}
+
+static void
+reset_all_start_position(struct input *input)
+{
+    struct touch_event *event = &input->touch_event;
+    for (size_t i = 0; i < 2; ++i) {
+        struct touch_point *point = &event->points[i];
+
+        if (!point->valid)
+            continue;
+
+        point->surface_start_x = point->surface_x;
+        point->surface_start_y = point->surface_y;
+    }
+}
+
+static void
+revalidate_all_released(struct input *input)
+{
+    struct touch_event *event = &input->touch_event;
+    for (size_t i = 0; i < 2; ++i) {
+        struct touch_point *point = &event->points[i];
+
+        if (!point->valid && point->event_mask & TOUCH_EVENT_DOWN)
+            point->valid = true;
+    }
+}
+
+static void
+touch_handle_down(void *data, struct wl_touch *wl_touch, uint32_t serial,
+    uint32_t time, struct wl_surface *surface, int32_t id,
+    wl_fixed_t x, wl_fixed_t y)
+{
+    (void) wl_touch, (void) surface;
+    struct input *input = data;
+    struct touch_point *point = get_touch_point(input, id);
+    if (point == NULL) {
+        return;
+    }
+    point->valid = true;
+    point->event_mask = TOUCH_EVENT_DOWN;
+    point->surface_x = x,
+    point->surface_y = y;
+    input->touch_event.time = time;
+    input->touch_event.serial = serial;
+    input->touch_event.active += 1;
+
+    revalidate_all_released(input);
+    reset_all_start_position(input);
+}
+
+static void
+touch_handle_up(void *data, struct wl_touch *wl_touch, uint32_t serial,
+               uint32_t time, int32_t id)
+{
+    (void) time, (void) wl_touch, (void) serial;
+    struct input *input = data;
+    struct touch_point *point = get_touch_point(input, id);
+    if (point == NULL) {
+        return;
+    }
+    point->event_mask |= TOUCH_EVENT_UP;
+    input->touch_event.active -= 1;
+
+    reset_all_start_position(input);
+}
+
+static void
+touch_handle_motion(void *data, struct wl_touch *wl_touch, uint32_t time,
+               int32_t id, wl_fixed_t x, wl_fixed_t y)
+{
+    (void) wl_touch;
+    struct input *input = data;
+    struct touch_point *point = get_touch_point(input, id);
+    if (point == NULL) {
+        return;
+    }
+    point->event_mask |= TOUCH_EVENT_MOTION;
+    point->surface_x = x, point->surface_y = y;
+    input->touch_event.time = time;
+}
+
+static void
+touch_handle_cancel(void *data, struct wl_touch *wl_touch)
+{
+    (void) wl_touch, (void) data;
+}
+
+static void
+touch_handle_shape(void *data, struct wl_touch *wl_touch,
+               int32_t id, wl_fixed_t major, wl_fixed_t minor)
+{
+    (void) wl_touch;
+    struct input *input = data;
+    struct touch_point *point = get_touch_point(input, id);
+    if (point == NULL) {
+        return;
+    }
+    point->event_mask |= TOUCH_EVENT_SHAPE;
+    point->major = major, point->minor = minor;
+}
+
+static void
+touch_handle_orientation(void *data, struct wl_touch *wl_touch,
+               int32_t id, wl_fixed_t orientation)
+{
+    (void) wl_touch;
+    struct input *input = data;
+    struct touch_point *point = get_touch_point(input, id);
+    if (point == NULL) {
+        return;
+    }
+    point->event_mask |= TOUCH_EVENT_ORIENTATION;
+    point->orientation = orientation;
+}
+
+static void
+touch_handle_frame(void *data, struct wl_touch *wl_touch)
+{
+    (void) data, (void) wl_touch;
+}
+
+static const struct wl_pointer_listener pointer_listener = {
+    .enter = pointer_handle_enter,
+    .leave = pointer_handle_leave,
+    .motion = pointer_handle_motion,
+    .button = pointer_handle_button,
+    .axis = pointer_handle_axis,
+    .frame = pointer_handle_frame,
+    .axis_source = pointer_handle_axis_source,
+    .axis_stop = pointer_handle_axis_stop,
+    .axis_discrete = pointer_handle_axis_discrete,
+};
+
 static const struct wl_keyboard_listener keyboard_listener = {
     .keymap = keyboard_handle_keymap,
     .enter = keyboard_handle_enter,
@@ -210,19 +462,46 @@ static const struct wl_keyboard_listener keyboard_listener = {
     .repeat_info = keyboard_handle_repeat_info
 };
 
+static const struct wl_touch_listener wl_touch_listener = {
+    .down = touch_handle_down,
+    .up = touch_handle_up,
+    .motion = touch_handle_motion,
+    .frame = touch_handle_frame,
+    .cancel = touch_handle_cancel,
+    .shape = touch_handle_shape,
+    .orientation = touch_handle_orientation,
+};
+
 static void
 seat_handle_capabilities(void *data, struct wl_seat *seat, enum wl_seat_capability caps)
 {
     struct input *input = data;
 
-    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !input->seat) {
+    if (!input->seat) {
         input->seat = seat;
+    }
+
+    if (caps & WL_SEAT_CAPABILITY_KEYBOARD) {
         input->keyboard = wl_seat_get_keyboard(seat);
         wl_keyboard_add_listener(input->keyboard, &keyboard_listener, data);
-    } else if (seat == input->seat && !(caps & WL_SEAT_CAPABILITY_KEYBOARD)) {
+    }
+
+    if (caps & WL_SEAT_CAPABILITY_POINTER) {
+        input->pointer = wl_seat_get_pointer(seat);
+        wl_pointer_add_listener(input->pointer, &pointer_listener, data);
+    }
+
+    if (caps & WL_SEAT_CAPABILITY_TOUCH) {
+        input->touch = wl_seat_get_touch(seat);
+        wl_touch_add_listener(input->touch, &wl_touch_listener, data);
+    }
+
+    if (seat == input->seat && !(caps & WL_SEAT_CAPABILITY_KEYBOARD) && !(caps & WL_SEAT_CAPABILITY_POINTER)) {
         wl_keyboard_destroy(input->keyboard);
         input->seat = NULL;
         input->keyboard = NULL;
+        input->pointer = NULL;
+        input->touch = NULL;
     }
 }
 

@@ -253,6 +253,70 @@ enum bm_key {
     BM_KEY_LAST
 };
 
+enum bm_pointer_key {
+    BM_POINTER_KEY_NONE,
+    BM_POINTER_KEY_PRIMARY,
+};
+
+enum bm_pointer_axis {
+    BM_POINTER_AXIS_VERTICAL = 0,
+    BM_POINTER_AXIS_HORIZONTAL = 1,
+};
+
+enum bm_pointer_event_mask {
+    POINTER_EVENT_ENTER = 1 << 1,
+    POINTER_EVENT_LEAVE = 1 << 2,
+    POINTER_EVENT_MOTION = 1 << 3,
+    POINTER_EVENT_BUTTON = 1 << 4,
+    POINTER_EVENT_AXIS = 1 << 5,
+    POINTER_EVENT_AXIS_SOURCE = 1 << 6,
+    POINTER_EVENT_AXIS_STOP = 1 << 7,
+    POINTER_EVENT_AXIS_DISCRETE = 1 << 8,
+};
+
+enum bm_pointer_state_mask {
+    POINTER_STATE_RELEASED,
+    POINTER_STATE_PRESSED,
+};
+
+struct bm_pointer {
+    uint32_t event_mask;
+    uint32_t pos_x, pos_y;
+    uint32_t button, state;
+    uint32_t time;
+    struct {
+        bool valid;
+        int32_t value;
+        int32_t discrete;
+    } axes[2];
+    uint32_t axis_source;
+};
+
+enum bm_touch_event_mask {
+    TOUCH_EVENT_DOWN = 1 << 0,
+    TOUCH_EVENT_UP = 1 << 1,
+    TOUCH_EVENT_MOTION = 1 << 2,
+    TOUCH_EVENT_CANCEL = 1 << 3,
+    TOUCH_EVENT_SHAPE = 1 << 4,
+    TOUCH_EVENT_ORIENTATION = 1 << 5,
+};
+
+struct bm_touch_point {
+    bool valid;
+    int32_t id;
+    uint32_t event_mask;
+    int32_t start_x, start_y;
+    int32_t pos_x, pos_y;
+    uint32_t major, minor;
+    uint32_t orientation;
+};
+
+struct bm_touch {
+    uint32_t time;
+    uint32_t serial;
+    struct bm_touch_point points[2];
+};
+
 /**
  * Colorable element constants.
  *
@@ -485,6 +549,22 @@ BM_PUBLIC void bm_menu_set_cursor_height(struct bm_menu *menu, uint32_t cursor_h
  * @return uint32_t for max amount of vertical cursors to be shown.
  */
 BM_PUBLIC uint32_t bm_menu_get_cursor_height(struct bm_menu *menu);
+
+/**
+ * Get with of menu in pixels.
+ *
+ * @param menu bm_menu instance where to get line height.
+ * @return uint32_t for max amount the menu height.
+ */
+BM_PUBLIC uint32_t bm_menu_get_height(struct bm_menu *menu);
+
+/**
+ * Get with of menu in pixels.
+ *
+ * @param menu bm_menu instance where to get line width.
+ * @return uint32_t for max amount the menu width.
+ */
+BM_PUBLIC uint32_t bm_menu_get_width(struct bm_menu *menu);
 
 /**
  * Set a hexadecimal color for element.
@@ -810,14 +890,43 @@ BM_PUBLIC void bm_menu_filter(struct bm_menu *menu);
 BM_PUBLIC enum bm_key bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode);
 
 /**
+ * Poll pointer and unicode from underlying UI toolkit.
+ *
+ * This function will block on **curses** renderer.
+ *
+ * @param menu bm_menu instance from which to poll.
+ * @return bm_pointer for polled pointer.
+ */
+BM_PUBLIC struct bm_pointer bm_menu_poll_pointer(struct bm_menu *menu);
+
+/**
+ * Poll touch and unicode from underlying UI toolkit.
+ *
+ * This function will block on **curses** renderer.
+ *
+ * @param menu bm_menu instance from which to poll.
+ * @return bm_touch for polled touch.
+ */
+BM_PUBLIC struct bm_touch bm_menu_poll_touch(struct bm_menu *menu);
+
+/**
+ * Enforce a release of the touches.
+ *
+ * @param menu bm_menu instance from which to poll.
+ */
+BM_PUBLIC void bm_menu_release_touch(struct bm_menu *menu);
+
+/**
  * Advances menu logic with key and unicode as input.
  *
  * @param menu bm_menu instance to be advanced.
  * @param key Key input that will advance menu logic.
+ * @param pointer Pointer input that will advance menu logic.
+ * @param touch Touch input that will advance menu logic.
  * @param unicode Unicode input that will advance menu logic.
  * @return bm_run_result for menu state.
  */
-BM_PUBLIC enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode);
+BM_PUBLIC enum bm_run_result bm_menu_run_with_events(struct bm_menu *menu, enum bm_key key, struct bm_pointer pointer, struct bm_touch touch, uint32_t unicode);
 
 /**  @} Menu Logic */
 
