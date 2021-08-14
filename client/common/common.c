@@ -192,6 +192,7 @@ usage(FILE *out, const char *name)
           "   (...) At end of help indicates the backend support for option.\n\n"
 
           " -b, --bottom          appears at the bottom of the screen. (wx)\n"
+          " -c, --center          appears at the center of the screen. (w)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
@@ -244,6 +245,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "filter",      required_argument, 0, 'F' },
         { "wrap",        no_argument,       0, 'w' },
         { "list",        required_argument, 0, 'l' },
+        { "center",      no_argument,       0, 'c' },
         { "prompt",      required_argument, 0, 'p' },
         { "index",       required_argument, 0, 'I' },
         { "prefix",      required_argument, 0, 'P' },
@@ -286,7 +288,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -308,6 +310,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'l':
                 client->lines = strtol(optarg, NULL, 10);
+                break;
+            case 'c':
+                client->center = true;
                 break;
             case 'p':
                 client->title = optarg;
@@ -433,12 +438,17 @@ menu_with_options(struct client *client)
     bm_menu_set_filter_mode(menu, client->filter_mode);
     bm_menu_set_lines(menu, client->lines);
     bm_menu_set_wrap(menu, client->wrap);
-    bm_menu_set_bottom(menu, client->bottom);
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_monitor_name(menu, client->monitor_name);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_password(menu, client->password);
+
+    if (client->center) {
+        bm_menu_set_center(menu, client->center);
+    } else if (client->bottom) {
+        bm_menu_set_bottom(menu, client->bottom);
+    }
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)
         bm_menu_set_color(menu, i, client->colors[i]);

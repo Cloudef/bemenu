@@ -484,6 +484,15 @@ BM_PUBLIC void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mod
 BM_PUBLIC enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
 
 /**
+ * Display menu at center of the screen.
+ * This may be no-op on some renderers (curses, wayland)
+ *
+ * @param menu bm_menu instance to set center mode for.
+ * @param center true for center mode, false for top mode.
+ */
+BM_PUBLIC void bm_menu_set_center(struct bm_menu *menu, bool center);
+
+/**
  * Display menu at bottom of the screen.
  * This may be no-op on some renderers (curses, wayland)
  *

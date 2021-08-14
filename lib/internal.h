@@ -80,6 +80,11 @@ struct render_api {
     void (*set_bottom)(const struct bm_menu *menu, bool bottom);
 
     /**
+     * Set menu to appear from center of the screen.
+     */
+    void (*set_center)(const struct bm_menu *menu, bool center);
+
+    /**
      * Set monitor indeax where menu will appear
      */
     void (*set_monitor)(const struct bm_menu *menu, int32_t monitor);
@@ -310,6 +315,11 @@ struct bm_menu {
      * Should selection be wrapped?
      */
     bool wrap;
+
+    /**
+     * Is menu shown from center?
+     */
+    bool center;
 
     /**
      * Is menu shown from bottom?

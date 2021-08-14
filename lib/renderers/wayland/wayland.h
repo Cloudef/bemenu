@@ -88,6 +88,7 @@ struct window {
     uint32_t displayed;
     struct wl_list link;
     bool bottom;
+    bool center;
     bool render_pending;
 
     struct {
@@ -129,6 +130,7 @@ void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_schedule_render(struct window *window);
 void bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu);
 void bm_wl_window_set_bottom(struct window *window, struct wl_display *display, bool bottom);
+void bm_wl_window_set_center(struct window *window, struct wl_display *display, bool center);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);
 void bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap);
 bool bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface);
