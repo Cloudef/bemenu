@@ -236,10 +236,10 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
         window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
-        if (window->height == result.height)
+        if (window->height == result.height / window->scale)
             break;
 
-        window->height = result.height;
+        window->height = result.height / window->scale;
         zwlr_layer_surface_v1_set_size(window->layer_surface, 0, window->height);
         wl_surface_commit(window->surface);
         wl_display_roundtrip(display);
