@@ -293,6 +293,7 @@ uint32_t
 bm_menu_get_line_height(struct bm_menu *menu)
 {
     assert(menu);
+
     return menu->line_height;
 }
 
@@ -308,6 +309,34 @@ bm_menu_get_cursor_height(struct bm_menu *menu)
 {
     assert(menu);
     return menu->cursor_height;
+}
+
+uint32_t
+bm_menu_get_height(struct bm_menu *menu)
+{
+    assert(menu);
+
+    uint32_t height = 0;
+
+    if (menu->renderer->api.get_height) {
+        height = menu->renderer->api.get_height(menu);
+    }
+
+    return height;
+}
+
+uint32_t
+bm_menu_get_width(struct bm_menu *menu)
+{
+    assert(menu);
+
+    uint32_t width = 0;
+
+    if (menu->renderer->api.get_width) {
+        width = menu->renderer->api.get_width(menu);
+    }
+
+    return width;
 }
 
 bool
@@ -707,6 +736,41 @@ bm_menu_poll_key(struct bm_menu *menu, uint32_t *out_unicode)
     return key;
 }
 
+struct bm_pointer
+bm_menu_poll_pointer(struct bm_menu *menu)
+{
+    assert(menu);
+
+    struct bm_pointer pointer = {0};
+
+    if (menu->renderer->api.poll_pointer)
+        pointer = menu->renderer->api.poll_pointer(menu);
+
+    return pointer;
+}
+
+struct bm_touch
+bm_menu_poll_touch(struct bm_menu *menu)
+{
+    assert(menu);
+
+    struct bm_touch touch = {0};
+
+    if (menu->renderer->api.poll_touch)
+        touch = menu->renderer->api.poll_touch(menu);
+
+    return touch;
+}
+
+void
+bm_menu_release_touch(struct bm_menu *menu)
+{
+    assert(menu);
+
+    if (menu->renderer->api.release_touch)
+        menu->renderer->api.release_touch(menu);
+}
+
 static void
 menu_next(struct bm_menu *menu, uint32_t count, bool wrap)
 {
@@ -724,6 +788,41 @@ menu_prev(struct bm_menu *menu, uint32_t count, bool wrap)
         menu->index--;
     } else if (wrap) {
         menu->index = count - 1;
+    }
+}
+
+static void
+menu_point_select(struct bm_menu *menu, uint32_t posx, uint32_t posy, uint32_t displayed)
+{
+    (void) posx;
+    uint32_t selected_line = posy / (bm_menu_get_height(menu) / displayed);
+    uint16_t current_page_index = menu->index / menu->lines;
+
+    if (0 == selected_line) { // Mouse over title bar
+        return;
+    }
+
+    if (selected_line >= displayed) { // This might be useless
+        return;
+    }
+
+    menu->index = current_page_index * menu->lines + (selected_line - 1);
+}
+
+static void
+menu_scroll_down(struct bm_menu *menu, uint16_t count)
+{
+    if (menu->index / menu->lines != count / menu->lines) { // not last page
+        menu->index = ((menu->index / menu->lines) + 1) * menu->lines;
+    }
+}
+
+static void
+menu_scroll_up(struct bm_menu *menu, uint16_t count)
+{
+    (void) count;
+    if (menu->index / menu->lines) { // not first page
+        menu->index = ((menu->index / menu->lines) - 1) * menu->lines + menu->lines - 1;
     }
 }
 
@@ -952,6 +1051,171 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
     }
 
     return BM_RUN_RESULT_RUNNING;
+}
+
+enum bm_run_result
+bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer, uint32_t unicode)
+{
+    (void) unicode;
+    uint32_t count;
+    bm_menu_get_filtered_items(menu, &count);
+
+    uint32_t displayed = 0;
+    if (menu->renderer->api.get_displayed_count)
+        displayed = menu->renderer->api.get_displayed_count(menu);
+
+    if (!displayed)
+        displayed = count;
+
+    if (!menu->lines) {
+        if (pointer.axes[BM_POINTER_AXIS_VERTICAL].valid) {
+            if (0 < pointer.axes[BM_POINTER_AXIS_VERTICAL].value) {
+                menu_next(menu, count, menu->wrap);
+            } else {
+                menu_prev(menu, count, menu->wrap);
+            }
+        }
+        if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_PRESSED) {
+            switch (pointer.button) {
+                case BM_POINTER_KEY_PRIMARY:
+                    {
+                        struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                        if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
+                            list_add_item(&menu->selection, highlighted);
+                    }
+                    return BM_RUN_RESULT_SELECTED;
+            }
+        }
+       return BM_RUN_RESULT_RUNNING;
+    }
+
+    if (pointer.axes[BM_POINTER_AXIS_VERTICAL].valid) {
+        if (0 < pointer.axes[BM_POINTER_AXIS_VERTICAL].value) {
+            menu_scroll_down(menu, count);
+        } else {
+            menu_scroll_up(menu, count);
+        }
+    }
+
+    if (pointer.event_mask & POINTER_EVENT_MOTION) {
+        menu_point_select(menu, pointer.pos_x, pointer.pos_y, displayed);
+    }
+
+    if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_PRESSED) {
+        switch (pointer.button) {
+            case BM_POINTER_KEY_PRIMARY:
+                {
+                    struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                    if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
+                        list_add_item(&menu->selection, highlighted);
+                }
+                return BM_RUN_RESULT_SELECTED;
+        }
+    }
+
+    return BM_RUN_RESULT_RUNNING;
+}
+
+enum bm_run_result
+bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch, uint32_t unicode)
+{
+    (void) unicode;
+    uint32_t count;
+    bm_menu_get_filtered_items(menu, &count);
+
+    uint32_t displayed = 0;
+    if (menu->renderer->api.get_displayed_count)
+        displayed = menu->renderer->api.get_displayed_count(menu);
+
+    if (!displayed)
+        displayed = count;
+
+    if (!menu->lines) {
+        // Not implemented yet
+        return BM_RUN_RESULT_RUNNING;
+    }
+
+    uint16_t count_down = 0;
+    for (size_t i = 0; i < 2; ++i) {
+        struct bm_touch_point point = touch.points[i];
+        if (point.event_mask & TOUCH_EVENT_DOWN) {
+            count_down += 1;
+        }
+    }
+
+    if (count_down == 2) {
+        int16_t scroll_count = 0;
+        int16_t scroll_directions[2];
+        int16_t distance_trigger = displayed * bm_menu_get_line_height(menu) / 4;
+        for (size_t i = 0; i < 2; ++i) {
+            struct bm_touch_point point = touch.points[i];
+            if (!(point.event_mask & TOUCH_EVENT_DOWN))
+                continue;
+
+            int32_t movement_y = point.pos_y - point.start_y;
+            if (abs(movement_y) > distance_trigger) {
+                scroll_directions[i] = movement_y / abs(movement_y);
+                scroll_count++;
+            }
+        }
+
+        int16_t scroll_direction_sum = scroll_directions[0] + scroll_directions[1];
+        if (2 == abs(scroll_direction_sum)) {
+            uint16_t current_page = menu->index / menu->lines;
+            if (scroll_direction_sum < 0 && current_page != count / menu->lines) { // not already the first page
+                menu_scroll_down(menu, count);
+                bm_menu_release_touch(menu);
+            } else if (scroll_direction_sum > 0 && current_page) { // not already the first page
+                menu_scroll_up(menu, count);
+                bm_menu_release_touch(menu);
+            }
+        }
+    }
+
+    if (count_down != 1)
+        return BM_RUN_RESULT_RUNNING;
+
+    for (size_t i = 0; i < 2; ++i) {
+        struct bm_touch_point point = touch.points[i];
+        if (!(point.event_mask & TOUCH_EVENT_DOWN))
+            continue;
+
+        menu_point_select(menu, point.pos_x, point.pos_y, displayed);
+
+        if (point.event_mask & TOUCH_EVENT_UP) {
+            if (point.pos_y < (int32_t) (bm_menu_get_height(menu) / displayed)) {
+                menu_scroll_up(menu, count);
+            } else if ((uint32_t) point.pos_y > bm_menu_get_height(menu)) {
+                menu_scroll_down(menu, count);
+            } else if (point.pos_x > 0
+                && (uint32_t) point.pos_x < bm_menu_get_width(menu)) {
+                {
+                    struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                    if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
+                        list_add_item(&menu->selection, highlighted);
+                }
+                return BM_RUN_RESULT_SELECTED;
+            }
+        }
+    }
+    return BM_RUN_RESULT_RUNNING;
+}
+
+enum bm_run_result
+bm_menu_run_with_events(struct bm_menu *menu, enum bm_key key,
+    struct bm_pointer pointer, struct bm_touch touch, uint32_t unicode)
+{
+    enum bm_run_result key_result = bm_menu_run_with_key(menu, key, unicode);
+    if (key_result != BM_RUN_RESULT_RUNNING) {
+        return key_result;
+    }
+
+    enum bm_run_result pointer_result = bm_menu_run_with_pointer(menu, pointer, unicode);
+    if (pointer_result != BM_RUN_RESULT_RUNNING) {
+        return pointer_result;
+    }
+
+    return bm_menu_run_with_touch(menu, touch, unicode);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

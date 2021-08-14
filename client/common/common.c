@@ -502,11 +502,15 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
 
     uint32_t unicode;
     enum bm_key key;
+    struct bm_pointer pointer;
+    struct bm_touch touch;
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
         bm_menu_render(menu);
         key = bm_menu_poll_key(menu, &unicode);
-    } while ((status = bm_menu_run_with_key(menu, key, unicode)) == BM_RUN_RESULT_RUNNING);
+        pointer = bm_menu_poll_pointer(menu);
+        touch = bm_menu_poll_touch(menu);
+    } while ((status = bm_menu_run_with_events(menu, key, pointer, touch, unicode)) == BM_RUN_RESULT_RUNNING);
 
     switch (status) {
         case BM_RUN_RESULT_SELECTED:

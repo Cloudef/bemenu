@@ -43,7 +43,9 @@ render(const struct bm_menu *menu)
         }
     }
 
-    if (wayland->input.code != wayland->input.last_code) {
+    if (wayland->input.code != wayland->input.last_code ||
+        wayland->input.touch_event.active ||
+        wayland->input.pointer_event.event_mask) {
         wl_list_for_each(window, &wayland->windows, link) {
             bm_wl_window_schedule_render(window);
         }
@@ -217,6 +219,96 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     return BM_KEY_UNICODE;
 }
 
+struct bm_pointer
+poll_pointer(const struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    struct input *input = &wayland->input;
+    struct pointer_event *event = &input->pointer_event;
+    assert(wayland && event);
+
+    struct bm_pointer bm_pointer;
+
+    bm_pointer.event_mask = event->event_mask;
+    bm_pointer.pos_x = wl_fixed_to_int(event->surface_x);
+    bm_pointer.pos_y = wl_fixed_to_int(event->surface_y);
+    bm_pointer.time = event->time;
+    bm_pointer.axes[0].valid = event->axes[0].valid;
+    bm_pointer.axes[0].value = event->axes[0].value;
+    bm_pointer.axes[0].discrete = event->axes[0].discrete;
+    bm_pointer.axes[1].valid = event->axes[1].valid;
+    bm_pointer.axes[1].value = event->axes[1].value;
+    bm_pointer.axes[1].discrete = event->axes[1].discrete;
+    bm_pointer.axis_source = event->axis_source;
+
+    bm_pointer.button = BM_POINTER_KEY_NONE;
+    switch (event->button) {
+        case BTN_LEFT:
+            bm_pointer.button = BM_POINTER_KEY_PRIMARY;
+            break;
+    }
+
+    if (event->state & WL_POINTER_BUTTON_STATE_PRESSED) {
+        bm_pointer.state |= POINTER_STATE_PRESSED;
+    }
+    if (event->state & WL_POINTER_BUTTON_STATE_RELEASED) {
+        bm_pointer.state |= POINTER_STATE_RELEASED;
+    }
+
+    memset(event, 0, sizeof(*event));
+    return bm_pointer;
+}
+
+struct bm_touch
+poll_touch(const struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    struct input *input = &wayland->input;
+    struct touch_event *event = &input->touch_event;
+    assert(wayland && event);
+
+    struct bm_touch bm_touch;
+
+    for (size_t i = 0; i < 2; ++i) {
+        struct touch_point *point = &event->points[i];
+
+        if (!point->valid) {
+            bm_touch.points[i].event_mask = 0;
+            continue;
+        }
+
+        bm_touch.points[i].event_mask = point->event_mask;
+        bm_touch.points[i].pos_x = wl_fixed_to_int(point->surface_x);
+        bm_touch.points[i].pos_y = wl_fixed_to_int(point->surface_y);
+        bm_touch.points[i].start_x = wl_fixed_to_int(point->surface_start_x);
+        bm_touch.points[i].start_y = wl_fixed_to_int(point->surface_start_y);
+        bm_touch.points[i].major = point->major;
+        bm_touch.points[i].minor = point->minor;
+        bm_touch.points[i].orientation = point->orientation;
+
+        if (point->event_mask & TOUCH_EVENT_UP) {
+            point->valid = false;
+            point->event_mask = 0;
+        }
+    }
+
+    return bm_touch;
+}
+
+void
+release_touch(const struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    struct input *input = &wayland->input;
+    struct touch_event *event = &input->touch_event;
+    assert(wayland && event);
+
+    for (size_t i = 0; i < 2; ++i) {
+        struct touch_point *point = &event->points[i];
+        point->valid = false;
+    }
+}
+
 static uint32_t
 get_displayed_count(const struct bm_menu *menu)
 {
@@ -227,6 +319,34 @@ get_displayed_count(const struct bm_menu *menu)
     wl_list_for_each(window, &wayland->windows, link) {
         if (window->displayed > max)
             max = window->displayed;
+    }
+    return max;
+}
+
+static uint32_t
+get_height(const struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+    uint32_t max = 0;
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        if (window->displayed > max)
+            max = window->height;
+    }
+    return max;
+}
+
+static uint32_t
+get_width(const struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+    uint32_t max = 0;
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        if (window->displayed > max)
+            max = window->width;
     }
     return max;
 }
@@ -447,7 +567,12 @@ register_renderer(struct render_api *api)
     api->constructor = constructor;
     api->destructor = destructor;
     api->get_displayed_count = get_displayed_count;
+    api->get_height = get_height;
+    api->get_width = get_width;
     api->poll_key = poll_key;
+    api->poll_pointer = poll_pointer;
+    api->poll_touch = poll_touch;
+    api->release_touch = release_touch;
     api->render = render;
     api->set_align = set_align;
     api->set_width = set_width;

@@ -67,10 +67,38 @@ struct render_api {
     uint32_t (*get_displayed_count)(const struct bm_menu *menu);
 
     /**
+     * Get height by the underlying renderer;
+     */
+    uint32_t (*get_height)(const struct bm_menu *menu);
+
+    /**
+     * Get width by the underlying renderer;
+     */
+    uint32_t (*get_width)(const struct bm_menu *menu);
+
+    /**
      * If the underlying renderer is a UI toolkit. (curses, etc...)
      * There might be possibility to get user input, and this should be thus implemented.
      */
     enum bm_key (*poll_key)(const struct bm_menu *menu, uint32_t *unicode);
+
+    /**
+     * If the underlying renderer is a UI toolkit. (curses, etc...)
+     * There might be possibility to get user pointer, and this should be thus implemented.
+     */
+    struct bm_pointer (*poll_pointer)(const struct bm_menu *menu);
+
+    /**
+     * If the underlying renderer is a UI toolkit. (curses, etc...)
+     * There might be possibility to get user touch, and this should be thus implemented.
+     */
+    struct bm_touch (*poll_touch)(const struct bm_menu *menu);
+
+    /**
+     * Enforce a release of the touches
+     * There might be possibility to get user touch, and this should be thus implemented.
+     */
+    void (*release_touch)(const struct bm_menu *menu);
 
     /**
      * Tells underlying renderer to draw the menu.
