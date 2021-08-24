@@ -197,6 +197,7 @@ usage(FILE *out, const char *name)
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
+          " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
           " --tf                  defines the title foreground color. (wx)\n"
@@ -260,6 +261,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "no-overlap",  no_argument,       0, 'n' },
         { "monitor",     required_argument, 0, 'm' },
         { "line-height", required_argument, 0, 'H' },
+        { "ch",          required_argument, 0, 0x118 },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
         { "tf",          required_argument, 0, 0x103 },
@@ -355,6 +357,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 'H':
                 client->line_height = strtol(optarg, NULL, 10);
                 break;
+            case 0x118:
+                client->cursor_height = strtol(optarg, NULL, 10);
+                break;
             case 0x101:
                 client->font = optarg;
                 break;
@@ -433,6 +438,7 @@ menu_with_options(struct client *client)
 
     bm_menu_set_font(menu, client->font);
     bm_menu_set_line_height(menu, client->line_height);
+    bm_menu_set_cursor_height(menu, client->cursor_height);
     bm_menu_set_title(menu, client->title);
     bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);

@@ -296,6 +296,20 @@ bm_menu_get_line_height(struct bm_menu *menu)
     return menu->line_height;
 }
 
+void
+bm_menu_set_cursor_height(struct bm_menu *menu, uint32_t cursor_height)
+{
+    assert(menu);
+    menu->cursor_height = cursor_height;
+}
+
+uint32_t
+bm_menu_get_cursor_height(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->cursor_height;
+}
+
 bool
 bm_menu_set_color(struct bm_menu *menu, enum bm_color color, const char *hex)
 {
