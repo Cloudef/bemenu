@@ -25,6 +25,7 @@ struct cairo_paint {
     const char *font;
     int32_t baseline;
     uint32_t cursor;
+    uint32_t cursor_height;
     bool draw_cursor;
 
     struct box {
@@ -131,11 +132,12 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
     height = paint->box.h > 0 ? paint->box.h : height;
     int base = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
+    uint32_t line_height = height + paint->box.by + paint->box.ty;
     cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
     cairo_rectangle(cairo->cr,
             paint->pos.x - paint->box.lx, paint->pos.y - paint->box.ty,
             (paint->box.w > 0 ? paint->box.w : width) + paint->box.rx + paint->box.lx,
-            height + paint->box.by + paint->box.ty);
+            line_height);
     cairo_fill(cairo->cr);
 
     cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
@@ -152,15 +154,16 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
             rect.width = result.x_advance * PANGO_SCALE;
         }
 
+        uint32_t cursor_height = fmin(paint->cursor_height == 0 ? line_height : paint->cursor_height, line_height);
         cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
         cairo_rectangle(cairo->cr,
-                paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty,
-                rect.width / PANGO_SCALE, height + paint->box.by + paint->box.ty);
+                paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty + ((line_height - cursor_height) / 2),
+                rect.width / PANGO_SCALE, cursor_height);
         cairo_fill(cairo->cr);
 
         cairo_rectangle(cairo->cr,
                 paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty,
-                rect.width / PANGO_SCALE, height + paint->box.by + paint->box.ty);
+                rect.width / PANGO_SCALE, line_height);
         cairo_clip(cairo->cr);
 
         cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
@@ -172,7 +175,7 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
     g_object_unref(layout);
 
     result->x_advance = width + paint->box.rx;
-    result->height = height + paint->box.by + paint->box.ty;
+    result->height = line_height;
 
     cairo_identity_matrix(cairo->cr);
     return true;
@@ -251,6 +254,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
     paint.draw_cursor = true;
     paint.cursor = menu->cursor;
+    paint.cursor_height = menu->cursor_height;
     paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance, vpadding };
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, vpadding, width - paint.pos.x, ascii_height };
 
