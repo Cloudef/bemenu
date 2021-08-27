@@ -212,6 +212,8 @@ usage(FILE *out, const char *name)
           " --nf                  defines the normal foreground color. (wx)\n"
           " --hb                  defines the highlighted background color. (wx)\n"
           " --hf                  defines the highlighted foreground color. (wx)\n"
+          " --fbb                 defines the feedback background color. (wx)\n"
+          " --fbf                 defines the feedback foreground color. (wx)\n"
           " --sb                  defines the selected background color. (wx)\n"
           " --sf                  defines the selected foreground color. (wx)\n"
           " --scb                 defines the scrollbar background color. (wx)\n"
@@ -257,10 +259,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prefix",       required_argument, 0, 'P' },
         { "password",     no_argument,       0, 'x' },
         { "scrollbar",    required_argument, 0, 0x100 },
-        { "ifne",         no_argument,       0, 0x115 },
-        { "fork",         no_argument,       0, 0x116 },
-        { "no-exec",      no_argument,       0, 0x117 },
-
+        { "ifne",         no_argument,       0, 0x117 },
+        { "fork",         no_argument,       0, 0x118 },
+        { "no-exec",      no_argument,       0, 0x119 },
         { "bottom",       no_argument,       0, 'b' },
         { "grab",         no_argument,       0, 'f' },
         { "no-overlap",   no_argument,       0, 'n' },
@@ -279,12 +280,14 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "nf",           required_argument, 0, 0x107 },
         { "hb",           required_argument, 0, 0x108 },
         { "hf",           required_argument, 0, 0x109 },
-        { "sb",           required_argument, 0, 0x110 },
-        { "sf",           required_argument, 0, 0x111 },
-        { "scb",          required_argument, 0, 0x112 },
-        { "scf",          required_argument, 0, 0x113 },
+        { "fbb",          required_argument, 0, 0x110 },
+        { "fbf",          required_argument, 0, 0x111 },
+        { "sb",           required_argument, 0, 0x112 },
+        { "sf",           required_argument, 0, 0x113 },
+        { "scb",          required_argument, 0, 0x114 },
+        { "scf",          required_argument, 0, 0x115 },
 
-        { "disco",       no_argument,       0, 0x114 },
+        { "disco",       no_argument,       0, 0x116 },
         { 0, 0, 0, 0 }
     };
 
@@ -336,13 +339,13 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 0x100:
                 client->scrollbar = (!strcmp(optarg, "none") ? BM_SCROLLBAR_NONE : (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE)));
                 break;
-            case 0x115:
+            case 0x117:
                 client->ifne = true;
                 break;
-            case 0x116:
+            case 0x118:
                 client->force_fork = true;
                 break;
-            case 0x117:
+            case 0x119:
                 client->no_exec = true;
                 break;
             case 'x':
@@ -374,7 +377,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 'W':
                 client->width_factor = strtof(optarg, NULL);
                 break;
-            case 0x118:
+            case 0x120:
                 client->cursor_height = strtol(optarg, NULL, 10);
                 break;
             case 0x101:
@@ -405,19 +408,25 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->colors[BM_COLOR_HIGHLIGHTED_FG] = optarg;
                 break;
             case 0x110:
-                client->colors[BM_COLOR_SELECTED_BG] = optarg;
+                client->colors[BM_COLOR_FEEDBACK_BG] = optarg;
                 break;
             case 0x111:
-                client->colors[BM_COLOR_SELECTED_FG] = optarg;
+                client->colors[BM_COLOR_FEEDBACK_FG] = optarg;
                 break;
             case 0x112:
-                client->colors[BM_COLOR_SCROLLBAR_BG] = optarg;
+                client->colors[BM_COLOR_SELECTED_BG] = optarg;
                 break;
             case 0x113:
+                client->colors[BM_COLOR_SELECTED_FG] = optarg;
+                break;
+            case 0x114:
+                client->colors[BM_COLOR_SCROLLBAR_BG] = optarg;
+                break;
+            case 0x115:
                 client->colors[BM_COLOR_SCROLLBAR_FG] = optarg;
                 break;
 
-            case 0x114:
+            case 0x116:
                 disco();
                 break;
 

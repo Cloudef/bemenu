@@ -23,6 +23,8 @@ static const char *default_colors[BM_COLOR_LAST] = {
     "#CACACAFF", // BM_COLOR_ITEM_FG
     "#121212FF", // BM_COLOR_HIGHLIGHTED_BG
     "#D81860FF", // BM_COLOR_HIGHLIGHTED_FG
+    "#D81860FF", // BM_COLOR_FEEDBACK_BG
+    "#121212FF", // BM_COLOR_FEEDBACK_FG
     "#121212FF", // BM_COLOR_SELECTED_BG
     "#D81860FF", // BM_COLOR_SELECTED_FG
     "#121212FF", // BM_COLOR_SCROLLBAR_BG
@@ -826,6 +828,31 @@ menu_scroll_up(struct bm_menu *menu, uint16_t count)
     }
 }
 
+static void
+menu_scroll_first(struct bm_menu *menu, uint16_t count)
+{
+    (void) count;
+    menu->index = 0;
+}
+
+static void
+menu_scroll_last(struct bm_menu *menu, uint16_t count)
+{
+    menu->index = count - 1;
+}
+
+void
+bm_menu_add_event_feedback(struct bm_menu *menu, uint32_t event_feedback)
+{
+    menu->event_feedback |= event_feedback;
+}
+
+void
+bm_menu_remove_event_feedback(struct bm_menu *menu, uint32_t event_feedback)
+{
+    menu->event_feedback &= ~event_feedback;
+}
+
 enum bm_run_result
 bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 {
@@ -1181,20 +1208,56 @@ bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch, uint32_t uni
             continue;
 
         menu_point_select(menu, point.pos_x, point.pos_y, displayed);
+        bm_menu_remove_event_feedback(menu,
+            TOUCH_WILL_CANCEL
+            | TOUCH_WILL_SCROLL_FIRST
+            | TOUCH_WILL_SCROLL_LAST
+            | TOUCH_WILL_SCROLL_UP
+            | TOUCH_WILL_SCROLL_DOWN
+        );
 
-        if (point.event_mask & TOUCH_EVENT_UP) {
-            if (point.pos_y < (int32_t) (bm_menu_get_height(menu) / displayed)) {
-                menu_scroll_up(menu, count);
-            } else if ((uint32_t) point.pos_y > bm_menu_get_height(menu)) {
-                menu_scroll_down(menu, count);
-            } else if (point.pos_x > 0
-                && (uint32_t) point.pos_x < bm_menu_get_width(menu)) {
-                {
-                    struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
-                    if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
-                        list_add_item(&menu->selection, highlighted);
+        if (point.pos_y < (int32_t) (bm_menu_get_height(menu) / displayed)) {
+            if (point.pos_y < ((int32_t) (bm_menu_get_height(menu) / displayed)) - 50) {
+                if (point.event_mask & TOUCH_EVENT_UP) {
+                    menu_scroll_first(menu, count);
+                } else if (point.event_mask & TOUCH_EVENT_MOTION) {
+                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_FIRST);
                 }
-                return BM_RUN_RESULT_SELECTED;
+            } else {
+                if (point.event_mask & TOUCH_EVENT_UP) {
+                    menu_scroll_up(menu, count);
+                } else if (point.event_mask & TOUCH_EVENT_MOTION) {
+                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_UP);
+                }
+            }
+        } else if ((uint32_t) point.pos_y > bm_menu_get_height(menu)) {
+            if ((uint32_t) point.pos_y > bm_menu_get_height(menu) + 50) {
+                if (point.event_mask & TOUCH_EVENT_UP) {
+                    menu_scroll_last(menu, count);
+                } else if (point.event_mask & TOUCH_EVENT_MOTION) {
+                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_LAST);
+                }
+            } else {
+                if (point.event_mask & TOUCH_EVENT_UP) {
+                    menu_scroll_down(menu, count);
+                } else if (point.event_mask & TOUCH_EVENT_MOTION) {
+                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_DOWN);
+                }
+            }
+        } else {
+            if (point.pos_x > 0 && (uint32_t) point.pos_x < bm_menu_get_width(menu)) {
+                if (point.event_mask & TOUCH_EVENT_UP) {
+                    {
+                        struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                        if (highlighted && !bm_menu_item_is_selected(menu, highlighted))
+                            list_add_item(&menu->selection, highlighted);
+                    }
+                    return BM_RUN_RESULT_SELECTED;
+                }
+            } else {
+                if (!(point.event_mask & TOUCH_EVENT_UP)) {
+                    bm_menu_add_event_feedback(menu, TOUCH_WILL_CANCEL);
+                }
             }
         }
     }
