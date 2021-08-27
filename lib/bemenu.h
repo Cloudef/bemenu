@@ -584,6 +584,14 @@ BM_PUBLIC void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
 BM_PUBLIC void bm_menu_set_password(struct bm_menu *menu, bool password);
 
 /**
+ * Space entries with title.
+ *
+ * @param menu bm_menu instance to set password mode for.
+ * @param spacing true to enable title spacing
+ */
+BM_PUBLIC void bm_menu_set_spacing(struct bm_menu *menu, bool spacing);
+
+/**
  * Is password mode activated and input hidden?
  *
  * @param menu bm_menu instance where to get password mode from.

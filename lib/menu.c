@@ -462,6 +462,17 @@ bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap)
 }
 
 void
+bm_menu_set_spacing(struct bm_menu *menu, bool spacing)
+{
+    assert(menu);
+
+    if (menu->spacing == spacing)
+        return;
+
+    menu->spacing = spacing;
+}
+
+void
 bm_menu_set_password(struct bm_menu *menu, bool password)
 {
     assert(menu);

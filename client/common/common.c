@@ -175,6 +175,7 @@ usage(FILE *out, const char *name)
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
           " -x, --password        hide input.\n"
+          " -s, --no-spacing      disable the title spacing on entries.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
@@ -259,6 +260,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "bottom",      no_argument,       0, 'b' },
         { "grab",        no_argument,       0, 'f' },
         { "no-overlap",  no_argument,       0, 'n' },
+        { "no-spacing",  no_argument,       0, 's' },
         { "monitor",     required_argument, 0, 'm' },
         { "line-height", required_argument, 0, 'H' },
         { "ch",          required_argument, 0, 0x118 },
@@ -290,7 +292,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:n", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:ns", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -352,6 +354,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'n':
                 client->no_overlap = true;
+                break;
+            case 's':
+                client->no_spacing = true;
                 break;
 
             case 'H':
@@ -448,6 +453,7 @@ menu_with_options(struct client *client)
     bm_menu_set_monitor_name(menu, client->monitor_name);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
+    bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);
 
     if (client->center) {
