@@ -317,6 +317,14 @@ struct bm_touch {
     struct bm_touch_point points[2];
 };
 
+enum bm_event_feedback_mask {
+    TOUCH_WILL_SCROLL_UP = 1 << 1,
+    TOUCH_WILL_SCROLL_DOWN = 1 << 2,
+    TOUCH_WILL_SCROLL_FIRST = 1 << 3,
+    TOUCH_WILL_SCROLL_LAST = 1 << 4,
+    TOUCH_WILL_CANCEL = 1 << 5,
+};
+
 /**
  * Colorable element constants.
  *
@@ -331,6 +339,8 @@ enum bm_color {
     BM_COLOR_ITEM_FG,
     BM_COLOR_HIGHLIGHTED_BG,
     BM_COLOR_HIGHLIGHTED_FG,
+    BM_COLOR_FEEDBACK_BG,
+    BM_COLOR_FEEDBACK_FG,
     BM_COLOR_SELECTED_BG,
     BM_COLOR_SELECTED_FG,
     BM_COLOR_SCROLLBAR_BG,

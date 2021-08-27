@@ -386,6 +386,11 @@ struct bm_menu {
      * Should the entry should follow the title spacing
      */
     bool spacing;
+
+    /**
+     * Mask representing a feedback to bring to user
+     */
+    uint32_t event_feedback;
 };
 
 /* library.c */

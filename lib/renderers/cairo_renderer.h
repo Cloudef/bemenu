@@ -208,6 +208,47 @@ bm_cairo_color_from_menu_color(const struct bm_menu *menu, enum bm_color color, 
     c->a = (float)menu->colors[color].a / 255.0f;
 }
 
+static char *
+bm_cairo_entry_message(char *entry_text, bool highlighted, uint32_t event_feedback, uint32_t index, uint32_t count)
+{
+    if (!highlighted || !event_feedback) {
+        return entry_text ? entry_text : "";
+    } else {
+        if (event_feedback & TOUCH_WILL_CANCEL) {
+            return "Cancel…";
+        }
+        if (event_feedback & TOUCH_WILL_SCROLL_FIRST) {
+            if (index == 0) {
+                return "Already on the first page…";
+            } else {
+                return "First page…";
+            }
+        }
+        if (event_feedback & TOUCH_WILL_SCROLL_UP) {
+            if (index == 0) {
+                return "Already on the first page…";
+            } else {
+                return "Previous page…";
+            }
+        }
+        if (event_feedback & TOUCH_WILL_SCROLL_DOWN) {
+            if (index == count - 1) {
+                return "Already on the last page…";
+            } else {
+                return "Next page…";
+            }
+        }
+        if (event_feedback & TOUCH_WILL_SCROLL_LAST) {
+            if (index == count - 1) {
+                return "Already on the last page…";
+            } else {
+                return "Last page…";
+            }
+        }
+        return "Not handled feedback…";
+    }
+}
+
 static inline void
 bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *out_result)
 {
@@ -303,8 +344,13 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
 
             if (highlighted) {
-                bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_FG, &paint.fg);
-                bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_BG, &paint.bg);
+                if (menu->event_feedback) {
+                    bm_cairo_color_from_menu_color(menu, BM_COLOR_FEEDBACK_FG, &paint.fg);
+                    bm_cairo_color_from_menu_color(menu, BM_COLOR_FEEDBACK_BG, &paint.bg);
+                } else {
+                    bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_FG, &paint.fg);
+                    bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_BG, &paint.bg);
+                }
             } else if (bm_menu_item_is_selected(menu, items[i])) {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_BG, &paint.bg);
@@ -313,14 +359,15 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             }
 
+            char *line_str = bm_cairo_entry_message(items[i]->text, highlighted, menu->event_feedback, i,  count);
             if (menu->prefix && highlighted) {
                 paint.pos = (struct pos){ spacing_x, posy+vpadding };
                 paint.box = (struct box){ 4, 0, vpadding, -vpadding, width - paint.pos.x, height };
-                bm_cairo_draw_line(cairo, &paint, &result, "%s %s", menu->prefix, (items[i]->text ? items[i]->text : ""));
+                bm_cairo_draw_line(cairo, &paint, &result, "%s %s", menu->prefix, line_str);
             } else {
                 paint.pos = (struct pos){ spacing_x, posy+vpadding };
                 paint.box = (struct box){ 4 + prefix_x, 0, vpadding, -vpadding, width - paint.pos.x, height };
-                bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
+                bm_cairo_draw_line(cairo, &paint, &result, "%s", line_str);
             }
 
             posy += (spacing_y ? spacing_y : result.height);
