@@ -277,7 +277,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
         /* vertical mode */
 
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
-        uint32_t spacing_x = title_x, spacing_y = 0; // 0 == variable width spacing
+        uint32_t spacing_x = menu->spacing ? title_x : 0, spacing_y = 0; // 0 == variable width spacing
         if (lines > max_height / titleh) {
             /* there is more lines than screen can fit, enter fixed spacing mode */
             lines = max_height / titleh - 1;
@@ -294,7 +294,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
         if (scrollbar) {
             bm_pango_get_text_extents(cairo, &paint, &result, "#");
             scrollbar_w = result.x_advance;
-            spacing_x += (title_x < scrollbar_w ? scrollbar_w - title_x : 0);
+            spacing_x += (spacing_x < scrollbar_w ? scrollbar_w : 0);
         }
 
         uint32_t posy = titleh;

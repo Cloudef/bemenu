@@ -23,6 +23,7 @@ struct client {
     bool wrap;
     bool ifne;
     bool no_overlap;
+    bool no_spacing;
     bool force_fork, fork;
     bool no_exec;
     bool password;
