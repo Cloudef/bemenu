@@ -238,7 +238,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     paint.baseline = result.baseline;
 
     int32_t vpadding_t = height == 0 ? 2 : (height - ascii_height) / 2;
-	int32_t vpadding_b = vpadding_t + (height - ascii_height) % 2;
+    int32_t vpadding_b = vpadding_t + (height - ascii_height) % 2;
 
     memset(&result, 0, sizeof(result));
     uint32_t title_x = 0;
