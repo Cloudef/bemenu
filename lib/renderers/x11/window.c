@@ -69,7 +69,7 @@ get_window_width(struct window *window)
     uint32_t width = window->width - 2 * window->hmargin_size;
 
     if(width < WINDOW_MIN_WIDTH || 2 * window->hmargin_size > window->width)
-	width = WINDOW_MIN_WIDTH;
+        width = WINDOW_MIN_WIDTH;
 
     return width;
 }
@@ -218,10 +218,10 @@ bm_x11_window_set_monitor(struct window *window, int32_t monitor)
             window->width = DisplayWidth(window->display, window->screen);
         }
 
-	window->orig_width = window->width;
-	window->orig_x = window->x;
-	window->width = get_window_width(window);
-	window->x += (window->orig_width - window->width) / 2;
+        window->orig_width = window->width;
+        window->orig_x = window->x;
+        window->width = get_window_width(window);
+        window->x += (window->orig_width - window->width) / 2;
 
 #undef INTERSECT
     }
@@ -244,15 +244,15 @@ bm_x11_window_set_align(struct window *window, enum bm_align align)
 void
 bm_x11_window_set_hmargin_size(struct window *window, uint32_t margin)
 {
-	if(window->hmargin_size == margin)
-	    return;
+    if(window->hmargin_size == margin)
+        return;
 
-	window->hmargin_size = margin;
-	window->width = window->orig_width;
-	window->x = window->orig_x;
-	window->width = get_window_width(window);
-	window->x += (window->orig_width - window->width) / 2;
-	bm_x11_window_set_monitor(window, window->monitor);
+    window->hmargin_size = margin;
+    window->width = window->orig_width;
+    window->x = window->orig_x;
+    window->width = get_window_width(window);
+    window->x += (window->orig_width - window->width) / 2;
+    bm_x11_window_set_monitor(window, window->monitor);
 }
 
 bool
