@@ -1,3 +1,4 @@
+#include "internal.h"
 #include "x11.h"
 
 #include <stdlib.h>
@@ -62,6 +63,17 @@ next_buffer(struct window *window)
     return buffer;
 }
 
+static uint32_t
+get_window_width(struct window *window)
+{
+    uint32_t width = window->width - 2 * window->hmargin_size;
+
+    if(width < WINDOW_MIN_WIDTH || 2 * window->hmargin_size > window->width)
+	width = WINDOW_MIN_WIDTH;
+
+    return width;
+}
+
 void
 bm_x11_window_render(struct window *window, const struct bm_menu *menu)
 {
@@ -95,7 +107,7 @@ bm_x11_window_render(struct window *window, const struct bm_menu *menu)
         if (window->bottom) {
             XMoveResizeWindow(window->display, window->drawable, window->x, window->max_height - window->height, window->width, window->height);
         } else {
-            XResizeWindow(window->display, window->drawable, window->width, window->height);
+            XMoveResizeWindow(window->display, window->drawable, window->x, 0, window->width, window->height);
         }
     }
 
@@ -190,6 +202,11 @@ bm_x11_window_set_monitor(struct window *window, int32_t monitor)
             window->width = DisplayWidth(window->display, window->screen);
         }
 
+	window->orig_width = window->width;
+	window->orig_x = window->x;
+	window->width = get_window_width(window);
+	window->x += (window->orig_width - window->width) / 2;
+
 #undef INTERSECT
     }
 
@@ -206,6 +223,20 @@ bm_x11_window_set_bottom(struct window *window, bool bottom)
 
     window->bottom = bottom;
     bm_x11_window_set_monitor(window, window->monitor);
+}
+
+void
+bm_x11_window_set_hmargin_size(struct window *window, uint32_t margin)
+{
+	if(window->hmargin_size == margin)
+	    return;
+
+	window->hmargin_size = margin;
+	window->width = window->orig_width;
+	window->x = window->orig_x;
+	window->width = get_window_width(window);
+	window->x += (window->orig_width - window->width) / 2;
+	bm_x11_window_set_monitor(window, window->monitor);
 }
 
 bool

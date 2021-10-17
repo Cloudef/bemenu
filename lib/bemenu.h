@@ -527,6 +527,24 @@ BM_PUBLIC void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
 BM_PUBLIC bool bm_menu_get_bottom(struct bm_menu *menu);
 
 /**
+ * Set the horizontal margin of the bar.
+ *
+ * @param menu bm_menu to set horizontal margin for.
+ * @param margin margin to set.
+ */
+
+BM_PUBLIC void bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin);
+
+/**
+ * Get the horizontal margin of the bar.
+ *
+ * @param menu bm_menu to get horizontal margin from.
+ * @return horizontal margin of the menu
+ */
+
+BM_PUBLIC uint32_t bm_menu_get_hmargin_size(struct bm_menu *menu);
+
+/**
  * Display menu at monitor index.
  * Indices start at 0, a value of -1 can be passed for the active monitor (default).
  * If index is more than amount of monitors, the monitor with highest index will be selected.

@@ -84,6 +84,7 @@ struct window {
     struct wl_shm *shm;
     struct buffer buffers[2];
     uint32_t width, height, max_height;
+    uint32_t hmargin_size;
     int32_t scale;
     uint32_t displayed;
     struct wl_list link;
@@ -130,6 +131,7 @@ void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_schedule_render(struct window *window);
 void bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu);
 void bm_wl_window_set_bottom(struct window *window, struct wl_display *display, bool bottom);
+void bm_wl_window_set_hmargin_size(struct window *window, struct wl_display *display, uint32_t margin);
 void bm_wl_window_set_center(struct window *window, struct wl_display *display, bool center);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);
 void bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap);
