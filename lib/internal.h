@@ -18,6 +18,9 @@ extern char *secure_getenv(const char *name);
 #include <stddef.h> /* for size_t */
 #include <stdarg.h>
 
+//minimum allowed window width when setting margin
+#define WINDOW_MIN_WIDTH 80
+
 /**
  * Destructor function pointer for some list calls.
  */
@@ -78,6 +81,11 @@ struct render_api {
      * Set menu to appear from bottom of the screen.
      */
     void (*set_bottom)(const struct bm_menu *menu, bool bottom);
+
+    /**
+     * Set horizontal margin.
+     */
+    void (*set_hmargin_size)(const struct bm_menu *menu, uint32_t margin);
 
     /**
      * Set menu to appear from center of the screen.
@@ -330,6 +338,11 @@ struct bm_menu {
      * Is menu shown from bottom?
      */
     bool bottom;
+
+    /**
+     * Horizontal margin.
+     */
+    uint32_t hmargin_size;
 
     /**
      * Is menu grabbed?

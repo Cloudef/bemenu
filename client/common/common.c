@@ -198,6 +198,7 @@ usage(FILE *out, const char *name)
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
+          " -M, --margin          defines the empty space on either side of the menu. (wx)"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
@@ -263,6 +264,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "no-spacing",  no_argument,       0, 's' },
         { "monitor",     required_argument, 0, 'm' },
         { "line-height", required_argument, 0, 'H' },
+	{ "margin",      required_argument, 0, 'M' },
         { "ch",          required_argument, 0, 0x118 },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
@@ -292,7 +294,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:ns", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:ns", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -361,6 +363,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
 
             case 'H':
                 client->line_height = strtol(optarg, NULL, 10);
+                break;
+            case 'M':
+                client->hmargin_size = strtol(optarg, NULL, 10);
                 break;
             case 0x118:
                 client->cursor_height = strtol(optarg, NULL, 10);
@@ -455,6 +460,7 @@ menu_with_options(struct client *client)
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);
+    bm_menu_set_hmargin_size(menu, client->hmargin_size);
 
     if (client->center) {
         bm_menu_set_center(menu, client->center);

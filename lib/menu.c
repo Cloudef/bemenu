@@ -390,6 +390,27 @@ bm_menu_get_bottom(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin)
+{
+	assert(menu);
+
+	if(menu->hmargin_size == margin)
+	    return;
+
+	menu->hmargin_size = margin;
+
+	if(menu->renderer->api.set_hmargin_size)
+		menu->renderer->api.set_hmargin_size(menu, margin);
+}
+
+uint32_t
+bm_menu_get_hmargin_size(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->hmargin_size;
+}
+
+void
 bm_menu_set_monitor(struct bm_menu *menu, int32_t monitor)
 {
     assert(menu);
