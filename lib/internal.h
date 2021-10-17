@@ -78,19 +78,14 @@ struct render_api {
     void (*render)(const struct bm_menu *menu);
 
     /**
-     * Set menu to appear from bottom of the screen.
+     * Set vertical alignment of the bar.
      */
-    void (*set_bottom)(const struct bm_menu *menu, bool bottom);
+    void (*set_align)(const struct bm_menu *menu, enum bm_align align);
 
     /**
      * Set horizontal margin.
      */
     void (*set_hmargin_size)(const struct bm_menu *menu, uint32_t margin);
-
-    /**
-     * Set menu to appear from center of the screen.
-     */
-    void (*set_center)(const struct bm_menu *menu, bool center);
 
     /**
      * Set monitor indeax where menu will appear
@@ -330,14 +325,9 @@ struct bm_menu {
     bool wrap;
 
     /**
-     * Is menu shown from center?
+     * Vertical alignment.
      */
-    bool center;
-
-    /**
-     * Is menu shown from bottom?
-     */
-    bool bottom;
+    enum bm_align align;
 
     /**
      * Horizontal margin.

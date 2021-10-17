@@ -104,11 +104,15 @@ bm_x11_window_render(struct window *window, const struct bm_menu *menu)
     }
 
     if (oldw != window->width || oldh != window->height) {
-        if (window->bottom) {
-            XMoveResizeWindow(window->display, window->drawable, window->x, window->max_height - window->height, window->width, window->height);
-        } else {
-            XMoveResizeWindow(window->display, window->drawable, window->x, 0, window->width, window->height);
+        uint32_t win_y = 0;
+
+        if(window->align == BM_ALIGN_CENTER) {
+                win_y = (window->max_height - window->height) / 2;
+        } else if(window->align == BM_ALIGN_BOTTOM) {
+                win_y = window->max_height - window->height;
         }
+
+        XMoveResizeWindow(window->display, window->drawable, window->x, win_y, window->width, window->height);
     }
 
     if (buffer->created) {
@@ -191,14 +195,26 @@ bm_x11_window_set_monitor(struct window *window, int32_t monitor)
             }
 
             window->x = info[i].x_org;
-            window->y = info[i].y_org + (window->bottom ? info[i].height - window->height : 0);
+            window->y = info[i].y_org;
+            if(window->align == BM_ALIGN_CENTER) {
+                window->y += (info[i].height - window->height) / 2;
+            } else if(window->align == BM_ALIGN_BOTTOM) {
+                window->y += info[i].height - window->height;
+            }
+
             window->width = info[i].width;
             window->max_height = info[i].height;
             XFree(info);
         } else {
             window->max_height = DisplayHeight(window->display, window->screen);
             window->x = 0;
-            window->y = (window->bottom ? window->max_height - window->height : 0);
+            if(window->align == BM_ALIGN_CENTER) {
+                window->y = (window->max_height - window->height) / 2;
+            } else if(window->align == BM_ALIGN_BOTTOM) {
+                window->y = window->max_height - window->height;
+            } else {
+                window->y = 0;
+            }
             window->width = DisplayWidth(window->display, window->screen);
         }
 
@@ -216,12 +232,12 @@ bm_x11_window_set_monitor(struct window *window, int32_t monitor)
 }
 
 void
-bm_x11_window_set_bottom(struct window *window, bool bottom)
+bm_x11_window_set_align(struct window *window, enum bm_align align)
 {
-    if (window->bottom == bottom)
+    if(window->align == align)
         return;
 
-    window->bottom = bottom;
+    window->align = align;
     bm_x11_window_set_monitor(window, window->monitor);
 }
 

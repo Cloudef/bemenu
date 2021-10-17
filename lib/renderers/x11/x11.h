@@ -1,6 +1,8 @@
 #ifndef _BM_X11_H_
 #define _BM_X11_H_
 
+#include "internal.h"
+
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
@@ -36,7 +38,7 @@ struct window {
     uint32_t displayed;
 
     int32_t monitor;
-    bool bottom;
+    enum bm_align align;
 
     struct {
         void (*render)(struct cairo *cairo, uint32_t width, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
@@ -51,7 +53,7 @@ struct x11 {
 void bm_x11_window_render(struct window *window, const struct bm_menu *menu);
 void bm_x11_window_key_press(struct window *window, XKeyEvent *ev);
 void bm_x11_window_set_monitor(struct window *window, int32_t monitor);
-void bm_x11_window_set_bottom(struct window *window, bool bottom);
+void bm_x11_window_set_align(struct window *window, enum bm_align align);
 void bm_x11_window_set_hmargin_size(struct window *window, uint32_t margin);
 bool bm_x11_window_create(struct window *window, Display *display);
 void bm_x11_window_destroy(struct window *window);
