@@ -357,12 +357,12 @@ bm_menu_get_scrollbar(struct bm_menu *menu)
 void
 bm_menu_set_align(struct bm_menu *menu, enum bm_align align)
 {
-	assert(menu);
+    assert(menu);
 
-	if(menu->align == align)
-	    return;
+    if(menu->align == align)
+        return;
 
-	menu->align = align;
+    menu->align = align;
 
     if (menu->renderer->api.set_align)
         menu->renderer->api.set_align(menu, align);
@@ -371,22 +371,22 @@ bm_menu_set_align(struct bm_menu *menu, enum bm_align align)
 enum bm_align
 bm_menu_get_align(struct bm_menu *menu)
 {
-	assert(menu);
-	return menu->align;
+    assert(menu);
+    return menu->align;
 }
 
 void
 bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin)
 {
-	assert(menu);
+    assert(menu);
 
-	if(menu->hmargin_size == margin)
-	    return;
+    if(menu->hmargin_size == margin)
+        return;
 
-	menu->hmargin_size = margin;
+    menu->hmargin_size = margin;
 
-	if(menu->renderer->api.set_hmargin_size)
-		menu->renderer->api.set_hmargin_size(menu, margin);
+    if(menu->renderer->api.set_hmargin_size)
+        menu->renderer->api.set_hmargin_size(menu, margin);
 }
 
 uint32_t

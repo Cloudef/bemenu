@@ -236,7 +236,7 @@ set_hmargin_size(const struct bm_menu *menu, uint32_t margin)
 
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
-	bm_wl_window_set_hmargin_size(window, wayland->display, margin);
+        bm_wl_window_set_hmargin_size(window, wayland->display, margin);
     }
 }
 
@@ -317,7 +317,7 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
         wl_surface_set_buffer_scale(surface, output->scale);
 
         struct window *window = calloc(1, sizeof(struct window));
-	window->align = menu->align;
+        window->align = menu->align;
         window->hmargin_size = menu->hmargin_size;
 
         const char *scale = getenv("BEMENU_SCALE");

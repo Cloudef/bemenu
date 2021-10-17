@@ -308,7 +308,7 @@ get_window_width(struct window *window)
     uint32_t width = window->width - 2 * window->hmargin_size;
 
     if(width < WINDOW_MIN_WIDTH || 2 * window->hmargin_size > window->width)
-	width = WINDOW_MIN_WIDTH;
+        width = WINDOW_MIN_WIDTH;
 
     return width;
 }
@@ -321,23 +321,23 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 void
 bm_wl_window_set_hmargin_size(struct window *window, struct wl_display *display, uint32_t margin)
 {
-	if(window->hmargin_size == margin)
-	    return;
+    if(window->hmargin_size == margin)
+        return;
 
-	window->hmargin_size = margin;
+    window->hmargin_size = margin;
 
-        zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
-	zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), window->height);
+    zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
+    zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), window->height);
 
-        wl_surface_commit(window->surface);
-        wl_display_roundtrip(display);
+    wl_surface_commit(window->surface);
+    wl_display_roundtrip(display);
 }
 
 void
 bm_wl_window_set_align(struct window *window, struct wl_display *display, enum bm_align align)
 {
     if(window->align == align)
-	return;
+        return;
 
     window->align = align;
 
@@ -371,14 +371,14 @@ bm_wl_window_create(struct window *window, struct wl_display *display, struct wl
 
     if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "menu"))) {
         zwlr_layer_surface_v1_add_listener(window->layer_surface, &layer_surface_listener, window);
-	window->align_anchor = get_align_anchor(window->align);
+        window->align_anchor = get_align_anchor(window->align);
         zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
         zwlr_layer_surface_v1_set_size(window->layer_surface, 0, 32);
 
         wl_surface_commit(surface);
         wl_display_roundtrip(display);
 
-	zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), 32);
+        zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), 32);
     } else {
         return false;
     }

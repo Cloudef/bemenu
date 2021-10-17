@@ -266,7 +266,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "no-spacing",  no_argument,       0, 's' },
         { "monitor",     required_argument, 0, 'm' },
         { "line-height", required_argument, 0, 'H' },
-	{ "margin",      required_argument, 0, 'M' },
+        { "margin",      required_argument, 0, 'M' },
         { "ch",          required_argument, 0, 0x118 },
         { "fn",          required_argument, 0, 0x101 },
         { "tb",          required_argument, 0, 0x102 },
