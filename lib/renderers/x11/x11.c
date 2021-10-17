@@ -199,11 +199,11 @@ get_displayed_count(const struct bm_menu *menu)
 }
 
 static void
-set_bottom(const struct bm_menu *menu, bool bottom)
+set_align(const struct bm_menu *menu, enum bm_align align)
 {
     struct x11 *x11 = menu->renderer->internal;
     assert(x11);
-    bm_x11_window_set_bottom(&x11->window, bottom);
+    bm_x11_window_set_align(&x11->window, align);
 }
 
 static void
@@ -276,7 +276,7 @@ constructor(struct bm_menu *menu)
 
     XSetClassHint(x11->window.display, x11->window.drawable, (XClassHint[]){{.res_name = (menu->title ? menu->title : "bemenu"), .res_class = "bemenu"}});
 
-    x11->window.bottom = menu->bottom;
+    x11->window.align = menu->align;
     bm_x11_window_set_monitor(&x11->window, menu->monitor);
 
     x11->window.notify.render = bm_cairo_paint;
@@ -295,7 +295,7 @@ register_renderer(struct render_api *api)
     api->get_displayed_count = get_displayed_count;
     api->poll_key = poll_key;
     api->render = render;
-    api->set_bottom = set_bottom;
+    api->set_align = set_align;
     api->set_hmargin_size = set_hmargin_size;
     api->set_monitor = set_monitor;
     api->grab_keyboard = grab_keyboard;

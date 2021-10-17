@@ -116,6 +116,26 @@ enum bm_priorty {
 };
 
 /**
+ * Vertical position of the menu.
+ */
+enum bm_align {
+    /**
+     * Menu is at the top of the screen.
+     */
+    BM_ALIGN_TOP,
+
+    /**
+     * Menu is at the bottom of the screen.
+     */
+    BM_ALIGN_BOTTOM,
+
+    /**
+     * Menu is in the center of the screen.
+     */
+    BM_ALIGN_CENTER,
+};
+
+/**
  * Get name of the renderer.
  *
  * @param renderer bm_renderer instance.
@@ -501,30 +521,21 @@ BM_PUBLIC void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mod
 BM_PUBLIC enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
 
 /**
- * Display menu at center of the screen.
- * This may be no-op on some renderers (curses, wayland)
+ * Set the vertical alignment of the bar.
  *
- * @param menu bm_menu instance to set center mode for.
- * @param center true for center mode, false for top mode.
+ * @param menu bm_menu to set alignment for.
+ * @param align alignment to set
  */
-BM_PUBLIC void bm_menu_set_center(struct bm_menu *menu, bool center);
+BM_PUBLIC void bm_menu_set_align(struct bm_menu *menu, enum bm_align align);
 
 /**
- * Display menu at bottom of the screen.
- * This may be no-op on some renderers (curses, wayland)
+ * Get the vertical alignment of the bar.
  *
- * @param menu bm_menu instance to set bottom mode for.
- * @param bottom true for bottom mode, false for top mode.
+ * @param menu bm_menu to get alignment for.
+ * @return alignment for the menu
  */
-BM_PUBLIC void bm_menu_set_bottom(struct bm_menu *menu, bool bottom);
 
-/**
- * Is menu being displayed at bottom of the screen?
- *
- * @param menu bm_menu instance where to get bottom mode from.
- * @return true if bottom mode, false otherwise.
- */
-BM_PUBLIC bool bm_menu_get_bottom(struct bm_menu *menu);
+BM_PUBLIC enum bm_align bm_menu_get_align(struct bm_menu *menu);
 
 /**
  * Set the horizontal margin of the bar.

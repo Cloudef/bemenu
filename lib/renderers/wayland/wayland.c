@@ -229,18 +229,6 @@ get_displayed_count(const struct bm_menu *menu)
 }
 
 static void
-set_bottom(const struct bm_menu *menu, bool bottom)
-{
-    struct wayland *wayland = menu->renderer->internal;
-    assert(wayland);
-
-    struct window *window;
-    wl_list_for_each(window, &wayland->windows, link) {
-        bm_wl_window_set_bottom(window, wayland->display, bottom);
-    }
-}
-
-static void
 set_hmargin_size(const struct bm_menu *menu, uint32_t margin)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -253,14 +241,14 @@ set_hmargin_size(const struct bm_menu *menu, uint32_t margin)
 }
 
 static void
-set_center(const struct bm_menu *menu, bool center)
+set_align(const struct bm_menu *menu, enum bm_align align)
 {
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
 
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
-        bm_wl_window_set_center(window, wayland->display, center);
+        bm_wl_window_set_align(window, wayland->display, align);
     }
 }
 
@@ -329,7 +317,7 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
         wl_surface_set_buffer_scale(surface, output->scale);
 
         struct window *window = calloc(1, sizeof(struct window));
-        window->bottom = menu->bottom;
+	window->align = menu->align;
         window->hmargin_size = menu->hmargin_size;
 
         const char *scale = getenv("BEMENU_SCALE");
@@ -457,8 +445,7 @@ register_renderer(struct render_api *api)
     api->get_displayed_count = get_displayed_count;
     api->poll_key = poll_key;
     api->render = render;
-    api->set_center = set_center;
-    api->set_bottom = set_bottom;
+    api->set_align = set_align;
     api->set_hmargin_size = set_hmargin_size;
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;

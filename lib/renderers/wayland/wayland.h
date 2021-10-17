@@ -1,6 +1,8 @@
 #ifndef _BM_WAYLAND_H_
 #define _BM_WAYLAND_H_
 
+#include "internal.h"
+
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 
@@ -88,8 +90,8 @@ struct window {
     int32_t scale;
     uint32_t displayed;
     struct wl_list link;
-    bool bottom;
-    bool center;
+    enum bm_align align;
+    uint32_t align_anchor;
     bool render_pending;
 
     struct {
@@ -130,9 +132,8 @@ bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_schedule_render(struct window *window);
 void bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu);
-void bm_wl_window_set_bottom(struct window *window, struct wl_display *display, bool bottom);
 void bm_wl_window_set_hmargin_size(struct window *window, struct wl_display *display, uint32_t margin);
-void bm_wl_window_set_center(struct window *window, struct wl_display *display, bool center);
+void bm_wl_window_set_align(struct window *window, struct wl_display *display, enum bm_align align);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);
 void bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap);
 bool bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface);

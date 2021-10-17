@@ -1,3 +1,5 @@
+#include "internal.h"
+
 #include "common.h"
 #include <stdlib.h>
 #include <string.h>
@@ -193,7 +195,7 @@ usage(FILE *out, const char *name)
           "   (...) At end of help indicates the backend support for option.\n\n"
 
           " -b, --bottom          appears at the bottom of the screen. (wx)\n"
-          " -c, --center          appears at the center of the screen. (w)\n"
+          " -c, --center          appears at the center of the screen. (wx)\n"
           " -f, --grab            show the menu before reading stdin. (wx)\n"
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
@@ -463,9 +465,11 @@ menu_with_options(struct client *client)
     bm_menu_set_hmargin_size(menu, client->hmargin_size);
 
     if (client->center) {
-        bm_menu_set_center(menu, client->center);
+        bm_menu_set_align(menu, BM_ALIGN_CENTER);
     } else if (client->bottom) {
-        bm_menu_set_bottom(menu, client->bottom);
+        bm_menu_set_align(menu, BM_ALIGN_BOTTOM);
+    } else {
+        bm_menu_set_align(menu, BM_ALIGN_TOP);
     }
 
     for (uint32_t i = 0; i < BM_COLOR_LAST; ++i)

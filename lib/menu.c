@@ -355,38 +355,24 @@ bm_menu_get_scrollbar(struct bm_menu *menu)
 }
 
 void
-bm_menu_set_center(struct bm_menu *menu, bool center)
+bm_menu_set_align(struct bm_menu *menu, enum bm_align align)
 {
-    assert(menu);
+	assert(menu);
 
-    if (menu->center == center)
-        return;
+	if(menu->align == align)
+	    return;
 
-    menu->center = center;
+	menu->align = align;
 
-    if (menu->renderer->api.set_center)
-        menu->renderer->api.set_center(menu, center);
+    if (menu->renderer->api.set_align)
+        menu->renderer->api.set_align(menu, align);
 }
 
-void
-bm_menu_set_bottom(struct bm_menu *menu, bool bottom)
+enum bm_align
+bm_menu_get_align(struct bm_menu *menu)
 {
-    assert(menu);
-
-    if (menu->bottom == bottom)
-        return;
-
-    menu->bottom = bottom;
-
-    if (menu->renderer->api.set_bottom)
-        menu->renderer->api.set_bottom(menu, bottom);
-}
-
-bool
-bm_menu_get_bottom(struct bm_menu *menu)
-{
-    assert(menu);
-    return menu->bottom;
+	assert(menu);
+	return menu->align;
 }
 
 void
