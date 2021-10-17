@@ -200,7 +200,7 @@ usage(FILE *out, const char *name)
           " -n, --no-overlap      adjust geometry to not overlap with panels. (w)\n"
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
-          " -M, --margin          defines the empty space on either side of the menu. (wx)"
+          " -M, --margin          defines the empty space on either side of the menu. (wx)\n"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
