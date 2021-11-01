@@ -835,6 +835,25 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             }
             break;
 
+        case BM_KEY_PASTE:
+            {
+                FILE *clipboard;
+                clipboard = popen("wl-paste -t text/plain", "r");
+                if (clipboard == NULL) {
+                    clipboard = popen("xclip -t text/plain -out", "r");
+                }
+                if (clipboard == NULL) {
+                    break;
+                }
+                int c;
+                while ((c = fgetc(clipboard)) != EOF) {
+                    size_t width;
+                    menu->cursor += bm_unicode_insert(&menu->filter, &menu->filter_size, menu->cursor, c, &width);
+                    menu->curses_cursor += width;
+                }
+            }
+            break;
+
         case BM_KEY_UNICODE:
             {
                 size_t width;
