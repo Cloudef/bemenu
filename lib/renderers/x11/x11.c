@@ -144,6 +144,9 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XK_w:
             return (mods & MOD_CTRL ? BM_KEY_WORD_DELETE : BM_KEY_UNICODE);
 
+        case XK_y:
+            return (mods & MOD_CTRL ? BM_KEY_PASTE : BM_KEY_UNICODE);
+
         case XK_j:
             return (mods & MOD_ALT ? BM_KEY_DOWN : BM_KEY_UNICODE);
 
