@@ -1,4 +1,4 @@
-.Dd March 29, 2021
+.Dd November 1, 2021
 .Dt BEMENU 1
 .Os
 .Sh NAME
@@ -268,6 +268,8 @@ Remove all characters before the cursor.
 Remove all characters after the cursor.
 .It Cm C-w
 Clear the filter.
+.It Cm C-y
+Paste the clipboard.
 .It Cm M- Ns Op 0\(en9
 Print selected items and exit with a custom error code.
 See
