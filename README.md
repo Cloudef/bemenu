@@ -131,6 +131,7 @@ Typically [wlroots](https://github.com/swaywm/wlroots)-based compositors.
 | Ctrl + k            |  Kill text after cursor                                        |
 | Ctrl + w            |  Kill all text in filter                                       |
 | Ctrl + m            |  Execute selected item                                         |
+| Ctrl + y            |  Paste clipboard                                               |
 
 ## Projects using bemenu
 
