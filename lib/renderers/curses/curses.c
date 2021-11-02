@@ -231,7 +231,7 @@ render(const struct bm_menu *menu)
 
     if (menu->title && title_len > 0) {
         attron(COLOR_PAIR(1));
-        mvprintw(0, 0, menu->title);
+        mvprintw(0, 0, "%s", menu->title);
         attroff(COLOR_PAIR(1));
     }
 
