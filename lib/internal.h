@@ -103,7 +103,7 @@ struct render_api {
     /**
      * Tells underlying renderer to draw the menu.
      */
-    void (*render)(const struct bm_menu *menu);
+    void (*render)(struct bm_menu *menu);
 
     /**
      * Set vertical alignment of the bar.
@@ -391,6 +391,11 @@ struct bm_menu {
      * Mask representing a feedback to bring to user
      */
     uint32_t event_feedback;
+
+    /**
+     * Is the menu needing a redraw ?
+     */
+    bool dirty;
 };
 
 /* library.c */

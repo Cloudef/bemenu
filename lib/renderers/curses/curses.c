@@ -177,7 +177,7 @@ draw_line(int32_t pair, int32_t y, const char *fmt, ...)
 }
 
 static void
-render(const struct bm_menu *menu)
+render(struct bm_menu *menu)
 {
     if (curses.should_terminate) {
         terminate();

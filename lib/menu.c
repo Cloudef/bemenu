@@ -58,6 +58,8 @@ bm_menu_new(const char *renderer)
     if (!(menu = calloc(1, sizeof(struct bm_menu))))
         return NULL;
 
+    menu->dirty = true;
+
     uint32_t count;
     const struct bm_renderer **renderers = bm_get_renderers(&count);
 
@@ -594,6 +596,9 @@ bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index)
     if (count <= index)
         return 0;
 
+    if (menu->index != index)
+        menu->dirty = true;
+
     return (menu->index = index);
 }
 
@@ -609,7 +614,7 @@ bm_menu_set_highlighted_item(struct bm_menu *menu, struct bm_item *item)
     if (count <= i)
         return 0;
 
-    return (menu->index = i);
+    return (bm_menu_set_highlighted_index(menu, i));
 }
 
 struct bm_item*
@@ -680,7 +685,7 @@ bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb)
 }
 
 void
-bm_menu_render(const struct bm_menu *menu)
+bm_menu_render(struct bm_menu *menu)
 {
     assert(menu);
 
@@ -718,7 +723,7 @@ bm_menu_filter(struct bm_menu *menu)
     struct bm_item **filtered = filter_func[menu->filter_mode](menu, addition, &count);
 
     list_set_items_no_copy(&menu->filtered, filtered, count);
-    menu->index = 0;
+    bm_menu_set_highlighted_index(menu, 0);
 
     free(menu->old_filter);
     menu->old_filter = bm_strdup(menu->filter);
@@ -777,9 +782,9 @@ static void
 menu_next(struct bm_menu *menu, uint32_t count, bool wrap)
 {
     if (menu->index < count - 1) {
-        menu->index++;
+        bm_menu_set_highlighted_index(menu, menu->index + 1);
     } else if (wrap) {
-        menu->index = 0;
+        bm_menu_set_highlighted_index(menu, 0);
     }
 }
 
@@ -787,9 +792,9 @@ static void
 menu_prev(struct bm_menu *menu, uint32_t count, bool wrap)
 {
     if (menu->index > 0) {
-        menu->index--;
+        bm_menu_set_highlighted_index(menu, menu->index - 1);
     } else if (wrap) {
-        menu->index = count - 1;
+        bm_menu_set_highlighted_index(menu, count - 1);
     }
 }
 
@@ -808,14 +813,14 @@ menu_point_select(struct bm_menu *menu, uint32_t posx, uint32_t posy, uint32_t d
         return;
     }
 
-    menu->index = current_page_index * menu->lines + (selected_line - 1);
+    bm_menu_set_highlighted_index(menu, current_page_index * menu->lines + (selected_line - 1));
 }
 
 static void
 menu_scroll_down(struct bm_menu *menu, uint16_t count)
 {
     if (menu->index / menu->lines != count / menu->lines) { // not last page
-        menu->index = ((menu->index / menu->lines) + 1) * menu->lines;
+        bm_menu_set_highlighted_index(menu, ((menu->index / menu->lines) + 1) * menu->lines);
     }
 }
 
@@ -824,7 +829,7 @@ menu_scroll_up(struct bm_menu *menu, uint16_t count)
 {
     (void) count;
     if (menu->index / menu->lines) { // not first page
-        menu->index = ((menu->index / menu->lines) - 1) * menu->lines + menu->lines - 1;
+        bm_menu_set_highlighted_index(menu, ((menu->index / menu->lines) - 1) * menu->lines + menu->lines - 1);
     }
 }
 
@@ -832,13 +837,13 @@ static void
 menu_scroll_first(struct bm_menu *menu, uint16_t count)
 {
     (void) count;
-    menu->index = 0;
+    bm_menu_set_highlighted_index(menu, 0);
 }
 
 static void
 menu_scroll_last(struct bm_menu *menu, uint16_t count)
 {
-    menu->index = count - 1;
+    bm_menu_set_highlighted_index(menu, count - 1);
 }
 
 void
@@ -851,6 +856,15 @@ void
 bm_menu_remove_event_feedback(struct bm_menu *menu, uint32_t event_feedback)
 {
     menu->event_feedback &= ~event_feedback;
+}
+
+void
+bm_menu_set_event_feedback(struct bm_menu *menu, uint32_t event_feedback)
+{
+    if (menu->event_feedback != event_feedback) {
+        menu->dirty = true;
+    }
+    menu->event_feedback = event_feedback;
 }
 
 enum bm_run_result
@@ -867,6 +881,9 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
     if (!displayed)
         displayed = count;
+
+    if (key != BM_KEY_NONE)
+        menu->dirty = true;
 
     switch (key) {
         case BM_KEY_LEFT:
@@ -903,19 +920,19 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_PAGE_UP:
-            menu->index = (menu->index < displayed ? 0 : menu->index - (displayed - 1));
+            bm_menu_set_highlighted_index(menu, (menu->index < displayed ? 0 : menu->index - (displayed - 1)));
             break;
 
         case BM_KEY_PAGE_DOWN:
-            menu->index = (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1));
+            bm_menu_set_highlighted_index(menu, (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1)));
             break;
 
         case BM_KEY_SHIFT_PAGE_UP:
-            menu->index = 0;
+            bm_menu_set_highlighted_index(menu, 0);
             break;
 
         case BM_KEY_SHIFT_PAGE_DOWN:
-            menu->index = count - 1;
+            bm_menu_set_highlighted_index(menu, count - 1);
             break;
 
         case BM_KEY_BACKSPACE:
@@ -1208,44 +1225,42 @@ bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch, uint32_t uni
             continue;
 
         menu_point_select(menu, point.pos_x, point.pos_y, displayed);
-        bm_menu_remove_event_feedback(menu,
-            TOUCH_WILL_CANCEL
-            | TOUCH_WILL_SCROLL_FIRST
-            | TOUCH_WILL_SCROLL_LAST
-            | TOUCH_WILL_SCROLL_UP
-            | TOUCH_WILL_SCROLL_DOWN
-        );
-
         if (point.pos_y < (int32_t) (bm_menu_get_height(menu) / displayed)) {
             if (point.pos_y < ((int32_t) (bm_menu_get_height(menu) / displayed)) - 50) {
                 if (point.event_mask & TOUCH_EVENT_UP) {
                     menu_scroll_first(menu, count);
+                    bm_menu_set_event_feedback(menu, 0);
                 } else if (point.event_mask & TOUCH_EVENT_MOTION) {
-                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_FIRST);
+                    bm_menu_set_event_feedback(menu, TOUCH_WILL_SCROLL_FIRST);
                 }
             } else {
                 if (point.event_mask & TOUCH_EVENT_UP) {
                     menu_scroll_up(menu, count);
+                    bm_menu_set_event_feedback(menu, 0);
                 } else if (point.event_mask & TOUCH_EVENT_MOTION) {
-                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_UP);
+                    bm_menu_set_event_feedback(menu, TOUCH_WILL_SCROLL_UP);
                 }
             }
         } else if ((uint32_t) point.pos_y > bm_menu_get_height(menu)) {
             if ((uint32_t) point.pos_y > bm_menu_get_height(menu) + 50) {
                 if (point.event_mask & TOUCH_EVENT_UP) {
                     menu_scroll_last(menu, count);
+                    bm_menu_set_event_feedback(menu, 0);
                 } else if (point.event_mask & TOUCH_EVENT_MOTION) {
-                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_LAST);
+                    bm_menu_set_event_feedback(menu, TOUCH_WILL_SCROLL_LAST);
                 }
             } else {
                 if (point.event_mask & TOUCH_EVENT_UP) {
                     menu_scroll_down(menu, count);
+                    bm_menu_set_event_feedback(menu, 0);
                 } else if (point.event_mask & TOUCH_EVENT_MOTION) {
-                    bm_menu_add_event_feedback(menu, TOUCH_WILL_SCROLL_DOWN);
+                    bm_menu_set_event_feedback(menu, TOUCH_WILL_SCROLL_DOWN);
                 }
             }
         } else {
             if (point.pos_x > 0 && (uint32_t) point.pos_x < bm_menu_get_width(menu)) {
+                bm_menu_set_event_feedback(menu, 0);
+
                 if (point.event_mask & TOUCH_EVENT_UP) {
                     {
                         struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
@@ -1256,7 +1271,9 @@ bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch, uint32_t uni
                 }
             } else {
                 if (!(point.event_mask & TOUCH_EVENT_UP)) {
-                    bm_menu_add_event_feedback(menu, TOUCH_WILL_CANCEL);
+                    bm_menu_set_event_feedback(menu, TOUCH_WILL_CANCEL);
+                } else {
+                    bm_menu_set_event_feedback(menu, 0);
                 }
             }
         }
