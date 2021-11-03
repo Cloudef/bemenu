@@ -839,10 +839,10 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             {
                 FILE *clipboard;
                 clipboard = popen("wl-paste -t text/plain", "r");
-                if (clipboard == NULL) {
+                if (!clipboard) {
                     clipboard = popen("xclip -t text/plain -out", "r");
                 }
-                if (clipboard == NULL) {
+                if (!clipboard) {
                     break;
                 }
                 int c;
