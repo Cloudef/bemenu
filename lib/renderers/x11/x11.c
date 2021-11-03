@@ -7,7 +7,7 @@
 #include <X11/Xutil.h>
 
 static void
-render(const struct bm_menu *menu)
+render(struct bm_menu *menu)
 {
     struct x11 *x11 = menu->renderer->internal;
 

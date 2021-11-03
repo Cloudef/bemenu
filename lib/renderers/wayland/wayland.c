@@ -14,7 +14,7 @@
 static int efd;
 
 static void
-render(const struct bm_menu *menu)
+render(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
     wl_display_dispatch_pending(wayland->display);
@@ -26,7 +26,7 @@ render(const struct bm_menu *menu)
 
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
-        if (window->render_pending)
+        if (menu->dirty && window->render_pending)
             bm_wl_window_render(window, wayland->display, menu);
     }
     wl_display_flush(wayland->display);
@@ -43,14 +43,11 @@ render(const struct bm_menu *menu)
         }
     }
 
-    if (wayland->input.code != wayland->input.last_code ||
-        wayland->input.touch_event.active ||
-        wayland->input.pointer_event.event_mask) {
+    if (menu->dirty) {
+        menu->dirty = false;
         wl_list_for_each(window, &wayland->windows, link) {
             bm_wl_window_schedule_render(window);
         }
-
-        wayland->input.last_code = wayland->input.code;
     }
 }
 
@@ -62,7 +59,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     *unicode = 0;
 
     if (wayland->input.sym == XKB_KEY_NoSymbol)
-        return BM_KEY_UNICODE;
+        return BM_KEY_NONE;
 
     xkb_keysym_t sym = wayland->input.sym;
     uint32_t mods = wayland->input.modifiers;

@@ -875,7 +875,7 @@ BM_PUBLIC struct bm_item** bm_menu_get_filtered_items(const struct bm_menu *menu
  *
  * @param menu bm_menu instance to be rendered.
  */
-BM_PUBLIC void bm_menu_render(const struct bm_menu *menu);
+BM_PUBLIC void bm_menu_render(struct bm_menu *menu);
 
 /**
  * Trigger filtering of menu manually.
