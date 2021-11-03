@@ -851,6 +851,7 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
                     menu->cursor += bm_unicode_insert(&menu->filter, &menu->filter_size, menu->cursor, c, &width);
                     menu->curses_cursor += width;
                 }
+                pclose(clipboard);
             }
             break;
 
