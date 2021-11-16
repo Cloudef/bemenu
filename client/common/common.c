@@ -569,6 +569,10 @@ menu_with_options(struct client *client)
 enum bm_run_result
 run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
+    bm_menu_set_highlighted_index(menu, client->selected);
+    bm_menu_grab_keyboard(menu, true);
+    bm_menu_set_filter(menu, client->initial_filter);
+
     {
     uint32_t total_item_count;
     struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
@@ -583,10 +587,6 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     }
 
     }
-
-    bm_menu_set_highlighted_index(menu, client->selected);
-    bm_menu_grab_keyboard(menu, true);
-    bm_menu_set_filter(menu, client->initial_filter);
 
     uint32_t unicode;
     enum bm_key key = BM_KEY_NONE;
