@@ -71,6 +71,14 @@ All dependencies are searched with `pkg-config`
 
 Currently, pasting from clipboard is done at runtime with `wl-paste -t text/plain` and `xclip -t text/plain -out`, attempted in that order.
 
+### Installing the dependencies
+
+#### Ubuntu 20.04
+
+```sh
+sudo apt install wayland-protocols libcairo-dev libpango1.0-dev libxkbcommon-dev libwayland-dev
+```
+
 ## Environment variables
 
 | Variable         | Description                             | Value                |
