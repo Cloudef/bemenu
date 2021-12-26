@@ -83,9 +83,9 @@ struct render_api {
     void (*set_align)(const struct bm_menu *menu, enum bm_align align);
 
     /**
-     * Set horizontal margin.
+     * Set horizontal margin and relative width factor.
      */
-    void (*set_hmargin_size)(const struct bm_menu *menu, uint32_t margin);
+    void (*set_width)(const struct bm_menu *menu, uint32_t margin, float factor);
 
     /**
      * Set monitor indeax where menu will appear
@@ -333,6 +333,11 @@ struct bm_menu {
      * Horizontal margin.
      */
     uint32_t hmargin_size;
+
+    /**
+     * Relative width factor.
+     */
+    float width_factor;
 
     /**
      * Is menu grabbed?

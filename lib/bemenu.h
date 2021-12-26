@@ -539,13 +539,14 @@ BM_PUBLIC void bm_menu_set_align(struct bm_menu *menu, enum bm_align align);
 BM_PUBLIC enum bm_align bm_menu_get_align(struct bm_menu *menu);
 
 /**
- * Set the horizontal margin of the bar.
+ * Set the horizontal margin and the relative width factor of the bar.
  *
  * @param menu bm_menu to set horizontal margin for.
  * @param margin margin to set.
+ * @param factor factor to set.
  */
 
-BM_PUBLIC void bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin);
+BM_PUBLIC void bm_menu_set_width(struct bm_menu *menu, uint32_t margin, float factor);
 
 /**
  * Get the horizontal margin of the bar.
@@ -555,6 +556,15 @@ BM_PUBLIC void bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin);
  */
 
 BM_PUBLIC uint32_t bm_menu_get_hmargin_size(struct bm_menu *menu);
+
+/**
+ * Get the relative width factor of the bar.
+ *
+ * @param menu bm_menu to get relative width factor from.
+ * @return relative width factor of the menu.
+ */
+
+BM_PUBLIC float bm_menu_get_width_factor(struct bm_menu *menu);
 
 /**
  * Display menu at monitor index.

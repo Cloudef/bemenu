@@ -10,7 +10,7 @@ GIT_TAG = $(shell git tag --points-at HEAD 2>/dev/null || cat VERSION)
 MAKEFLAGS += --no-builtin-rules
 
 WARNINGS = -Wall -Wextra -Wpedantic -Wformat=2 -Wstrict-aliasing=3 -Wstrict-overflow=5 -Wstack-usage=12500 \
-	-Wfloat-equal -Wcast-align -Wpointer-arith -Wchar-subscripts -Warray-bounds=2 -Wno-unknown-warning-option
+	-Wcast-align -Wpointer-arith -Wchar-subscripts -Warray-bounds=2 -Wno-unknown-warning-option
 
 override CFLAGS ?= -g -O2 $(WARNINGS) $(EXTRA_WARNINGS)
 override CFLAGS += -std=c99

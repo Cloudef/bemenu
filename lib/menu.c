@@ -376,17 +376,18 @@ bm_menu_get_align(struct bm_menu *menu)
 }
 
 void
-bm_menu_set_hmargin_size(struct bm_menu *menu, uint32_t margin)
+bm_menu_set_width(struct bm_menu *menu, uint32_t margin, float factor)
 {
     assert(menu);
 
-    if(menu->hmargin_size == margin)
+    if(menu->hmargin_size == margin && menu->width_factor == factor)
         return;
 
     menu->hmargin_size = margin;
+    menu->width_factor = factor;
 
-    if(menu->renderer->api.set_hmargin_size)
-        menu->renderer->api.set_hmargin_size(menu, margin);
+    if(menu->renderer->api.set_width)
+        menu->renderer->api.set_width(menu, margin, factor);
 }
 
 uint32_t
@@ -394,6 +395,13 @@ bm_menu_get_hmargin_size(struct bm_menu *menu)
 {
     assert(menu);
     return menu->hmargin_size;
+}
+
+float
+bm_menu_get_width_factor(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->width_factor;
 }
 
 void

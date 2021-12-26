@@ -201,6 +201,7 @@ usage(FILE *out, const char *name)
           " -m, --monitor         index of monitor where menu will appear. (wx)\n"
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
           " -M, --margin          defines the empty space on either side of the menu. (wx)\n"
+          " -W, --width-factor    defines the relative width factor of the menu (from 0 to 1). (wx)\n"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
@@ -243,44 +244,45 @@ do_getopt(struct client *client, int *argc, char **argv[])
     assert(client && argc && argv);
 
     static const struct option opts[] = {
-        { "help",        no_argument,       0, 'h' },
-        { "version",     no_argument,       0, 'v' },
+        { "help",         no_argument,       0, 'h' },
+        { "version",      no_argument,       0, 'v' },
 
-        { "ignorecase",  no_argument,       0, 'i' },
-        { "filter",      required_argument, 0, 'F' },
-        { "wrap",        no_argument,       0, 'w' },
-        { "list",        required_argument, 0, 'l' },
-        { "center",      no_argument,       0, 'c' },
-        { "prompt",      required_argument, 0, 'p' },
-        { "index",       required_argument, 0, 'I' },
-        { "prefix",      required_argument, 0, 'P' },
-        { "password",    no_argument,       0, 'x' },
-        { "scrollbar",   required_argument, 0, 0x100 },
-        { "ifne",        no_argument,       0, 0x115 },
-        { "fork",        no_argument,       0, 0x116 },
-        { "no-exec",     no_argument,       0, 0x117 },
+        { "ignorecase",   no_argument,       0, 'i' },
+        { "filter",       required_argument, 0, 'F' },
+        { "wrap",         no_argument,       0, 'w' },
+        { "list",         required_argument, 0, 'l' },
+        { "center",       no_argument,       0, 'c' },
+        { "prompt",       required_argument, 0, 'p' },
+        { "index",        required_argument, 0, 'I' },
+        { "prefix",       required_argument, 0, 'P' },
+        { "password",     no_argument,       0, 'x' },
+        { "scrollbar",    required_argument, 0, 0x100 },
+        { "ifne",         no_argument,       0, 0x115 },
+        { "fork",         no_argument,       0, 0x116 },
+        { "no-exec",      no_argument,       0, 0x117 },
 
-        { "bottom",      no_argument,       0, 'b' },
-        { "grab",        no_argument,       0, 'f' },
-        { "no-overlap",  no_argument,       0, 'n' },
-        { "no-spacing",  no_argument,       0, 's' },
-        { "monitor",     required_argument, 0, 'm' },
-        { "line-height", required_argument, 0, 'H' },
-        { "margin",      required_argument, 0, 'M' },
-        { "ch",          required_argument, 0, 0x118 },
-        { "fn",          required_argument, 0, 0x101 },
-        { "tb",          required_argument, 0, 0x102 },
-        { "tf",          required_argument, 0, 0x103 },
-        { "fb",          required_argument, 0, 0x104 },
-        { "ff",          required_argument, 0, 0x105 },
-        { "nb",          required_argument, 0, 0x106 },
-        { "nf",          required_argument, 0, 0x107 },
-        { "hb",          required_argument, 0, 0x108 },
-        { "hf",          required_argument, 0, 0x109 },
-        { "sb",          required_argument, 0, 0x110 },
-        { "sf",          required_argument, 0, 0x111 },
-        { "scb",         required_argument, 0, 0x112 },
-        { "scf",         required_argument, 0, 0x113 },
+        { "bottom",       no_argument,       0, 'b' },
+        { "grab",         no_argument,       0, 'f' },
+        { "no-overlap",   no_argument,       0, 'n' },
+        { "no-spacing",   no_argument,       0, 's' },
+        { "monitor",      required_argument, 0, 'm' },
+        { "line-height",  required_argument, 0, 'H' },
+        { "margin",       required_argument, 0, 'M' },
+        { "width-factor", required_argument, 0, 'W' },
+        { "ch",           required_argument, 0, 0x118 },
+        { "fn",           required_argument, 0, 0x101 },
+        { "tb",           required_argument, 0, 0x102 },
+        { "tf",           required_argument, 0, 0x103 },
+        { "fb",           required_argument, 0, 0x104 },
+        { "ff",           required_argument, 0, 0x105 },
+        { "nb",           required_argument, 0, 0x106 },
+        { "nf",           required_argument, 0, 0x107 },
+        { "hb",           required_argument, 0, 0x108 },
+        { "hf",           required_argument, 0, 0x109 },
+        { "sb",           required_argument, 0, 0x110 },
+        { "sf",           required_argument, 0, 0x111 },
+        { "scb",          required_argument, 0, 0x112 },
+        { "scf",          required_argument, 0, 0x113 },
 
         { "disco",       no_argument,       0, 0x114 },
         { 0, 0, 0, 0 }
@@ -296,7 +298,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:ns", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:ns", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -368,6 +370,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'M':
                 client->hmargin_size = strtol(optarg, NULL, 10);
+                break;
+            case 'W':
+                client->width_factor = strtof(optarg, NULL);
                 break;
             case 0x118:
                 client->cursor_height = strtol(optarg, NULL, 10);
@@ -462,7 +467,7 @@ menu_with_options(struct client *client)
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);
-    bm_menu_set_hmargin_size(menu, client->hmargin_size);
+    bm_menu_set_width(menu, client->hmargin_size, client->width_factor);
 
     if (client->center) {
         bm_menu_set_align(menu, BM_ALIGN_CENTER);

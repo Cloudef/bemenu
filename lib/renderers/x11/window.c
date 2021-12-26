@@ -66,7 +66,10 @@ next_buffer(struct window *window)
 static uint32_t
 get_window_width(struct window *window)
 {
-    uint32_t width = window->width - 2 * window->hmargin_size;
+    uint32_t width = window->width * ((window->width_factor != 0) ? window->width_factor : 1);
+
+    if(width > window->width - 2 * window->hmargin_size)
+        width = window->width - 2 * window->hmargin_size;
 
     if(width < WINDOW_MIN_WIDTH || 2 * window->hmargin_size > window->width)
         width = WINDOW_MIN_WIDTH;
@@ -242,12 +245,13 @@ bm_x11_window_set_align(struct window *window, enum bm_align align)
 }
 
 void
-bm_x11_window_set_hmargin_size(struct window *window, uint32_t margin)
+bm_x11_window_set_width(struct window *window, uint32_t margin, float factor)
 {
-    if(window->hmargin_size == margin)
+    if(window->hmargin_size == margin && window->width_factor == factor)
         return;
 
     window->hmargin_size = margin;
+    window->width_factor = factor;
     window->width = window->orig_width;
     window->x = window->orig_x;
     window->width = get_window_width(window);
