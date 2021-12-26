@@ -305,7 +305,10 @@ layer_surface_closed(void *data, struct zwlr_layer_surface_v1 *layer_surface)
 static uint32_t
 get_window_width(struct window *window)
 {
-    uint32_t width = window->width - 2 * window->hmargin_size;
+    uint32_t width = window->width * ((window->width_factor != 0) ? window->width_factor : 1);
+
+    if(width > window->width - 2 * window->hmargin_size)
+        width = window->width - 2 * window->hmargin_size;
 
     if(width < WINDOW_MIN_WIDTH || 2 * window->hmargin_size > window->width)
         width = WINDOW_MIN_WIDTH;
@@ -319,12 +322,13 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
 };
 
 void
-bm_wl_window_set_hmargin_size(struct window *window, struct wl_display *display, uint32_t margin)
+bm_wl_window_set_width(struct window *window, struct wl_display *display, uint32_t margin, float factor)
 {
-    if(window->hmargin_size == margin)
+    if(window->hmargin_size == margin && window->width_factor == factor)
         return;
 
     window->hmargin_size = margin;
+    window->width_factor = factor;
 
     zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
     zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), window->height);

@@ -73,7 +73,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     wayland->input.code = 0;
 
     if (!wayland->input.key_pending)
-	    return BM_KEY_UNICODE;
+        return BM_KEY_UNICODE;
     wayland->input.key_pending = false;
 
     switch (sym) {
@@ -232,14 +232,14 @@ get_displayed_count(const struct bm_menu *menu)
 }
 
 static void
-set_hmargin_size(const struct bm_menu *menu, uint32_t margin)
+set_width(const struct bm_menu *menu, uint32_t margin, float factor)
 {
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
 
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
-        bm_wl_window_set_hmargin_size(window, wayland->display, margin);
+        bm_wl_window_set_width(window, wayland->display, margin, factor);
     }
 }
 
@@ -322,6 +322,7 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
         struct window *window = calloc(1, sizeof(struct window));
         window->align = menu->align;
         window->hmargin_size = menu->hmargin_size;
+        window->width_factor = menu->width_factor;
 
         const char *scale = getenv("BEMENU_SCALE");
         if (scale) {
@@ -449,7 +450,7 @@ register_renderer(struct render_api *api)
     api->poll_key = poll_key;
     api->render = render;
     api->set_align = set_align;
-    api->set_hmargin_size = set_hmargin_size;
+    api->set_width = set_width;
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
     api->set_monitor = set_monitor;

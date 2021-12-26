@@ -210,11 +210,11 @@ set_align(const struct bm_menu *menu, enum bm_align align)
 }
 
 static void
-set_hmargin_size(const struct bm_menu *menu, uint32_t margin)
+set_width(const struct bm_menu *menu, uint32_t margin, float factor)
 {
     struct x11 *x11 = menu->renderer->internal;
     assert(x11);
-    bm_x11_window_set_hmargin_size(&x11->window, margin);
+    bm_x11_window_set_width(&x11->window, margin, factor);
 }
 
 static void
@@ -299,7 +299,7 @@ register_renderer(struct render_api *api)
     api->poll_key = poll_key;
     api->render = render;
     api->set_align = set_align;
-    api->set_hmargin_size = set_hmargin_size;
+    api->set_width = set_width;
     api->set_monitor = set_monitor;
     api->grab_keyboard = grab_keyboard;
     api->priorty = BM_PRIO_GUI;

@@ -18,6 +18,7 @@ struct client {
     uint32_t selected;
     uint32_t monitor;
     uint32_t hmargin_size;
+    float width_factor;
     bool bottom;
     bool center;
     bool grab;
