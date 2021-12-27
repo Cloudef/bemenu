@@ -61,7 +61,12 @@ PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" sh build-osx.sh curses
 
 ## Dependencies
 
-All dependencies are searched with `pkg-config`
+- C compiler
+- scdoc to generate manpage
+
+### Backend-specific
+
+All dependencies below are searched with `pkg-config`
 
 | Backend  | Dependencies                                                           |
 |----------|------------------------------------------------------------------------|
@@ -76,7 +81,7 @@ Currently, pasting from clipboard is done at runtime with `wl-paste -t text/plai
 #### Ubuntu 20.04
 
 ```sh
-sudo apt install wayland-protocols libcairo-dev libpango1.0-dev libxkbcommon-dev libwayland-dev
+sudo apt install scdoc wayland-protocols libcairo-dev libpango1.0-dev libxkbcommon-dev libwayland-dev
 ```
 
 ## Environment variables

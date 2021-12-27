@@ -12,7 +12,7 @@ jobs:
       steps:
          - uses: actions/checkout@v2
          - name: install build deps
-           run: sudo apt-get install libcairo2-dev libpango1.0-dev libxinerama-dev libwayland-dev wayland-protocols libxkbcommon-dev
+           run: sudo apt-get install scdoc libcairo2-dev libpango1.0-dev libxinerama-dev libwayland-dev wayland-protocols libxkbcommon-dev
          - name: make
            run: make PREFIX=install EXTRA_WARNINGS=-Werror
          - name: make install

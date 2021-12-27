@@ -47,8 +47,8 @@ $(libs): %: VERSION .git/index
 $(pkgconfigs): %: VERSION %.in
 	sed "s/@VERSION@/$(VERSION)/;s,@PREFIX@,$(PREFIX),;s,@LIBDIR@,$(libdir),;s,@INCLUDEDIR@,$(includedir)," $(addsuffix .in, $@) > $@
 
-bemenu.1: man/bemenu.1.in
-	sed 's,@LIBDIR@,$(PREFIX)$(libdir),' $< > $@
+bemenu.1: man/bemenu.1.scd.in
+	sed 's,@LIBDIR@,$(PREFIX)$(libdir),' $< | scdoc > $@
 
 $(renderers): %: VERSION .git/index | $(libs)
 	$(LINK.c) -shared -fPIC $(filter %.c %.a,$^) $(LDLIBS) -L. -lbemenu -o $@
