@@ -140,9 +140,11 @@ install-x11:
 	mkdir -p "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 	-cp bemenu-renderer-x11.so "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
 
-install-base: install-pkgconfig install-include install-lib-symlinks install-bins install-man
+install-docs: install-man
 
-install: install-base install-renderers
+install-base: install-pkgconfig install-include install-lib-symlinks install-bins
+
+install: install-base install-renderers install-docs
 	@echo "Install OK!"
 
 doxygen:
@@ -163,5 +165,5 @@ clean:
 
 .DELETE_ON_ERROR:
 .PHONY: all clean install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
-		install-man install-bins install-renderers install-curses install-wayland install-x11 \
+		install-man install-bins install-docs install-renderers install-curses install-wayland install-x11 \
 		doxygen sign clients curses x11 wayland
