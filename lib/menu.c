@@ -802,12 +802,23 @@ static void
 menu_point_select(struct bm_menu *menu, uint32_t posx, uint32_t posy, uint32_t displayed)
 {
     (void) posx;
-    uint32_t selected_line = posy / (bm_menu_get_height(menu) / displayed);
-    uint16_t current_page_index = menu->index / menu->lines;
+
+    if (displayed == 0) {
+        return;
+    }
+    uint32_t line_height = bm_menu_get_height(menu) / displayed;
+
+    if (line_height == 0) {
+        return;
+    }
+    uint32_t selected_line = posy / line_height;
 
     if (0 == selected_line) { // Mouse over title bar
         return;
     }
+
+    assert(menu->lines != 0);
+    uint16_t current_page_index = menu->index / menu->lines;
 
     if (selected_line >= displayed) { // This might be useless
         return;
@@ -819,6 +830,7 @@ menu_point_select(struct bm_menu *menu, uint32_t posx, uint32_t posy, uint32_t d
 static void
 menu_scroll_down(struct bm_menu *menu, uint16_t count)
 {
+    assert(menu->lines != 0);
     if (menu->index / menu->lines != count / menu->lines) { // not last page
         bm_menu_set_highlighted_index(menu, ((menu->index / menu->lines) + 1) * menu->lines);
     }
@@ -828,6 +840,7 @@ static void
 menu_scroll_up(struct bm_menu *menu, uint16_t count)
 {
     (void) count;
+    assert(menu->lines != 0);
     if (menu->index / menu->lines) { // not first page
         bm_menu_set_highlighted_index(menu, ((menu->index / menu->lines) - 1) * menu->lines + menu->lines - 1);
     }
