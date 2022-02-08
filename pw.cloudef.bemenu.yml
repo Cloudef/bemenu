@@ -8,7 +8,7 @@ modules:
     buildsystem: simple
     build-commands:
       - make bemenu x11 wayland curses PREFIX=/app
-      - make install PREFIX=/app
+      - make install-base install-renderers PREFIX=/app
     sources:
       - type: git
         url: https://github.com/Cloudef/bemenu.git
