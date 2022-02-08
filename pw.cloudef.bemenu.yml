@@ -12,6 +12,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/Cloudef/bemenu.git
+        branch: master
 finish-args:
   - --share=ipc
   - --socket=x11
