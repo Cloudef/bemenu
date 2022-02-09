@@ -163,7 +163,15 @@ clean:
 	$(RM) lib/renderers/wayland/wlr-*.h lib/renderers/wayland/wlr-*.c lib/renderers/wayland/xdg-shell.c
 	$(RM) -r html
 
+uninstall:
+	$(RM) -r "$(DESTDIR)$(PREFIX)$(libdir)/bemenu"
+	$(RM) "$(DESTDIR)$(PREFIX)$(mandir)/bemenu.1"
+	$(RM) "$(DESTDIR)$(PREFIX)$(bindir)/bemenu"
+	$(RM) "$(DESTDIR)$(PREFIX)$(bindir)/bemenu-run"
+	$(RM) "$(DESTDIR)$(PREFIX)$(libdir)"/libbemenu.so*
+	$(RM) "$(DESTDIR)$(PREFIX)$(includedir)/bemenu.h"
+
 .DELETE_ON_ERROR:
-.PHONY: all clean install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
+.PHONY: all clean uninstall install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
 		install-man install-bins install-docs install-renderers install-curses install-wayland install-x11 \
 		doxygen sign clients curses x11 wayland
