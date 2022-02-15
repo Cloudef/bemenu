@@ -1,9 +1,0 @@
-prefix=@PREFIX@
-libdir=${prefix}@LIBDIR@
-includedir=${prefix}@INCLUDEDIR@
-
-Name: bemenu
-Description: Dynamic menu library
-Version: @VERSION@
-Libs: -L${libdir} -lbemenu
-Cflags: -I${includedir}
