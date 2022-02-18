@@ -400,4 +400,16 @@ bm_unicode_insert(char **in_out_string, size_t *in_out_buf_size, size_t start, u
     return bm_utf8_rune_insert(in_out_string, in_out_buf_size, start, mb, u8len, out_rune_width);
 }
 
+bool
+bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
+{
+    assert(menu);
+    assert(item);
+
+    uint32_t i, count;
+    struct bm_item **items = bm_menu_get_selected_items(menu, &count);
+    for (i = 0; i < count && items[i] != item; ++i);
+    return (i < count);
+}
+
 /* vim: set ts=8 sw=4 tw=0 :*/

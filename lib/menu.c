@@ -39,18 +39,6 @@ static struct bm_item** (*filter_func[BM_FILTER_MODE_LAST])(struct bm_menu *menu
     bm_filter_dmenu_case_insensitive /* BM_FILTER_DMENU_CASE_INSENSITIVE */
 };
 
-bool
-bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
-{
-    assert(menu);
-    assert(item);
-
-    uint32_t i, count;
-    struct bm_item **items = bm_menu_get_selected_items(menu, &count);
-    for (i = 0; i < count && items[i] != item; ++i);
-    return (i < count);
-}
-
 struct bm_menu*
 bm_menu_new(const char *renderer)
 {

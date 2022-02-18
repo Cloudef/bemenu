@@ -2,6 +2,7 @@
 #define _BEMENU_INTERNAL_H_
 
 #include "bemenu.h"
+#include "util.h"
 
 #if __GNUC__
 #  define BM_LOG_ATTR(x, y) __attribute__((format(printf, x, y)))
@@ -422,21 +423,21 @@ bool list_remove_item(struct list *list, const void *item);
 void list_sort(struct list *list, int (*compar)(const void *a, const void *b));
 
 /* util.c */
-BM_PUBLIC char* bm_strdup(const char *s);
-BM_PUBLIC bool bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize);
-BM_PUBLIC BM_LOG_ATTR(1, 2) char* bm_dprintf(const char *fmt, ...);
-BM_PUBLIC BM_LOG_ATTR(3, 0) bool bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args);
-BM_PUBLIC size_t bm_strip_token(char *string, const char *token, size_t *out_next);
-BM_PUBLIC int bm_strupcmp(const char *hay, const char *needle);
-BM_PUBLIC int bm_strnupcmp(const char *hay, const char *needle, size_t len);
-BM_PUBLIC char* bm_strupstr(const char *hay, const char *needle);
-BM_PUBLIC int32_t bm_utf8_string_screen_width(const char *string);
-BM_PUBLIC size_t bm_utf8_rune_next(const char *string, size_t start);
-BM_PUBLIC size_t bm_utf8_rune_prev(const char *string, size_t start);
-BM_PUBLIC size_t bm_utf8_rune_width(const char *rune, uint32_t u8len);
-BM_PUBLIC size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
-BM_PUBLIC size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
-BM_PUBLIC size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
+char* bm_strdup(const char *s);
+bool bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize);
+BM_LOG_ATTR(1, 2) char* bm_dprintf(const char *fmt, ...);
+BM_LOG_ATTR(3, 0) bool bm_vrprintf(char **in_out_buffer, size_t *in_out_len, const char *fmt, va_list args);
+size_t bm_strip_token(char *string, const char *token, size_t *out_next);
+int bm_strupcmp(const char *hay, const char *needle);
+int bm_strnupcmp(const char *hay, const char *needle, size_t len);
+char* bm_strupstr(const char *hay, const char *needle);
+int32_t bm_utf8_string_screen_width(const char *string);
+size_t bm_utf8_rune_next(const char *string, size_t start);
+size_t bm_utf8_rune_prev(const char *string, size_t start);
+size_t bm_utf8_rune_width(const char *rune, uint32_t u8len);
+size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
+size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
+size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
 
 #endif /* _BEMENU_INTERNAL_H_ */
 
