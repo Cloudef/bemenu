@@ -1111,9 +1111,8 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 }
 
 enum bm_run_result
-bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer, uint32_t unicode)
+bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer)
 {
-    (void) unicode;
     uint32_t count;
     bm_menu_get_filtered_items(menu, &count);
 
@@ -1174,9 +1173,8 @@ bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer, uint32
 }
 
 enum bm_run_result
-bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch, uint32_t unicode)
+bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch)
 {
-    (void) unicode;
     uint32_t count;
     bm_menu_get_filtered_items(menu, &count);
 
@@ -1303,12 +1301,12 @@ bm_menu_run_with_events(struct bm_menu *menu, enum bm_key key,
         return key_result;
     }
 
-    enum bm_run_result pointer_result = bm_menu_run_with_pointer(menu, pointer, unicode);
+    enum bm_run_result pointer_result = bm_menu_run_with_pointer(menu, pointer);
     if (pointer_result != BM_RUN_RESULT_RUNNING) {
         return pointer_result;
     }
 
-    return bm_menu_run_with_touch(menu, touch, unicode);
+    return bm_menu_run_with_touch(menu, touch);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/
