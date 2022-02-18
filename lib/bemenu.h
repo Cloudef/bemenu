@@ -188,7 +188,7 @@ enum bm_scrollbar_mode {
 };
 
 /**
- * Result constants from bm_menu_run_with_key function.
+ * Result constants for the menu run functions.
  *
  * - @link ::bm_run_result BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
  * - @link ::bm_run_result BM_RUN_RESULT_SELECTED @endlink means that menu was closed and items were selected.
@@ -927,7 +927,35 @@ BM_PUBLIC struct bm_touch bm_menu_poll_touch(struct bm_menu *menu);
 BM_PUBLIC void bm_menu_release_touch(struct bm_menu *menu);
 
 /**
- * Advances menu logic with key and unicode as input.
+ * Advances menu logic with a key and unicode as input.
+ *
+ * @param menu bm_menu instance to be advanced.
+ * @param key Key input that will advance menu logic.
+ * @param unicode Unicode input that will advance menu logic.
+ * @return bm_run_result for menu state.
+ */
+BM_PUBLIC enum bm_run_result bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode);
+
+/**
+ * Advances menu logic with a pointer event.
+ *
+ * @param menu bm_menu instance to be advanced.
+ * @param pointer Pointer input that will advance menu logic.
+ * @return bm_run_result for menu state.
+ */
+BM_PUBLIC enum bm_run_result bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer);
+
+/**
+ * Advances menu logic with a touch event.
+ *
+ * @param menu bm_menu instance to be advanced.
+ * @param touch Touch input that will advance menu logic.
+ * @return bm_run_result for menu state.
+ */
+BM_PUBLIC enum bm_run_result bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch);
+
+/**
+ * Advances menu logic with various events.
  *
  * @param menu bm_menu instance to be advanced.
  * @param key Key input that will advance menu logic.
