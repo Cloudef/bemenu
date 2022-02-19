@@ -401,9 +401,6 @@ struct bm_menu {
 /* library.c */
 bool bm_renderer_activate(struct bm_renderer *renderer, struct bm_menu *menu);
 
-/* menu.c */
-BM_PUBLIC bool bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item);
-
 /* filter.c */
 struct bm_item** bm_filter_dmenu(struct bm_menu *menu, bool addition, uint32_t *out_nmemb);
 struct bm_item** bm_filter_dmenu_case_insensitive(struct bm_menu *menu, bool addition, uint32_t *out_nmemb);
@@ -421,7 +418,10 @@ bool list_remove_item_at(struct list *list, uint32_t index);
 bool list_remove_item(struct list *list, const void *item);
 void list_sort(struct list *list, int (*compar)(const void *a, const void *b));
 
-/* util.c */
+/* util.c
+ * Functions here may be used in renderers also. They will be statically compiled to all units,
+ * so do not mark them as a BM_PUBLIC.
+ */
 char* bm_strdup(const char *s);
 bool bm_resize_buffer(char **in_out_buffer, size_t *in_out_size, size_t nsize);
 BM_LOG_ATTR(1, 2) char* bm_dprintf(const char *fmt, ...);
@@ -437,6 +437,7 @@ size_t bm_utf8_rune_width(const char *rune, uint32_t u8len);
 size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
 size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
 size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
+bool bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item);
 
 #endif /* _BEMENU_INTERNAL_H_ */
 
