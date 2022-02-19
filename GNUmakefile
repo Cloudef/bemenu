@@ -127,8 +127,8 @@ install-bins:
 	-chmod 0755 $(addprefix "$(DESTDIR)$(PREFIX)$(bindir)"/,$(bins))
 
 install-man: bemenu.1
-	mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
-	-cp $< "$(DESTDIR)$(PREFIX)$(mandir)"
+	-hash scdoc && mkdir -p "$(DESTDIR)$(PREFIX)$(mandir)"
+	-hash scdoc && cp $< "$(DESTDIR)$(PREFIX)$(mandir)"
 
 install-renderers: install-curses install-wayland install-x11
 
