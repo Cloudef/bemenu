@@ -27,7 +27,7 @@ jobs:
       steps:
          - uses: actions/checkout@v2
          - name: install build deps
-           run: brew update; brew install make pkg-config
+           run: brew update; brew install make pkg-config scdoc
          - name: make
            run: sh build-osx.sh EXTRA_WARNINGS=-Werror PREFIX=install clients curses
          - name: make install
