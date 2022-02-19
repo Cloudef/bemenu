@@ -17,6 +17,8 @@ jobs:
            run: make PREFIX=install EXTRA_WARNINGS=-Werror
          - name: make install
            run: make install PREFIX=install
+         - name: print install tree
+           run: find install
          - name: check symbols
            run: make check-symbols
 
