@@ -438,6 +438,8 @@ size_t bm_utf8_rune_remove(char *string, size_t start, size_t *out_rune_width);
 size_t bm_utf8_rune_insert(char **string, size_t *bufSize, size_t start, const char *rune, uint32_t u8len, size_t *out_rune_width);
 size_t bm_unicode_insert(char **string, size_t *bufSize, size_t start, uint32_t unicode, size_t *out_rune_width);
 bool bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item);
+char* bm_cstrcopy(const char *str, size_t size);
+char** bm_tokenize_quoted_to_argv(const char *str, char *argv0, int *out_argc);
 
 #endif /* _BEMENU_INTERNAL_H_ */
 

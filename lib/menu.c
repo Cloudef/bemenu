@@ -47,6 +47,7 @@ bm_menu_new(const char *renderer)
         return NULL;
 
     menu->dirty = true;
+    menu->monitor = -1;
 
     uint32_t count;
     const struct bm_renderer **renderers = bm_get_renderers(&count);
@@ -131,6 +132,11 @@ bm_menu_free_items(struct bm_menu *menu)
 
     if (menu->filter_item)
         free(menu->filter_item);
+}
+
+bool
+bm_menu_apply_options(struct bm_menu *menu, int argc, const char *argv[])
+{
 }
 
 const struct bm_renderer*

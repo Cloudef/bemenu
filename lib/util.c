@@ -412,4 +412,109 @@ bm_menu_item_is_selected(const struct bm_menu *menu, const struct bm_item *item)
     return (i < count);
 }
 
+#define WHITESPACE " \t\n\r"
+
+static const char*
+tokenize(const char *cstr, size_t *out_len, const char *separator, bool skip_whitespace, const char **state)
+{
+   assert(out_len && separator && state);
+   const char *current = (state && *state ? *state : cstr);
+
+   if (!current || !*current || !cstr || !*cstr)
+      return NULL;
+
+   current += strspn(current, separator);
+
+   if (skip_whitespace)
+      current += strspn(current, WHITESPACE);
+
+   *out_len = strcspn(current, separator);
+   *state = current + *out_len;
+
+   if (skip_whitespace) {
+      const size_t ws = strcspn(current, WHITESPACE);
+      *out_len -= (ws < *out_len ? *out_len - ws : 0);
+   }
+
+   return current;
+}
+
+static const char*
+tokenize_quoted(const char *cstr, size_t *out_len, const char *separator, const char *quotes, const char **state)
+{
+    assert(out_len && separator && quotes && state);
+    const char *e, *current = tokenize(cstr, out_len, separator, true, state);
+
+    if (!current)
+        return NULL;
+
+    for (const char *q = quotes; *q; ++q) {
+        if (*current != *q)
+            continue;
+
+        bool escaped = false;
+        for (e = ++current; *e; ++e) {
+            if (escaped)
+                escaped = false;
+            else if (*e == '\\')
+                escaped = true;
+            else if (*e == *q)
+                break;
+        }
+
+        *out_len = e - current;
+        e = (!*e ? e : e + 1);
+
+        if (*e) {
+            size_t tmp;
+            const char *state2 = NULL;
+            *state = tokenize(e, &tmp, separator, true, &state2);
+        } else {
+            *state = e;
+        }
+
+        break;
+    }
+
+    return current;
+}
+
+char*
+bm_cstrcopy(const char *str, size_t size)
+{
+    char *cpy = calloc(1, size + 1);
+    return (cpy ? memcpy(cpy, str, size) : NULL);
+}
+
+char**
+bm_tokenize_quoted_to_argv(const char *str, char *argv0, int *out_argc)
+{
+    if (out_argc) *out_argc = 0;
+
+    size_t count = !!argv0;
+    {
+        size_t len;
+        const char *state = NULL;
+        while (tokenize_quoted(str, &len, " ", "\"'", &state))
+            ++count;
+    }
+
+    char **tokens;
+    if (!count || !(tokens = calloc(count + 1, sizeof(char*))))
+        return NULL;
+
+    {
+        tokens[0] = argv0;
+        size_t i = !!argv0, len;
+        const char *t, *state = NULL;
+        while (i < count && (t = tokenize_quoted(str, &len, " ", "\"'", &state))) {
+            if (!(tokens[i++] = cstrcopy(t, len)))
+                return NULL;
+        }
+    }
+
+    if (out_argc) *out_argc = count;
+    return tokens;
+}
+
 /* vim: set ts=8 sw=4 tw=0 :*/

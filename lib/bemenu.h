@@ -52,6 +52,13 @@ struct bm_item;
  */
 
 /**
+ * @defgroup Options
+ * @brief Option interface..
+ *
+ * Provides CLI argument interface so that common options can be reused.
+ */
+
+/**
  * @addtogroup Library
  * @{ */
 
@@ -1036,6 +1043,49 @@ BM_PUBLIC const char* bm_item_get_text(const struct bm_item *item);
 /**  @} Item Properties */
 
 /**  @} Item */
+
+/**
+ * @addtogroup Options
+ * @{ */
+
+enum bm_option {
+    BM_OPT_IGNORECASE,
+    BM_OPT_FILTER,
+    BM_OPT_WRAP,
+    BM_OPT_LIST,
+    BM_OPT_PROMPT,
+    BM_OPT_PREFIX,
+    BM_OPT_INDEX,
+    BM_OPT_PASSWORD,
+    BM_OPT_NO_SPACING,
+    BM_OPT_SCROLLBAR,
+};
+
+enum bm_option_type {
+    BM_OPT_TYPE_VOID,
+    BM_OPT_TYPE_STRING,
+    BM_OPT_TYPE_INT,
+    BM_OPT_TYPE_FLOAT,
+    BM_OPT_TYPE_STRING_OR_INT,
+};
+
+struct bm_option_desc {
+    const char short_opt; // 0 if no short option string
+    const char *long_opt, *desc;
+    const char *backends; // NULL if not a backend option
+    enum bm_option option;
+    enum bm_option_type type;
+    bool need_arg;
+};
+
+BM_PUBLIC const struct bm_option_desc* bm_available_options(size_t *out_num);
+
+/**
+ * Parse standard bemenu options from argc, argv and environment.
+ */
+BM_PUBLIC bool bm_menu_parse_options(struct bm_menu *menu, int argc, const char *argv[]);
+
+/**  @} Options */
 
 #endif /* _BEMENU_H_ */
 
