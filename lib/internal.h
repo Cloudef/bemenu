@@ -2,7 +2,6 @@
 #define _BEMENU_INTERNAL_H_
 
 #include "bemenu.h"
-#include "util.h"
 
 #if __GNUC__
 #  define BM_LOG_ATTR(x, y) __attribute__((format(printf, x, y)))
