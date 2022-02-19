@@ -161,6 +161,9 @@ sign:
 	git archive --prefix="bemenu-$(VERSION)/" -o "bemenu-$(VERSION).tar.gz" "$(GIT_TAG)"
 	gpg --default-key "$(GPG_KEY_ID)" --armor --detach-sign "bemenu-$(VERSION).tar.gz"
 
+check-symbols: libbemenu.so lib/bemenu.h
+	sh scripts/check-symbols.sh $^ bemenu-renderer-*.so
+
 clean:
 	$(RM) -r *.dSYM # OSX generates .dSYM dirs with -g ...
 	$(RM) $(pkgconfigs) $(libs) $(bins) $(renderers) $(mans) *.a *.so.*
@@ -178,4 +181,4 @@ uninstall:
 .DELETE_ON_ERROR:
 .PHONY: all clean uninstall install install-base install-pkgconfig install-include install-libs install-lib-symlinks \
 		install-man install-bins install-docs install-renderers install-curses install-wayland install-x11 \
-		doxygen sign clients curses x11 wayland
+		doxygen sign check-symbols clients curses x11 wayland

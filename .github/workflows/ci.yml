@@ -17,6 +17,8 @@ jobs:
            run: make PREFIX=install EXTRA_WARNINGS=-Werror
          - name: make install
            run: make install PREFIX=install
+         - name: check symbols
+           run: make check-symbols
 
    osx:
       runs-on: macos-latest
@@ -26,6 +28,8 @@ jobs:
            run: brew update; brew install make pkg-config
          - name: make
            run: sh build-osx.sh EXTRA_WARNINGS=-Werror clients curses
+         - name: check symbols
+           run: sh build-osx.sh check-symbols
 
    doxygen:
       runs-on: ubuntu-latest
