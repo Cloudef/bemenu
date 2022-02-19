@@ -18,7 +18,7 @@ jobs:
          - name: make install
            run: make install PREFIX=install
          - name: print install tree
-           run: find install
+           run: find install | sort
          - name: check symbols
            run: make check-symbols
 
@@ -33,7 +33,7 @@ jobs:
          - name: make install
            run: sh build-osx.sh PREFIX=install install
          - name: print install tree
-           run: find install
+           run: find install | sort
          - name: check symbols
            run: sh build-osx.sh check-symbols
 
