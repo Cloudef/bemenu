@@ -56,7 +56,7 @@ keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard, uint32_t format
     }
 
     char *map_str;
-    if ((map_str = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+    if ((map_str = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED) {
         close(fd);
         return;
     }
