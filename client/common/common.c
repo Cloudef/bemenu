@@ -270,7 +270,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "line-height",  required_argument, 0, 'H' },
         { "margin",       required_argument, 0, 'M' },
         { "width-factor", required_argument, 0, 'W' },
-        { "ch",           required_argument, 0, 0x118 },
+        { "ch",           required_argument, 0, 0x120 },
         { "fn",           required_argument, 0, 0x101 },
         { "tb",           required_argument, 0, 0x102 },
         { "tf",           required_argument, 0, 0x103 },
