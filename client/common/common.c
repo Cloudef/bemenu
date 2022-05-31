@@ -202,6 +202,7 @@ usage(FILE *out, const char *name)
           " -H, --line-height     defines the height to make each menu line (0 = default height). (wx)\n"
           " -M, --margin          defines the empty space on either side of the menu. (wx)\n"
           " -W, --width-factor    defines the relative width factor of the menu (from 0 to 1). (wx)\n"
+          " -B, --border          defines the width of the border in pixels around the menu. (wx)\n"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --cw                  defines the width of the cursor. (wx)\n"
           " --hp                  defines the horizontal padding for the entries in single line mode. (wx)\n"
@@ -221,7 +222,8 @@ usage(FILE *out, const char *name)
           " --ab                  defines the alternating background color. (wx)\n"
           " --af                  defines the alternating foreground color. (wx)\n"
           " --scb                 defines the scrollbar background color. (wx)\n"
-          " --scf                 defines the scrollbar foreground color. (wx)\n", out);
+          " --scf                 defines the scrollbar foreground color. (wx)\n"
+          " --bdr                 defines the border color. (wx)\n", out);
 
     exit((out == stderr ? EXIT_FAILURE : EXIT_SUCCESS));
 }
@@ -274,6 +276,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "line-height",  required_argument, 0, 'H' },
         { "margin",       required_argument, 0, 'M' },
         { "width-factor", required_argument, 0, 'W' },
+        { "border",       required_argument, 0, 'B' },
         { "ch",           required_argument, 0, 0x120 },
         { "cw",           required_argument, 0, 0x125 },
         { "hp",           required_argument, 0, 0x122 },
@@ -294,6 +297,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "af",           required_argument, 0, 0x124 },
         { "scb",          required_argument, 0, 0x114 },
         { "scf",          required_argument, 0, 0x115 },
+        { "bdr",          required_argument, 0, 0x121 },
 
         { "disco",       no_argument,       0, 0x116 },
         { 0, 0, 0, 0 }
@@ -309,7 +313,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:ns", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:B:ns", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -385,6 +389,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 'W':
                 client->width_factor = strtof(optarg, NULL);
                 break;
+            case 'B':
+                client->border_size = strtol(optarg, NULL, 10);
+                break;
             case 0x120:
                 client->cursor_height = strtol(optarg, NULL, 10);
                 break;
@@ -445,6 +452,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 0x115:
                 client->colors[BM_COLOR_SCROLLBAR_FG] = optarg;
                 break;
+            case 0x121:
+                client->colors[BM_COLOR_BORDER] = optarg;
+                break;
 
             case 0x116:
                 disco();
@@ -499,6 +509,7 @@ menu_with_options(struct client *client)
     bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);
     bm_menu_set_width(menu, client->hmargin_size, client->width_factor);
+    bm_menu_set_border_size(menu, client->border_size);
 
     if (client->center) {
         bm_menu_set_align(menu, BM_ALIGN_CENTER);

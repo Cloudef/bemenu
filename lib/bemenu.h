@@ -347,6 +347,7 @@ enum bm_color {
     BM_COLOR_ALTERNATE_FG,
     BM_COLOR_SCROLLBAR_BG,
     BM_COLOR_SCROLLBAR_FG,
+    BM_COLOR_BORDER,
     BM_COLOR_LAST
 };
 
@@ -612,6 +613,24 @@ BM_PUBLIC uint32_t bm_menu_get_height(struct bm_menu *menu);
  * @return uint32_t for max amount the menu width.
  */
 BM_PUBLIC uint32_t bm_menu_get_width(struct bm_menu *menu);
+
+/**
+ * Set the size of the border for the bar
+ *
+ * @param menu bm_menu to get border size from.
+ * @return border size of the menu.
+ */
+
+BM_PUBLIC void bm_menu_set_border_size(struct bm_menu* menu, uint32_t border_size);
+
+/**
+ * Get the size of the border for the bar
+ *
+ * @param menu bm_menu to get border size from.
+ * @return border size of the menu.
+ */
+
+BM_PUBLIC uint32_t bm_menu_get_border_size(struct bm_menu* menu);
 
 /**
  * Set a hexadecimal color for element.
