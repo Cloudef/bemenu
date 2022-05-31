@@ -31,6 +31,7 @@ static const char *default_colors[BM_COLOR_LAST] = {
     "#121212FF", // BM_COLOR_ALTERNATE_FG
     "#121212FF", // BM_COLOR_SCROLLBAR_BG
     "#D81860FF", // BM_COLOR_SCROLLBAR_FG
+    "#D81860FF", // BM_COLOR_BORDER
 };
 
 /**
@@ -331,6 +332,20 @@ bm_menu_get_hpadding(struct bm_menu *menu)
 {
     assert(menu);
     return menu->hpadding;
+}
+
+void
+bm_menu_set_border_size(struct bm_menu* menu, uint32_t border_size)
+{
+    assert(menu);
+    menu->border_size = border_size;
+}
+
+uint32_t
+bm_menu_get_border_size(struct bm_menu* menu)
+{
+    assert(menu);
+    return menu->border_size;
 }
 
 uint32_t

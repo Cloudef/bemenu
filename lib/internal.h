@@ -378,6 +378,11 @@ struct bm_menu {
     float width_factor;
 
     /**
+     * Border size
+     */
+    uint32_t border_size;
+
+    /**
      * Is menu grabbed?
      */
     bool grabbed;
