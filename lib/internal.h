@@ -280,6 +280,11 @@ struct bm_menu {
     uint32_t cursor_width;
 
     /**
+     * Horizontal Padding.
+     */
+    uint32_t hpadding;
+
+    /**
      * Colors.
      */
     struct bm_hex_color colors[BM_COLOR_LAST];

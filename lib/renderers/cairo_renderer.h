@@ -27,6 +27,7 @@ struct cairo_paint {
     uint32_t cursor;
     uint32_t cursor_height;
     uint32_t cursor_width;
+    uint32_t hpadding;
     bool draw_cursor;
 
     struct box {
@@ -437,10 +438,11 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             }
 
-            paint.pos = (struct pos){ cl, vpadding };
-            paint.box = (struct box){ 2, 4, vpadding, -vpadding, 0, height };
+            uint32_t hpadding = (menu->hpadding == 0 ? 2 : menu->hpadding);
+            paint.pos = (struct pos){ cl + (hpadding/2), vpadding };
+            paint.box = (struct box){ hpadding/2, 1.5 * hpadding, vpadding, -vpadding, 0, height };
             bm_cairo_draw_line(cairo, &paint, &result, "%s", (items[i]->text ? items[i]->text : ""));
-            cl += result.x_advance + 2;
+            cl += result.x_advance + (0.5 * hpadding);
             out_result->displayed += (cl < width);
             out_result->height = fmax(out_result->height, result.height);
         }

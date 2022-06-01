@@ -580,6 +580,24 @@ BM_PUBLIC void bm_menu_set_cursor_width(struct bm_menu *menu, uint32_t cursor_wi
 BM_PUBLIC uint32_t bm_menu_get_cursor_width(struct bm_menu *menu);
 
 /**
+ * Set horizontal padding in pixels.
+ * Some renderers such as ncurses may ignore this when it does not make sense.
+ *
+ * @param menu bm_menu instance where to set horizontal padding.
+ * @return uint32_t for horizontal padding
+ */
+BM_PUBLIC void bm_menu_set_hpadding(struct bm_menu *menu, uint32_t hpadding);
+
+/**
+ * Get horizontal padding in pixels.
+ * Some renderers such as ncurses may ignore this when it does not make sense.
+ *
+ * @param menu bm_menu instance where to set horizontal padding.
+ * @return uint32_t for horizontal padding
+ */
+BM_PUBLIC uint32_t bm_menu_get_hpadding(struct bm_menu *menu);
+
+/**
  * Get with of menu in pixels.
  *
  * @param menu bm_menu instance where to get line height.
