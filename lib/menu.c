@@ -319,6 +319,20 @@ bm_menu_get_cursor_width(struct bm_menu *menu)
     return menu->cursor_width;
 }
 
+void
+bm_menu_set_hpadding(struct bm_menu *menu, uint32_t hpadding)
+{
+    assert(menu);
+    menu->hpadding = hpadding;
+}
+
+uint32_t
+bm_menu_get_hpadding(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->hpadding;
+}
+
 uint32_t
 bm_menu_get_height(struct bm_menu *menu)
 {

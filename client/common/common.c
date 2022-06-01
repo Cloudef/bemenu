@@ -204,6 +204,7 @@ usage(FILE *out, const char *name)
           " -W, --width-factor    defines the relative width factor of the menu (from 0 to 1). (wx)\n"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --cw                  defines the width of the cursor. (wx)\n"
+          " --hp                  defines the horizontal padding for the entries in single line mode. (wx)\n"
           " --fn                  defines the font to be used ('name [size]'). (wx)\n"
           " --tb                  defines the title background color. (wx)\n"
           " --tf                  defines the title foreground color. (wx)\n"
@@ -275,6 +276,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "width-factor", required_argument, 0, 'W' },
         { "ch",           required_argument, 0, 0x120 },
         { "cw",           required_argument, 0, 0x125 },
+        { "hp",           required_argument, 0, 0x122 },
         { "fn",           required_argument, 0, 0x101 },
         { "tb",           required_argument, 0, 0x102 },
         { "tf",           required_argument, 0, 0x103 },
@@ -389,6 +391,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 0x125:
                 client->cursor_width = strtol(optarg, NULL, 10);
                 break;
+            case 0x122:
+                client->hpadding = strtol(optarg, NULL, 10);
+                break;
             case 0x101:
                 client->font = optarg;
                 break;
@@ -481,6 +486,7 @@ menu_with_options(struct client *client)
     bm_menu_set_line_height(menu, client->line_height);
     bm_menu_set_cursor_height(menu, client->cursor_height);
     bm_menu_set_cursor_width(menu, client->cursor_width);
+    bm_menu_set_hpadding(menu, client->hpadding);
     bm_menu_set_title(menu, client->title);
     bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);
