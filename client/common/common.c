@@ -217,6 +217,8 @@ usage(FILE *out, const char *name)
           " --fbf                 defines the feedback foreground color. (wx)\n"
           " --sb                  defines the selected background color. (wx)\n"
           " --sf                  defines the selected foreground color. (wx)\n"
+          " --ab                  defines the alternating background color. (wx)\n"
+          " --af                  defines the alternating foreground color. (wx)\n"
           " --scb                 defines the scrollbar background color. (wx)\n"
           " --scf                 defines the scrollbar foreground color. (wx)\n", out);
 
@@ -286,6 +288,8 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "fbf",          required_argument, 0, 0x111 },
         { "sb",           required_argument, 0, 0x112 },
         { "sf",           required_argument, 0, 0x113 },
+        { "ab",           required_argument, 0, 0x123 },
+        { "af",           required_argument, 0, 0x124 },
         { "scb",          required_argument, 0, 0x114 },
         { "scf",          required_argument, 0, 0x115 },
 
@@ -423,6 +427,12 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x113:
                 client->colors[BM_COLOR_SELECTED_FG] = optarg;
+                break;
+            case 0x123:
+                client->colors[BM_COLOR_ALTERNATE_BG] = optarg;
+                break;
+            case 0x124:
+                client->colors[BM_COLOR_ALTERNATE_FG] = optarg;
                 break;
             case 0x114:
                 client->colors[BM_COLOR_SCROLLBAR_BG] = optarg;
