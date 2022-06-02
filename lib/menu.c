@@ -303,6 +303,20 @@ bm_menu_get_cursor_height(struct bm_menu *menu)
     return menu->cursor_height;
 }
 
+void
+bm_menu_set_cursor_width(struct bm_menu *menu, uint32_t cursor_width)
+{
+    assert(menu);
+    menu->cursor_width = cursor_width;
+}
+
+uint32_t
+bm_menu_get_cursor_width(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->cursor_width;
+}
+
 uint32_t
 bm_menu_get_height(struct bm_menu *menu)
 {
