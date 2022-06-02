@@ -354,6 +354,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             } else if (bm_menu_item_is_selected(menu, items[i])) {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_BG, &paint.bg);
+            } else if (i % 2 == 1) {
+                bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_FG, &paint.fg);
+                bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_BG, &paint.bg);
             } else {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
@@ -420,6 +423,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             } else if (bm_menu_item_is_selected(menu, items[i])) {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_BG, &paint.bg);
+            } else if (i % 2 == 1) {
+                bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_FG, &paint.fg);
+                bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_BG, &paint.bg);
             } else {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
