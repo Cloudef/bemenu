@@ -275,6 +275,11 @@ struct bm_menu {
     uint32_t cursor_height;
 
     /**
+     * Cursor width.
+     */
+    uint32_t cursor_width;
+
+    /**
      * Colors.
      */
     struct bm_hex_color colors[BM_COLOR_LAST];
