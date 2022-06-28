@@ -26,7 +26,7 @@ render(struct bm_menu *menu)
 
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
-        if (menu->dirty && window->render_pending)
+        if (window->render_pending)
             bm_wl_window_render(window, wayland->display, menu);
     }
     wl_display_flush(wayland->display);
