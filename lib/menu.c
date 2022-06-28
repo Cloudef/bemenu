@@ -177,10 +177,14 @@ bm_menu_set_filter(struct bm_menu *menu, const char *filter)
 {
     assert(menu);
 
+    if (strcmp(menu->filter ? menu->filter : "", filter ? filter : ""))
+        menu->dirty = true;
+
     free(menu->filter);
     menu->filter_size = (filter ? strlen(filter) : 0);
     menu->filter = (menu->filter_size > 0 ? bm_strdup(filter) : NULL);
     menu->curses_cursor = (menu->filter ? bm_utf8_string_screen_width(menu->filter) : 0);
+    menu->dirty |= (menu->cursor != menu->filter_size);
     menu->cursor = menu->filter_size;
 }
 
