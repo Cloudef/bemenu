@@ -1190,7 +1190,7 @@ bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer)
         }
     }
 
-    if (pointer.event_mask & POINTER_EVENT_MOTION) {
+    if (pointer.event_mask & (POINTER_EVENT_ENTER | POINTER_EVENT_MOTION)) {
         menu_point_select(menu, pointer.pos_x, pointer.pos_y, displayed);
     }
 
