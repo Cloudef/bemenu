@@ -14,22 +14,23 @@
 static int efd;
 
 static void
-render(struct bm_menu *menu)
-{
-    struct wayland *wayland = menu->renderer->internal;
-    wl_display_dispatch_pending(wayland->display);
-
-    if (wl_display_flush(wayland->display) < 0 && errno != EAGAIN) {
-        wayland->input.sym = XKB_KEY_Escape;
-        return;
-    }
-
+render_windows_if_pending(const struct bm_menu *menu, struct wayland *wayland) {
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
         if (window->render_pending)
             bm_wl_window_render(window, wayland->display, menu);
     }
     wl_display_flush(wayland->display);
+}
+
+static void
+wait_for_events(struct wayland *wayland) {
+    wl_display_dispatch_pending(wayland->display);
+
+    if (wl_display_flush(wayland->display) < 0 && errno != EAGAIN) {
+        wayland->input.sym = XKB_KEY_Escape;
+        return;
+    }
 
     struct epoll_event ep[16];
     uint32_t num = epoll_wait(efd, ep, 16, -1);
@@ -42,13 +43,33 @@ render(struct bm_menu *menu)
             bm_wl_repeat(wayland);
         }
     }
+}
 
-    if (menu->dirty) {
-        menu->dirty = false;
-        wl_list_for_each(window, &wayland->windows, link) {
+static void
+schedule_windows_render_if_dirty(struct bm_menu *menu, struct wayland *wayland) {
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        if (window->render_pending) {
+            // This does not happen during normal execution, but only when the windows need to
+            // be(re)created. We need to do the render ASAP (not schedule it) because otherwise,
+            // since we lack a window, we may not receive further events and will get deadlocked
+            render_windows_if_pending(menu, wayland);
+        } else if (menu->dirty) {
             bm_wl_window_schedule_render(window);
         }
     }
+
+    menu->dirty = false;
+}
+
+static void
+render(struct bm_menu *menu)
+{
+    struct wayland *wayland = menu->renderer->internal;
+
+    schedule_windows_render_if_dirty(menu, wayland);
+    wait_for_events(wayland);
+    render_windows_if_pending(menu, wayland);
 }
 
 static enum bm_key
