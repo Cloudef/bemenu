@@ -27,6 +27,8 @@ struct cairo_paint {
     uint32_t cursor;
     uint32_t cursor_height;
     uint32_t cursor_width;
+    struct cairo_color cursor_fg;
+    struct cairo_color cursor_bg;
     uint32_t hpadding;
     bool draw_cursor;
 
@@ -161,7 +163,7 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
             cursor_width = paint->cursor_width;
         }
         uint32_t cursor_height = fmin(paint->cursor_height == 0 ? line_height : paint->cursor_height, line_height);
-        cairo_set_source_rgba(cairo->cr, paint->fg.r, paint->fg.b, paint->fg.g, paint->fg.a);
+        cairo_set_source_rgba(cairo->cr, paint->cursor_fg.r, paint->cursor_fg.b, paint->cursor_fg.g, paint->cursor_fg.a);
         cairo_rectangle(cairo->cr,
                 paint->pos.x + paint->box.lx + rect.x / PANGO_SCALE, paint->pos.y - paint->box.ty + ((line_height - cursor_height) / 2),
                 cursor_width, cursor_height);
@@ -172,7 +174,7 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
                 cursor_width, line_height);
         cairo_clip(cairo->cr);
 
-        cairo_set_source_rgba(cairo->cr, paint->bg.r, paint->bg.b, paint->bg.g, paint->bg.a);
+        cairo_set_source_rgba(cairo->cr, paint->cursor_bg.r, paint->cursor_bg.b, paint->cursor_bg.g, paint->cursor_bg.a);
         cairo_move_to(cairo->cr, paint->box.lx + paint->pos.x, paint->pos.y - base + paint->baseline);
         pango_cairo_show_layout(cairo->cr, layout);
         cairo_reset_clip(cairo->cr);
@@ -301,6 +303,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
     bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
+    bm_cairo_color_from_menu_color(menu, BM_COLOR_CURSOR_FG, &paint.cursor_fg);
+    bm_cairo_color_from_menu_color(menu, BM_COLOR_CURSOR_BG, &paint.cursor_bg);
     paint.draw_cursor = true;
     paint.cursor = menu->cursor;
     paint.cursor_height = menu->cursor_height;
