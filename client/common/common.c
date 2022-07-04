@@ -285,6 +285,8 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "tf",           required_argument, 0, 0x103 },
         { "fb",           required_argument, 0, 0x104 },
         { "ff",           required_argument, 0, 0x105 },
+        { "cb",           required_argument, 0, 0x126 },
+        { "cf",           required_argument, 0, 0x127 },
         { "nb",           required_argument, 0, 0x106 },
         { "nf",           required_argument, 0, 0x107 },
         { "hb",           required_argument, 0, 0x108 },
@@ -415,6 +417,12 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x105:
                 client->colors[BM_COLOR_FILTER_FG] = optarg;
+                break;
+            case 0x126:
+                client->colors[BM_COLOR_CURSOR_BG] = optarg;
+                break;
+            case 0x127:
+                client->colors[BM_COLOR_CURSOR_FG] = optarg;
                 break;
             case 0x106:
                 client->colors[BM_COLOR_ITEM_BG] = optarg;

@@ -136,6 +136,10 @@ control the red, green, blue and alpha-transparency channels.
 
 *--ff* <_color_>	Filter foreground
 
+*--cb* <_color_>	Cursor background.
+
+*--cf* <_color_>	Cursor foreground
+
 *--nb* <_color_>	Normal background.
 
 *--nf* <_color_>	Normal foreground.
