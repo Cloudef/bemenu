@@ -1170,7 +1170,7 @@ bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer)
                 menu_prev(menu, count, menu->wrap);
             }
         }
-        if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_PRESSED) {
+        if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_RELEASED) {
             switch (pointer.button) {
                 case BM_POINTER_KEY_PRIMARY:
                     {
@@ -1196,7 +1196,7 @@ bm_menu_run_with_pointer(struct bm_menu *menu, struct bm_pointer pointer)
         menu_point_select(menu, pointer.pos_x, pointer.pos_y, displayed);
     }
 
-    if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_PRESSED) {
+    if (pointer.event_mask & POINTER_EVENT_BUTTON && pointer.state == POINTER_STATE_RELEASED) {
         switch (pointer.button) {
             case BM_POINTER_KEY_PRIMARY:
                 {
