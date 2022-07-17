@@ -152,6 +152,10 @@ control the red, green, blue and alpha-transparency channels.
 
 *--sf* <_color_>	Selected foreground.
 
+*--ab* <_color_>	Alternating background color.
+
+*--af* <_color_>	Alternating foreground color.
+
 *--scb* <_color_>	Scrollbar background.
 
 *--scf* <_color_>	Scrollbar foreground.
