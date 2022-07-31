@@ -103,7 +103,7 @@ struct render_api {
     /**
      * Tells underlying renderer to draw the menu.
      */
-    void (*render)(struct bm_menu *menu);
+    bool (*render)(struct bm_menu *menu);
 
     /**
      * Set vertical alignment of the bar.

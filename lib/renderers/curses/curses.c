@@ -176,7 +176,7 @@ draw_line(int32_t pair, int32_t y, const char *fmt, ...)
         attroff(COLOR_PAIR(pair));
 }
 
-static void
+static bool
 render(struct bm_menu *menu)
 {
     if (curses.should_terminate) {
@@ -190,7 +190,7 @@ render(struct bm_menu *menu)
         setlocale(LC_CTYPE, "");
 
         if ((curses.stdscreen = initscr()) == NULL)
-            return;
+            return true;
 
         set_escdelay(25);
         flushinp();
@@ -280,6 +280,8 @@ render(struct bm_menu *menu)
         restore_stdin();
         curses.should_terminate = true;
     }
+
+    return true;
 }
 
 static uint32_t
