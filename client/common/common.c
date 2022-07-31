@@ -556,7 +556,10 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     struct bm_touch touch;
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
-        bm_menu_render(menu);
+        if (!bm_menu_render(menu)) {
+            status = BM_RUN_RESULT_CANCEL;
+            break;
+        }
         key = bm_menu_poll_key(menu, &unicode);
         pointer = bm_menu_poll_pointer(menu);
         touch = bm_menu_poll_touch(menu);

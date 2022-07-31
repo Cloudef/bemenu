@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <X11/Xutil.h>
 
-static void
+static bool
 render(struct bm_menu *menu)
 {
     struct x11 *x11 = menu->renderer->internal;
@@ -16,7 +16,7 @@ render(struct bm_menu *menu)
 
     XEvent ev;
     if (XNextEvent(x11->display, &ev) || XFilterEvent(&ev, x11->window.drawable))
-        return;
+        return true;
 
     switch (ev.type) {
         case KeyPress:
@@ -32,6 +32,8 @@ render(struct bm_menu *menu)
             }
             break;
     }
+
+    return true;
 }
 
 static enum bm_key

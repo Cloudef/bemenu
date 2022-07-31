@@ -723,13 +723,15 @@ bm_menu_get_filtered_items(const struct bm_menu *menu, uint32_t *out_nmemb)
     return list_get_items(&menu->items, out_nmemb);
 }
 
-void
+bool
 bm_menu_render(struct bm_menu *menu)
 {
     assert(menu);
 
     if (menu->renderer->api.render)
-        menu->renderer->api.render(menu);
+        return menu->renderer->api.render(menu);
+
+    return true;
 }
 
 void

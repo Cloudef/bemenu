@@ -23,14 +23,12 @@ render_windows_if_pending(const struct bm_menu *menu, struct wayland *wayland) {
     wl_display_flush(wayland->display);
 }
 
-static void
+static bool
 wait_for_events(struct wayland *wayland) {
     wl_display_dispatch_pending(wayland->display);
 
-    if (wl_display_flush(wayland->display) < 0 && errno != EAGAIN) {
-        wayland->input.sym = XKB_KEY_Escape;
-        return;
-    }
+    if (wl_display_flush(wayland->display) < 0 && errno != EAGAIN)
+        return false;
 
     struct epoll_event ep[16];
     uint32_t num = epoll_wait(efd, ep, 16, -1);
@@ -38,11 +36,13 @@ wait_for_events(struct wayland *wayland) {
         if (ep[i].data.ptr == &wayland->fds.display) {
             if (ep[i].events & EPOLLERR || ep[i].events & EPOLLHUP ||
                ((ep[i].events & EPOLLIN) && wl_display_dispatch(wayland->display) < 0))
-                wayland->input.sym = XKB_KEY_Escape;
+                return false;
         } else if (ep[i].data.ptr == &wayland->fds.repeat) {
             bm_wl_repeat(wayland);
         }
     }
+
+    return true;
 }
 
 static void
@@ -62,14 +62,17 @@ schedule_windows_render_if_dirty(struct bm_menu *menu, struct wayland *wayland) 
     menu->dirty = false;
 }
 
-static void
+static bool
 render(struct bm_menu *menu)
 {
     struct wayland *wayland = menu->renderer->internal;
 
     schedule_windows_render_if_dirty(menu, wayland);
-    wait_for_events(wayland);
+    if (!wait_for_events(wayland))
+        return false;
     render_windows_if_pending(menu, wayland);
+
+    return true;
 }
 
 static enum bm_key
