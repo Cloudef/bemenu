@@ -211,10 +211,8 @@ get_align_anchor(enum bm_align align)
 {
     uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT | ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
 
-    if(align == BM_ALIGN_TOP) {
+    if(align == BM_ALIGN_TOP || align == BM_ALIGN_CENTER) {
         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
-    } else if(align == BM_ALIGN_CENTER) {
-        anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP | ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
     } else {
         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
     }
@@ -249,7 +247,11 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
             break;
 
         struct cairo_paint_result result;
-        window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
+        uint32_t max_height = window->max_height;
+        if (menu->align == BM_ALIGN_CENTER) {
+            max_height /= 2;
+        }
+        window->notify.render(&buffer->cairo, buffer->width, max_height, menu, &result);
         window->displayed = result.displayed;
 
         if (window->height == result.height / window->scale)
@@ -348,6 +350,9 @@ bm_wl_window_set_align(struct window *window, struct wl_display *display, enum b
     window->align_anchor = get_align_anchor(window->align);
 
     zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
+    if (align == BM_ALIGN_CENTER) {
+        zwlr_layer_surface_v1_set_margin(window->layer_surface, window->max_height / 2, 0, 0, 0);
+    }
     wl_surface_commit(window->surface);
     wl_display_roundtrip(display);
 }
