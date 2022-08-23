@@ -4,6 +4,7 @@ includedir ?= /include
 bindir ?= /bin
 libdir ?= /lib
 mandir ?= /share/man/man1
+PKG_CONFIG ?= pkg-config
 
 GIT_SHA1 = $(shell git rev-parse HEAD 2>/dev/null || printf 'nogit')
 GIT_TAG = $(shell git tag --points-at HEAD 2>/dev/null || cat VERSION)
@@ -66,16 +67,16 @@ util.a: lib/util.c lib/internal.h
 libbemenu.so: private override LDLIBS += -ldl
 libbemenu.so: lib/bemenu.h lib/internal.h lib/filter.c lib/item.c lib/library.c lib/list.c lib/menu.c lib/vim.c util.a cdl.a
 
-bemenu-renderer-curses.so: private override LDLIBS += $(shell pkg-config --libs ncursesw) -lm
-bemenu-renderer-curses.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I ncursesw)
+bemenu-renderer-curses.so: private override LDLIBS += $(shell $(PKG_CONFIG) --libs ncursesw) -lm
+bemenu-renderer-curses.so: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I ncursesw)
 bemenu-renderer-curses.so: lib/renderers/curses/curses.c util.a
 
-bemenu-renderer-x11.so: private override LDLIBS += $(shell pkg-config --libs x11 xinerama cairo pango pangocairo)
-bemenu-renderer-x11.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I x11 xinerama cairo pango pangocairo)
+bemenu-renderer-x11.so: private override LDLIBS += $(shell $(PKG_CONFIG) --libs x11 xinerama cairo pango pangocairo)
+bemenu-renderer-x11.so: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I x11 xinerama cairo pango pangocairo)
 bemenu-renderer-x11.so: lib/renderers/cairo_renderer.h lib/renderers/x11/x11.c lib/renderers/x11/x11.h lib/renderers/x11/window.c lib/renderers/x11/xkb_unicode.c lib/renderers/x11/xkb_unicode.h util.a
 
 lib/renderers/wayland/xdg-shell.c:
-	wayland-scanner private-code < "$$(pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
+	wayland-scanner private-code < "$$($(PKG_CONFIG) --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml" > $@
 
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.h: lib/renderers/wayland/wlr-layer-shell-unstable-v1.xml
 	wayland-scanner client-header < $^ > $@
@@ -90,16 +91,16 @@ lib/renderers/wayland/xdg-output-unstable-v1.c: lib/renderers/wayland/xdg-output
 	wayland-scanner private-code < $^ > $@
 
 xdg-shell.a: private override LDFLAGS += -fPIC
-xdg-shell.a: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client)
+xdg-shell.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
 wlr-layer-shell.a: private override LDFLAGS += -fPIC
-wlr-layer-shell.a: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client)
+wlr-layer-shell.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
 xdg-output.a: private override LDFLAGS += -fPIC
-xdg-output.a: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client)
+xdg-output.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
 xdg-output.a: lib/renderers/wayland/xdg-output-unstable-v1.c lib/renderers/wayland/xdg-output-unstable-v1.h
-bemenu-renderer-wayland.so: private override LDLIBS += $(shell pkg-config --libs wayland-client cairo pango pangocairo xkbcommon)
-bemenu-renderer-wayland.so: private override CPPFLAGS += $(shell pkg-config --cflags-only-I wayland-client cairo pango pangocairo xkbcommon)
+bemenu-renderer-wayland.so: private override LDLIBS += $(shell $(PKG_CONFIG) --libs wayland-client cairo pango pangocairo xkbcommon)
+bemenu-renderer-wayland.so: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client cairo pango pangocairo xkbcommon)
 bemenu-renderer-wayland.so: lib/renderers/cairo_renderer.h lib/renderers/wayland/wayland.c lib/renderers/wayland/wayland.h lib/renderers/wayland/registry.c lib/renderers/wayland/window.c xdg-shell.a wlr-layer-shell.a xdg-output.a util.a
 
 common.a: client/common/common.c client/common/common.h
