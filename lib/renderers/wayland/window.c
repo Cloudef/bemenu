@@ -262,7 +262,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, const str
         destroy_buffer(buffer);
     }
 
-    wl_surface_damage(window->surface, 0, 0, buffer->width, buffer->height);
+    wl_surface_damage_buffer(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
     wl_surface_commit(window->surface);
     buffer->busy = true;
