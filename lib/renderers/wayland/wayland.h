@@ -8,7 +8,6 @@
 #include <linux/input-event-codes.h>
 
 #include "wlr-layer-shell-unstable-v1.h"
-#include "xdg-output-unstable-v1.h"
 #include "renderers/cairo_renderer.h"
 
 struct bm_menu;
@@ -137,7 +136,6 @@ struct window {
 
 struct output {
     struct wl_output *output;
-    struct zxdg_output_v1 *xdg_output;
     struct wl_list link;
     int height;
     int scale;

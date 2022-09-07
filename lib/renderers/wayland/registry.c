@@ -517,46 +517,6 @@ static const struct wl_seat_listener seat_listener = {
 };
 
 static void
-xdg_output_handle_logical_position(void *data, struct zxdg_output_v1 *xdg_output, int32_t x, int32_t y)
-{
-    (void)data, (void)xdg_output, (void)x, (void)y;
-}
-
-static void
-xdg_output_handle_logical_size(void *data, struct zxdg_output_v1 *xdg_output, int32_t width, int32_t height)
-{
-    (void)data, (void)xdg_output, (void)width, (void)height;
-}
-
-static void
-xdg_output_handle_done(void *data, struct zxdg_output_v1 *xdg_output)
-{
-    (void)data, (void)xdg_output;
-}
-
-static void
-xdg_output_handle_name(void *data, struct zxdg_output_v1 *xdg_output, const char *name)
-{
-    (void)xdg_output;
-    struct output *output = data;
-    output->name = bm_strdup(name);
-}
-
-static void
-xdg_output_handle_description(void *data, struct zxdg_output_v1 *xdg_output, const char *description)
-{
-    (void)data, (void)xdg_output, (void)description;
-}
-
-static const struct zxdg_output_v1_listener xdg_output_listener = {
-    .logical_position = xdg_output_handle_logical_position,
-    .logical_size = xdg_output_handle_logical_size,
-    .done = xdg_output_handle_done,
-    .name = xdg_output_handle_name,
-    .description = xdg_output_handle_description,
-};
-
-static void
 display_handle_geometry(void *data, struct wl_output *wl_output, int x, int y, int physical_width, int physical_height, int subpixel, const char *make, const char *model, int transform)
 {
     (void)data, (void)wl_output, (void)x, (void)y, (void)physical_width, (void)physical_height, (void)subpixel, (void)make, (void)model, (void)transform;
@@ -589,11 +549,27 @@ display_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int
     }
 }
 
+static void
+display_handle_name(void *data, struct wl_output *wl_output, const char *name)
+{
+    (void)wl_output;
+    struct output *output = data;
+    output->name = bm_strdup(name);
+}
+
+static void
+display_handle_description(void *data, struct wl_output *wl_output, const char *description)
+{
+    (void)data, (void)wl_output, (void)description;
+}
+
 static const struct wl_output_listener output_listener = {
     .geometry = display_handle_geometry,
     .mode = display_handle_mode,
     .done = display_handle_done,
-    .scale = display_handle_scale
+    .scale = display_handle_scale,
+    .name = display_handle_name,
+    .description = display_handle_description,
 };
 
 static void
@@ -613,14 +589,12 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         wayland->shm = wl_registry_bind(registry, id, &wl_shm_interface, 1);
         wl_shm_add_listener(wayland->shm, &shm_listener, data);
     } else if (strcmp(interface, "wl_output") == 0) {
-        struct wl_output *wl_output = wl_registry_bind(registry, id, &wl_output_interface, 2);
+        struct wl_output *wl_output = wl_registry_bind(registry, id, &wl_output_interface, 4);
         struct output *output = calloc(1, sizeof(struct output));
         output->output = wl_output;
         output->scale = 1;
         wl_list_insert(&wayland->outputs, &output->link);
         wl_output_add_listener(wl_output, &output_listener, output);
-    } else if (!strcmp(interface, zxdg_output_manager_v1_interface.name)) {
-        wayland->xdg_output_manager = wl_registry_bind(registry, id, &zxdg_output_manager_v1_interface, 2);
     }
 }
 
@@ -681,14 +655,6 @@ bm_wl_registry_register(struct wayland *wayland)
     wl_display_roundtrip(wayland->display); // trip 1, registry globals
     if (!wayland->compositor || !wayland->seat || !wayland->shm || !wayland->layer_shell)
         return false;
-
-    struct output *output;
-    wl_list_for_each(output, &wayland->outputs, link) {
-        output->xdg_output = zxdg_output_manager_v1_get_xdg_output(
-            wayland->xdg_output_manager, output->output);
-        zxdg_output_v1_add_listener(
-            output->xdg_output, &xdg_output_listener, output);
-    }
 
     wl_display_roundtrip(wayland->display); // trip 2, global listeners
     if (!wayland->input.keyboard || !(wayland->formats & (1 << WL_SHM_FORMAT_ARGB8888)))
