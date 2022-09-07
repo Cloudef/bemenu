@@ -603,7 +603,7 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
     struct wayland *wayland = data;
 
     if (strcmp(interface, "wl_compositor") == 0) {
-        wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 3);
+        wayland->compositor = wl_registry_bind(registry, id, &wl_compositor_interface, 4);
     } else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0) {
         wayland->layer_shell = wl_registry_bind(registry, id, &zwlr_layer_shell_v1_interface, 2);
     } else if (strcmp(interface, "wl_seat") == 0) {
