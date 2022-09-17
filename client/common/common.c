@@ -309,9 +309,6 @@ do_getopt(struct client *client, int *argc, char **argv[])
      * Either break the interface and make them --sf, --sb (like they are now),
      * or parse them before running getopt.. */
 
-    /* Set default monitor index to -1 (maybe be overwritten with -m below). */
-    client->monitor = -1;
-
     for (optind = 0;;) {
         int32_t opt;
 
