@@ -541,14 +541,14 @@ enum bm_run_result
 run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
     if (client->ifne) {
-	uint32_t total_item_count;
-	struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
-	if (total_item_count == 0)
-	    return BM_RUN_RESULT_CANCEL;
-	if (total_item_count == 1) {
-	    item_cb(client, *items);
-	    return BM_RUN_RESULT_SELECTED;
-	}
+        uint32_t total_item_count;
+        struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
+        if (total_item_count == 0)
+            return BM_RUN_RESULT_CANCEL;
+        if (total_item_count == 1) {
+            item_cb(client, *items);
+            return BM_RUN_RESULT_SELECTED;
+        }
     }
 
     bm_menu_set_highlighted_index(menu, client->selected);
