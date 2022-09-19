@@ -179,7 +179,8 @@ usage(FILE *out, const char *name)
           " -x, --password        hide input.\n"
           " -s, --no-spacing      disable the title spacing on entries.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
-          " --ifne                only display menu if there are multiple items.\n"
+          " --accept-single       immediately return if there is only one item.\n"
+          " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
           " --no-exec             do not execute command. (bemenu-run)\n\n"
 
@@ -265,6 +266,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prefix",       required_argument, 0, 'P' },
         { "password",     no_argument,       0, 'x' },
         { "scrollbar",    required_argument, 0, 0x100 },
+        { "accept-single",no_argument,       0, 0x11a },
         { "ifne",         no_argument,       0, 0x117 },
         { "fork",         no_argument,       0, 0x118 },
         { "no-exec",      no_argument,       0, 0x119 },
@@ -349,6 +351,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x100:
                 client->scrollbar = (!strcmp(optarg, "none") ? BM_SCROLLBAR_NONE : (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE)));
+                break;
+            case 0x11a:
+                client->accept_single = true;
                 break;
             case 0x117:
                 client->ifne = true;
@@ -540,15 +545,19 @@ menu_with_options(struct client *client)
 enum bm_run_result
 run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
-    if (client->ifne) {
-        uint32_t total_item_count;
-        struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
-        if (total_item_count == 0)
-            return BM_RUN_RESULT_CANCEL;
-        if (total_item_count == 1) {
-            item_cb(client, *items);
-            return BM_RUN_RESULT_SELECTED;
-        }
+    {
+    uint32_t total_item_count;
+    struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
+
+    if (client->ifne && total_item_count == 0) {
+        return BM_RUN_RESULT_CANCEL;
+    }
+
+    if (client->accept_single && total_item_count == 1) {
+        item_cb(client, *items);
+        return BM_RUN_RESULT_SELECTED;
+    }
+
     }
 
     bm_menu_set_highlighted_index(menu, client->selected);
