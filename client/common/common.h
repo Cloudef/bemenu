@@ -26,6 +26,7 @@ struct client {
     bool center;
     bool grab;
     bool wrap;
+    bool accept_single;
     bool ifne;
     bool no_overlap;
     bool no_spacing;
