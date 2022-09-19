@@ -179,7 +179,7 @@ usage(FILE *out, const char *name)
           " -x, --password        hide input.\n"
           " -s, --no-spacing      disable the title spacing on entries.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
-          " --ifne                only display menu if there are items.\n"
+          " --ifne                only display menu if there are multiple items.\n"
           " --fork                always fork. (bemenu-run)\n"
           " --no-exec             do not execute command. (bemenu-run)\n\n"
 
@@ -540,12 +540,20 @@ menu_with_options(struct client *client)
 enum bm_run_result
 run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
+    if (client->ifne) {
+	uint32_t total_item_count;
+	struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
+	if (total_item_count == 0)
+	    return BM_RUN_RESULT_CANCEL;
+	if (total_item_count == 1) {
+	    item_cb(client, *items);
+	    return BM_RUN_RESULT_SELECTED;
+	}
+    }
+
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
     bm_menu_set_filter(menu, client->initial_filter);
-
-    if (client->ifne && !bm_menu_get_items(menu, NULL))
-        return BM_RUN_RESULT_CANCEL;
 
     uint32_t unicode;
     enum bm_key key;
