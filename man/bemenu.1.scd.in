@@ -148,6 +148,10 @@ control the red, green, blue and alpha-transparency channels.
 
 *--hf* <_color_>	Highlighted foreground.
 
+*--fbb* <_color_>	Feedback background.
+
+*--fbf* <_color_>	Feedback foreground.
+
 *--sb* <_color_>	Selected background.
 
 *--sf* <_color_>	Selected foreground.
