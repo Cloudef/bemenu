@@ -48,6 +48,8 @@ LD_LIBRARY_PATH=. BEMENU_RENDERERS=. ./bemenu-run
 
 ## OSX
 
+### Homebrew
+
 ```sh
 # Make sure you have GNU Make and pkg-config installed
 brew install make pkg-config
@@ -58,6 +60,15 @@ PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" sh build-osx.sh curses
 
 # Other than that, follow the normal build steps, but use `build-osx.sh` instead of make
 ```
+
+### Nix
+
+There is darwin.nix provided in this repo, you can install bemenu with it by running
+```sh
+nix-env -i -f darwin.nix
+```
+
+This installs only the curses backend.
 
 ## Dependencies
 
