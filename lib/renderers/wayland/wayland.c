@@ -248,7 +248,7 @@ poll_pointer(const struct bm_menu *menu)
     struct pointer_event *event = &input->pointer_event;
     assert(wayland && event);
 
-    struct bm_pointer bm_pointer;
+    struct bm_pointer bm_pointer = {0};
 
     bm_pointer.event_mask = event->event_mask;
     bm_pointer.pos_x = wl_fixed_to_int(event->surface_x);
@@ -270,10 +270,10 @@ poll_pointer(const struct bm_menu *menu)
     }
 
     if (event->state & WL_POINTER_BUTTON_STATE_PRESSED) {
-        bm_pointer.state |= POINTER_STATE_PRESSED;
+        bm_pointer.state = POINTER_STATE_PRESSED;
     }
     if (event->state & WL_POINTER_BUTTON_STATE_RELEASED) {
-        bm_pointer.state |= POINTER_STATE_RELEASED;
+        bm_pointer.state = POINTER_STATE_RELEASED;
     }
 
     memset(event, 0, sizeof(*event));
