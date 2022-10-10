@@ -30,6 +30,9 @@ struct client {
     bool ifne;
     bool no_overlap;
     bool no_spacing;
+    bool no_cursor;
+    bool no_touch;
+    bool no_keyboard;
     bool force_fork, fork;
     bool no_exec;
     bool password;

@@ -178,6 +178,9 @@ usage(FILE *out, const char *name)
           " -I, --index           select item at index automatically.\n"
           " -x, --password        hide input.\n"
           " -s, --no-spacing      disable the title spacing on entries.\n"
+          " -C, --no-cursor       ignore cursor events.\n"
+          " -T, --no-touch        ignore touch events.\n"
+          " -K, --no-keyboard     ignore keyboard events.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
@@ -274,6 +277,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "grab",         no_argument,       0, 'f' },
         { "no-overlap",   no_argument,       0, 'n' },
         { "no-spacing",   no_argument,       0, 's' },
+        { "no-cursor",    no_argument,       0, 'C' },
+        { "no-touch",     no_argument,       0, 'T' },
+        { "no-keyboard",  no_argument,       0, 'K' },
         { "monitor",      required_argument, 0, 'm' },
         { "line-height",  required_argument, 0, 'H' },
         { "margin",       required_argument, 0, 'M' },
@@ -314,7 +320,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:B:ns", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:B:nsCTK", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -383,7 +389,15 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 's':
                 client->no_spacing = true;
                 break;
-
+            case 'C':
+                client->no_cursor = true;
+                break;
+            case 'T':
+                client->no_touch = true;
+                break;
+            case 'K':
+                client->no_keyboard = true;
+                break;
             case 'H':
                 client->line_height = strtol(optarg, NULL, 10);
                 break;
@@ -500,7 +514,7 @@ menu_with_options(struct client *client)
     if (!(menu = bm_menu_new(NULL)))
         return NULL;
 
-    client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL)); 
+    client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL));
 
     bm_menu_set_font(menu, client->font);
     bm_menu_set_line_height(menu, client->line_height);
@@ -565,7 +579,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     bm_menu_set_filter(menu, client->initial_filter);
 
     uint32_t unicode;
-    enum bm_key key;
+    enum bm_key key = BM_KEY_NONE;
     struct bm_pointer pointer;
     struct bm_touch touch;
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
@@ -574,9 +588,15 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
             status = BM_RUN_RESULT_CANCEL;
             break;
         }
-        key = bm_menu_poll_key(menu, &unicode);
-        pointer = bm_menu_poll_pointer(menu);
-        touch = bm_menu_poll_touch(menu);
+        if (!client->no_keyboard) {
+            key = bm_menu_poll_key(menu, &unicode);
+        }
+        if (!client->no_cursor) {
+            pointer = bm_menu_poll_pointer(menu);
+        }
+        if (!client->no_touch) {
+            touch = bm_menu_poll_touch(menu);
+        }
     } while ((status = bm_menu_run_with_events(menu, key, pointer, touch, unicode)) == BM_RUN_RESULT_RUNNING);
 
     switch (status) {
