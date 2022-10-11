@@ -1,8 +1,15 @@
 { pkgs ? import <nixpkgs> {} }:
 
-pkgs.stdenv.mkDerivation rec {
-  name = "bemenu";
-  src = ./.;
+let
+  src = pkgs.copyPathToStore ./.;
+  semver = builtins.readFile "${src}/VERSION";
+  revision = builtins.readFile (pkgs.runCommand "get-rev" {
+    nativeBuildInputs = with pkgs; [ git ];
+  } "GIT_DIR=${src}/.git git rev-parse --short HEAD | tr -d '\n' > $out");
+in pkgs.stdenv.mkDerivation rec {
+  inherit src;
+  pname = "bemenu";
+  version = "${semver}${revision}";
   nativeBuildInputs = with pkgs; [ pkg-config scdoc ];
   buildInputs = with pkgs; [ ncurses ];
 
