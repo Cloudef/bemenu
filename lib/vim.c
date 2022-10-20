@@ -164,6 +164,7 @@ enum bm_vim_code bm_vim_key_press(struct bm_menu *menu, enum bm_key key, uint32_
     if(key == BM_KEY_ESCAPE && unicode == 99) return BM_VIM_EXIT;
 
     if(menu->vim_mode == 'n'){
+        if(key == BM_KEY_ESCAPE) return BM_VIM_CONSUME;
         if(unicode == 0 || unicode > 128) return BM_VIM_IGNORE;
 
         if(menu->vim_last_key == 0) return vim_on_first_key(menu, unicode, item_count, items_displayed);
