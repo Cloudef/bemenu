@@ -36,7 +36,7 @@ struct client {
     bool force_fork, fork;
     bool no_exec;
     bool password;
-    char *key_binding;
+    enum bm_key_binding key_binding;
     char *monitor_name;
 };
 

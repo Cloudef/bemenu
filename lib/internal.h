@@ -414,9 +414,8 @@ struct bm_menu {
 
     /**
      * Key binding that should be used.
-     * If empty or invalid the default bindings will be used. (available: vim)
      */
-    char *key_binding;
+    enum bm_key_binding key_binding;
 
     /**
      * Vim binding specific variables.

@@ -353,6 +353,16 @@ enum bm_color {
     BM_COLOR_LAST
 };
 
+
+/**
+ * Key bindings
+ */
+enum bm_key_binding {
+    BM_KEY_BINDING_DEFAULT,
+    BM_KEY_BINDING_VIM,
+};
+
+
 /**
  * @name Menu Memory
  * @{ */
@@ -790,12 +800,11 @@ BM_PUBLIC bool bm_menu_get_password(struct bm_menu *menu);
 
 /**
  * Specify the key bindings that should be used. 
- * If an invalid key_binding is provided it will fall back to the default one.
  *
  * @param menu bm_menu instance to set the key binding on.
- * @param key_binding binding name that should be used. (available: vim)
+ * @param key_binding binding that should be used.
  */
-BM_PUBLIC void bm_menu_set_key_binding(struct bm_menu *menu, char *key_binding);
+BM_PUBLIC void bm_menu_set_key_binding(struct bm_menu *menu, enum bm_key_binding);
 
 
 /**  @} Properties */
