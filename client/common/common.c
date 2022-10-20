@@ -482,7 +482,11 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->colors[BM_COLOR_BORDER] = optarg;
                 break;
             case 0x128:
-                client->key_binding = optarg;
+                if(strcmp(optarg, "vim") == 0){
+                    client->key_binding = BM_KEY_BINDING_VIM;
+                } else {
+                    client->key_binding = BM_KEY_BINDING_DEFAULT;
+                }
                 break;
 
             case 0x116:

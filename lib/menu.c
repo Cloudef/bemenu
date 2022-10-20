@@ -55,7 +55,7 @@ bm_menu_new(const char *renderer)
 
     menu->dirty = true;
 
-    menu->key_binding = NULL;
+    menu->key_binding = BM_KEY_BINDING_DEFAULT;
     menu->vim_mode = 'i';
     menu->vim_last_key = 0;
 
@@ -690,7 +690,7 @@ bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_
 }
 
 void
-bm_menu_set_key_binding(struct bm_menu *menu, char *key_binding){
+bm_menu_set_key_binding(struct bm_menu *menu, enum bm_key_binding key_binding){
     menu->key_binding = key_binding;
 }
 
@@ -950,19 +950,17 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
     if (key != BM_KEY_NONE)
         menu->dirty = true;
 
-    if(menu->key_binding != NULL){
-        if(strcmp(menu->key_binding, "vim") == 0){
-            enum bm_vim_code code = bm_vim_key_press(menu, key, unicode, count, displayed);
+    if(menu->key_binding == BM_KEY_BINDING_VIM){
+        enum bm_vim_code code = bm_vim_key_press(menu, key, unicode, count, displayed);
 
-            switch(code){
-                case BM_VIM_CONSUME:
-                    return BM_RUN_RESULT_RUNNING;
-                case BM_VIM_EXIT:
-                    list_free_list(&menu->selection);
-                    return BM_RUN_RESULT_CANCEL;
-                case BM_VIM_IGNORE:
-                    break;
-            }
+        switch(code){
+            case BM_VIM_CONSUME:
+                return BM_RUN_RESULT_RUNNING;
+            case BM_VIM_EXIT:
+                list_free_list(&menu->selection);
+                return BM_RUN_RESULT_CANCEL;
+            case BM_VIM_IGNORE:
+                break;
         }
     }
 
