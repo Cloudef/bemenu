@@ -112,7 +112,7 @@ Typically [wlroots](https://github.com/swaywm/wlroots)-based compositors.
 
 ## Keybindings
 
-
+### Default Bindings
 |         Key         |                             Binding                            |
 |---------------------|----------------------------------------------------------------|
 | Left Arrow          |  Move cursor left                                              |
@@ -158,6 +158,51 @@ Typically [wlroots](https://github.com/swaywm/wlroots)-based compositors.
 | Ctrl + w            |  Kill all text in filter                                       |
 | Ctrl + m            |  Execute selected item                                         |
 | Ctrl + y            |  Paste clipboard                                               |
+
+### Vim Bindings
+Vim bindings can be activated via the `--binding vim` option. All bindings are in vim
+`normal` mode. When bemenu is started with vim bindings it will be in `insert` mode. By 
+pressing `escape`, `normal` mode can be activated.
+
+**Note**: The default bindings can still be used for actions that do not have a separate
+vim binding such as launching a program or pasting.
+
+|  Key  |                    Binding                    |
+|-------|-----------------------------------------------|
+|  j/n  | Goto next item                                |
+|  k/p  | Goto previous item                            |
+|  h    | Move cursor left                              |
+|  l    | Move cursor right                             |
+|  q    | Quit bemenu                                   |
+|  v    | Toggle item selection                         |
+|  i    | Enter insert mode                             |
+|  I    | Move to line start and enter insert mode      |
+|  a    | Move to the right and enter insert mode       |
+|  A    | Move to line end and enter insert mode        |
+|  w    | Move a word                                   |
+|  b    | Move a word backwards                         |
+|  e    | Move to end of word                           |
+|  x    | Delete a character                            |
+|  X    | Delete a character before the cursor          |
+|  0    | Move to line start                            |
+|  $    | Move to line end                              |
+|  gg   | Goto first item                               |
+|  G    | Goto last item                                |
+|  H    | Goto first item in view                       |
+|  M    | Goto middle item in view                      |
+|  L    | Goto last item in view                        |
+|  F    | Scroll one page of items down                 |
+|  B    | Scroll one page of items up                   |
+|  dd   | Delete the whole line                         |
+|  dw   | Delete a word                                 |
+|  db   | Delete a word backwards                       |
+|  d0   | Delete to start of line                       |
+|  d$   | Delete to end of line                         |
+|  cc   | Change the whole line                         |
+|  cw   | Change a word                                 |
+|  cb   | Change a word backwards                       |
+|  c0   | Change to start of line                       |
+|  c$   | Change to end of line                         |
 
 ## Projects using bemenu
 
