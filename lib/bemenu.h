@@ -788,6 +788,13 @@ BM_PUBLIC void bm_menu_set_spacing(struct bm_menu *menu, bool spacing);
 BM_PUBLIC bool bm_menu_get_password(struct bm_menu *menu);
 
 
+/**
+ * Should the menu use vim bindings?
+ * @param menu bm_menu instance to enable/disable vim bindings
+ */
+BM_PUBLIC void bm_menu_set_use_vim_bindings(struct bm_menu *menu, bool use_vim_bindings);
+
+
 /**  @} Properties */
 
 /**

@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "vim.h"
+
 /**
  * Default font.
  */
@@ -52,6 +54,10 @@ bm_menu_new(const char *renderer)
         return NULL;
 
     menu->dirty = true;
+
+    menu->use_vim_bindings = false;
+    menu->vim_mode = 'i';
+    menu->vim_last_key = 0;
 
     uint32_t count;
     const struct bm_renderer **renderers = bm_get_renderers(&count);
@@ -683,6 +689,11 @@ bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_
     return list_set_items_no_copy(&menu->selection, new_items, nmemb);
 }
 
+void
+bm_menu_set_use_vim_bindings(struct bm_menu *menu, bool use_vim_bindings){
+    menu->use_vim_bindings = use_vim_bindings;
+}
+
 struct bm_item**
 bm_menu_get_selected_items(const struct bm_menu *menu, uint32_t *out_nmemb)
 {
@@ -938,6 +949,20 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
     if (key != BM_KEY_NONE)
         menu->dirty = true;
+
+    if(menu->use_vim_bindings){
+        enum bm_vim_code code = bm_vim_key_press(menu, key, unicode, count, displayed);
+
+        switch(code){
+            case BM_VIM_CONSUME:
+                return BM_RUN_RESULT_RUNNING;
+            case BM_VIM_EXIT:
+                list_free_list(&menu->selection);
+                return BM_RUN_RESULT_CANCEL;
+            case BM_VIM_IGNORE:
+                break;
+        }
+    }
 
     switch (key) {
         case BM_KEY_LEFT:
