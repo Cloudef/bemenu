@@ -181,7 +181,7 @@ usage(FILE *out, const char *name)
           " -C, --no-cursor       ignore cursor events.\n"
           " -T, --no-touch        ignore touch events.\n"
           " -K, --no-keyboard     ignore keyboard events.\n"
-          " --vim                 use vim bindings.\n"
+          " --binding             use alternative key bindings. Available options: vim\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
@@ -309,7 +309,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "scb",          required_argument, 0, 0x114 },
         { "scf",          required_argument, 0, 0x115 },
         { "bdr",          required_argument, 0, 0x121 },
-        { "vim",          no_argument, 0, 0x128 },
+        { "binding",      required_argument, 0, 0x128 },
 
         { "disco",       no_argument,       0, 0x116 },
         { 0, 0, 0, 0 }
@@ -482,7 +482,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->colors[BM_COLOR_BORDER] = optarg;
                 break;
             case 0x128:
-                client->use_vim_bindings = true;
+                client->key_binding = optarg;
                 break;
 
             case 0x116:
@@ -539,7 +539,7 @@ menu_with_options(struct client *client)
     bm_menu_set_password(menu, client->password);
     bm_menu_set_width(menu, client->hmargin_size, client->width_factor);
     bm_menu_set_border_size(menu, client->border_size);
-    bm_menu_set_use_vim_bindings(menu, client->use_vim_bindings);
+    bm_menu_set_key_binding(menu, client->key_binding);
 
     if (client->center) {
         bm_menu_set_align(menu, BM_ALIGN_CENTER);
