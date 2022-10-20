@@ -8,9 +8,6 @@
 #include "vim.h"
 
 
-#define LOG(x)
-//#define LOG(x) printf(x)
-
 static enum bm_vim_code vim_on_first_key(struct bm_menu *menu, uint32_t unicode, uint32_t item_count, uint32_t items_displayed);
 static enum bm_vim_code vim_on_second_key(struct bm_menu *menu, uint32_t unicode, uint32_t item_count, uint32_t items_displayed);
 
@@ -227,97 +224,74 @@ static enum bm_vim_code vim_on_first_key(struct bm_menu *menu, uint32_t unicode,
 
     switch(unicode){
         case 'q':
-            LOG("quit\n");
             return BM_VIM_EXIT;
         case 'v':
-            LOG("toggle item selection\n");
             toggle_item_selection(menu);
             goto action_executed;
         case 'i':
-            LOG("insert mode\n");
             goto insert_action_executed;
         case 'I':
-            LOG("insert line beginning\n");
             move_line_start(menu);
             goto insert_action_executed;
         case 'a':
-            LOG("append\n");
             filter_length = strlen(menu->filter);
             move_right(menu, filter_length);
             goto insert_action_executed;
         case 'A':
-            LOG("append line end\n");
             move_line_end(menu);
             goto insert_action_executed;
         case 'h':
-            LOG("left\n");
             move_left(menu);
             goto action_executed;
         case 'n':
         case 'j':
-            LOG("down\n");
             menu_next(menu, item_count, menu->wrap);
             goto action_executed;
         case 'p':
         case 'k':
-            LOG("up\n");
             menu_prev(menu, item_count, menu->wrap);
             goto action_executed;
         case 'l':
-            LOG("right\n");
             filter_length = strlen(menu->filter);
             move_right(menu, filter_length);
             goto action_executed;
         case 'w':
-            LOG("move word\n");
             move_word(menu);
             goto action_executed;
         case 'b':
-            LOG("move word back\n");
             move_word_back(menu);
             goto action_executed;
         case 'e':
-            LOG("move word end\n");
             move_word_end(menu);
             goto action_executed;
         case 'x':
-            LOG("delete char\n");
             delete_char(menu);
             goto action_executed;
         case 'X':
-            LOG("delete char back\n");
             delete_char_back(menu);
             goto action_executed;
         case '0':
-            LOG("move line start\n");
             move_line_start(menu);
             goto action_executed;
         case '$':
-            LOG("move line end\n");
             move_line_end(menu);
             goto action_executed;
         case 'G':
-            LOG("menu last\n");
             menu_last(menu, item_count);
             goto action_executed;
         case 'H':
-            LOG("menu view high\n");
             menu_view_high(menu, item_count);
             goto action_executed;
         case 'M':
-            LOG("menu view mid\n");
             menu_view_mid(menu, item_count, items_displayed);
             goto action_executed;
         case 'L':
-            LOG("menu view low\n");
             menu_view_low(menu, item_count, items_displayed);
             goto action_executed;
         case 'F':
-            LOG("menu page down\n");
             menu_page_down(menu, item_count, items_displayed);
             goto action_executed;
         case 'B':
-            LOG("menu page up\n");
             menu_page_up(menu, items_displayed);
             goto action_executed;
         case 'c':
@@ -341,53 +315,42 @@ static enum bm_vim_code vim_on_second_key(struct bm_menu *menu, uint32_t unicode
     if(menu->vim_last_key == 'd'){
         switch(unicode){
             case 'd':
-                LOG("Delete line\n");
                 delete_line(menu);
                 goto action_executed;
             case 'w':
-                LOG("Delete word\n");
                 delete_word(menu);
                 goto action_executed;
             case 'b':
-                LOG("Delete word back\n");
                 delete_word_back(menu);
                 goto action_executed;
             case '$':
-                LOG("Delete to line end\n");
                 delete_to_line_end(menu);
                 goto action_executed;
             case '0':
-                LOG("Delete to line start\n");
                 delete_to_line_start(menu);
                 goto action_executed;
         }
     } else if(menu->vim_last_key == 'c'){
         switch(unicode){
             case 'c':
-                LOG("Change line\n");
                 delete_line(menu);
                 goto insert_action_executed;
             case 'w':
-                LOG("Change word\n");
                 delete_word(menu);
                 goto insert_action_executed;
             case 'b':
-                LOG("Change word back\n");
                 delete_word_back(menu);
                 goto insert_action_executed;
             case '$':
-                LOG("Change to line end\n");
                 delete_to_line_end(menu);
                 goto insert_action_executed;
             case '0':
-                LOG("Change to line start\n");
                 delete_to_line_start(menu);
                 goto insert_action_executed;
         }
     } else if(menu->vim_last_key == 'g'){
         switch(unicode){
             case 'g':
-                LOG("menu first\n");
                 menu_first(menu, item_count);
                 goto action_executed;
         }
