@@ -111,6 +111,8 @@ static void move_word_back(struct bm_menu *menu){
 }
 
 static void move_word_end(struct bm_menu *menu){
+    if(!menu->filter) return;
+
     size_t filter_length = strlen(menu->filter);
     size_t old_cursor = menu->cursor;
     size_t old_curses_cursor = menu->curses_cursor;
@@ -220,7 +222,7 @@ enum bm_vim_code bm_vim_key_press(struct bm_menu *menu, enum bm_key key, uint32_
 }
 
 static enum bm_vim_code vim_on_first_key(struct bm_menu *menu, uint32_t unicode, uint32_t item_count, uint32_t items_displayed){
-    size_t filter_length;
+    size_t filter_length = 0;
 
     switch(unicode){
         case 'q':
@@ -234,7 +236,7 @@ static enum bm_vim_code vim_on_first_key(struct bm_menu *menu, uint32_t unicode,
             move_line_start(menu);
             goto insert_action_executed;
         case 'a':
-            filter_length = strlen(menu->filter);
+            if(menu->filter) filter_length = strlen(menu->filter);
             move_right(menu, filter_length);
             goto insert_action_executed;
         case 'A':
@@ -252,7 +254,7 @@ static enum bm_vim_code vim_on_first_key(struct bm_menu *menu, uint32_t unicode,
             menu_prev(menu, item_count, menu->wrap);
             goto action_executed;
         case 'l':
-            filter_length = strlen(menu->filter);
+            if(menu->filter) filter_length = strlen(menu->filter);
             move_right(menu, filter_length);
             goto action_executed;
         case 'w':
