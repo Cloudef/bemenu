@@ -789,10 +789,13 @@ BM_PUBLIC bool bm_menu_get_password(struct bm_menu *menu);
 
 
 /**
- * Should the menu use vim bindings?
- * @param menu bm_menu instance to enable/disable vim bindings
+ * Specify the key bindings that should be used. 
+ * If an invalid key_binding is provided it will fall back to the default one.
+ *
+ * @param menu bm_menu instance to set the key binding on.
+ * @param key_binding binding name that should be used. (available: vim)
  */
-BM_PUBLIC void bm_menu_set_use_vim_bindings(struct bm_menu *menu, bool use_vim_bindings);
+BM_PUBLIC void bm_menu_set_key_binding(struct bm_menu *menu, char *key_binding);
 
 
 /**  @} Properties */

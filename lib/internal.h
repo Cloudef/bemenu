@@ -412,7 +412,15 @@ struct bm_menu {
      */
     bool dirty;
 
-    bool use_vim_bindings;
+    /**
+     * Key binding that should be used.
+     * If empty or invalid the default bindings will be used. (available: vim)
+     */
+    char *key_binding;
+
+    /**
+     * Vim binding specific variables.
+     */
     char vim_mode;
     uint32_t vim_last_key;
 };

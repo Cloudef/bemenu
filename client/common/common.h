@@ -36,7 +36,7 @@ struct client {
     bool force_fork, fork;
     bool no_exec;
     bool password;
-    bool use_vim_bindings;
+    char *key_binding;
     char *monitor_name;
 };
 
