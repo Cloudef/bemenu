@@ -411,6 +411,10 @@ struct bm_menu {
      * Is the menu needing a redraw ?
      */
     bool dirty;
+
+    bool use_vim_bindings;
+    char vim_mode;
+    uint32_t vim_last_key;
 };
 
 /* library.c */
