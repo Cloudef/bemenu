@@ -234,9 +234,13 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 *C-y*
 	Paste the clipboard.
 
-*M-[0-9]*
-	Print selected items and exit with a custom error code. See _EXIT
-	STATUS_.
+*M-[1-9]*
+	Print selected items and exit with a custom error code 10 (*M-1*)
+        through 18 (*M-9*), see _EXIT STATUS_.
+
+*M-0*
+	Print selected items and exit with the custom error code 19, see _EXIT
+        STATUS_.
 
 # ENVIRONMENT
 
@@ -256,8 +260,15 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 
 # EXIT STATUS
 
-*bemenu* exits 0 on success, 1 if the user exited without selecting or an error,
-and if exiting with a custom error code, 10 plus the number specified.
+*0*
+	bemenu ran successfully.
+
+*1*
+	The user exited without selecting, or bemenu encountered an error.
+
+*10-19*
+	The user specified a custom exit code with *M-[0-9]*, see _KEYBOARD
+	COMMANDS_.
 
 # SEE ALSO
 
