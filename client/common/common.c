@@ -322,7 +322,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfm:H:M:W:B:nsCTK", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfF:m:H:M:W:B:nsCTK", opts, NULL)) < 0)
             break;
 
         switch (opt) {
