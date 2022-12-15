@@ -54,7 +54,8 @@ schedule_windows_render_if_dirty(struct bm_menu *menu, struct wayland *wayland) 
             // be(re)created. We need to do the render ASAP (not schedule it) because otherwise,
             // since we lack a window, we may not receive further events and will get deadlocked
             render_windows_if_pending(menu, wayland);
-        } else if (menu->dirty) {
+        }
+        if (menu->dirty) {
             bm_wl_window_schedule_render(window);
         }
     }
