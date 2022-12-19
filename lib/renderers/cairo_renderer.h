@@ -258,6 +258,18 @@ bm_cairo_entry_message(char *entry_text, bool highlighted, uint32_t event_feedba
 }
 
 static inline void
+bm_cairo_draw_rounded_path(cairo_t *cr, double x, double y, double width, double height, double radius)
+{
+    double degrees = M_PI / 180;
+    cairo_new_sub_path (cr);
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+    cairo_close_path (cr);
+}
+
+static inline void
 bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *out_result)
 {
     assert(cairo && menu && out_result);
@@ -281,6 +293,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     width -= border_size;
     uint32_t height = fmin(fmax(menu->line_height, ascii_height), max_height);
     uint32_t vpadding = (height - ascii_height)/2;
+
+    uint32_t border_radius = menu->border_radius;
 
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
@@ -469,7 +483,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     // Draw borders
     bm_cairo_color_from_menu_color(menu, BM_COLOR_BORDER, &paint.fg);
     cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
-    cairo_rectangle(cairo->cr, 0, 0, width + border_size, (height * (page_length + 1)) + (2 * border_size));
+    bm_cairo_draw_rounded_path(cairo->cr, 0, 0, width + border_size, (height * (page_length + 1)) + (2 * border_size), border_radius);
     cairo_set_line_width(cairo->cr, 2 * menu->border_size);
     cairo_stroke(cairo->cr);
 
