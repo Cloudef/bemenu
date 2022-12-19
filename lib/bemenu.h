@@ -645,6 +645,25 @@ BM_PUBLIC void bm_menu_set_border_size(struct bm_menu* menu, uint32_t border_siz
 BM_PUBLIC uint32_t bm_menu_get_border_size(struct bm_menu* menu);
 
 /**
+ * Set the radius of the border for the bar
+ *
+ * @param menu bm_menu to get border radius from.
+ * @return border radius of the menu.
+ */
+
+BM_PUBLIC void bm_menu_set_border_radius(struct bm_menu* menu, uint32_t border_radius);
+
+/**
+ * Get the size of the border for the bar
+ *
+ * @param menu bm_menu to get border radius from.
+ * @return border radius of the menu.
+ */
+
+BM_PUBLIC uint32_t bm_menu_get_border_radius(struct bm_menu* menu);
+
+
+/**
  * Set a hexadecimal color for element.
  *
  * @param menu bm_menu instance where to set color.

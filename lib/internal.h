@@ -383,6 +383,11 @@ struct bm_menu {
     uint32_t border_size;
 
     /**
+     * Border radius
+     */
+    uint32_t border_radius;
+
+    /**
      * Is menu grabbed?
      */
     bool grabbed;

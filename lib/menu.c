@@ -360,6 +360,20 @@ bm_menu_get_border_size(struct bm_menu* menu)
     return menu->border_size;
 }
 
+void
+bm_menu_set_border_radius(struct bm_menu* menu, uint32_t border_radius)
+{
+    assert(menu);
+    menu->border_radius = border_radius;
+}
+
+uint32_t
+bm_menu_get_border_radius(struct bm_menu* menu)
+{
+    assert(menu);
+    return menu->border_radius;
+}
+
 uint32_t
 bm_menu_get_height(struct bm_menu *menu)
 {

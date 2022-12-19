@@ -208,6 +208,7 @@ usage(FILE *out, const char *name)
           " -M, --margin          defines the empty space on either side of the menu. (wx)\n"
           " -W, --width-factor    defines the relative width factor of the menu (from 0 to 1). (wx)\n"
           " -B, --border          defines the width of the border in pixels around the menu. (wx)\n"
+          " -R  --border-radius   defines the radius of the border around the menu (0 = no curved borders).\n"
           " --ch                  defines the height of the cursor (0 = scales with line height). (wx)\n"
           " --cw                  defines the width of the cursor. (wx)\n"
           " --hp                  defines the horizontal padding for the entries in single line mode. (wx)\n"
@@ -286,6 +287,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "margin",       required_argument, 0, 'M' },
         { "width-factor", required_argument, 0, 'W' },
         { "border",       required_argument, 0, 'B' },
+        { "border-radius",required_argument, 0, 'R' },
         { "ch",           required_argument, 0, 0x120 },
         { "cw",           required_argument, 0, 0x125 },
         { "hp",           required_argument, 0, 0x122 },
@@ -322,7 +324,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfF:m:H:M:W:B:nsCTK", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfF:m:H:M:W:B:R:nsCTK", opts, NULL)) < 0)
             break;
 
         switch (opt) {
@@ -411,6 +413,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'B':
                 client->border_size = strtol(optarg, NULL, 10);
+                break;
+            case 'R':
+                client->border_radius = strtol(optarg, NULL, 10);
                 break;
             case 0x120:
                 client->cursor_height = strtol(optarg, NULL, 10);
@@ -543,6 +548,7 @@ menu_with_options(struct client *client)
     bm_menu_set_password(menu, client->password);
     bm_menu_set_width(menu, client->hmargin_size, client->width_factor);
     bm_menu_set_border_size(menu, client->border_size);
+    bm_menu_set_border_radius(menu, client->border_radius);
     bm_menu_set_key_binding(menu, client->key_binding);
 
     if (client->center) {
