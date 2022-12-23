@@ -663,22 +663,39 @@ BM_PUBLIC void bm_menu_set_border_radius(struct bm_menu* menu, uint32_t border_r
 BM_PUBLIC uint32_t bm_menu_get_border_radius(struct bm_menu* menu);
 
 /**
- * Set the total amount of items in the menu(displayed on the counter).
+ * Set the total amount of items(displayed on the counter).
  *
  * @param menu bm_menu to get the total amount of items from.
- * @return total amount of items in the menu.
+ * @return total amount of items.
  */
 
 BM_PUBLIC uint32_t bm_menu_set_total_item_count(struct bm_menu* menu, uint32_t total_item_count);
 
 /**
- * Get the total amount of items in the menu(displayed on the counter).
+ * Get the total amount of items(displayed on the counter).
  *
  * @param menu bm_menu to get the total amount of items from.
- * @return total amount of items in the menu.
+ * @return total amount of items.
  */
 
 BM_PUBLIC uint32_t bm_menu_get_total_item_count(struct bm_menu* menu);
+
+/**
+ * Set the filtered item count(displayed on the counter).
+ *
+ * @param menu bmenu to get the filtered item count from.
+ * @return filtered item count
+ */
+BM_PUBLIC uint32_t bm_menu_set_filtered_item_count(struct bm_menu* menu, uint32_t filtered_item_count);
+
+/**
+ * Get the filtered item count(displayed on the counter).
+ *
+ * @param menu bmenu to get the filtered item count from.
+ * @return filtered item count
+ */
+
+BM_PUBLIC uint32_t bm_menu_get_filtered_item_count(struct bm_menu* menu);
 
 /**
  * Set a hexadecimal color for element.

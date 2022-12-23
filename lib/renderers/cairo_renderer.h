@@ -297,6 +297,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     uint32_t border_radius = menu->border_radius;
 
     uint32_t total_item_count = menu->total_item_count;
+    uint32_t filtered_item_count = menu->filtered_item_count;
 
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
@@ -479,9 +480,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }
-        unsigned int current_item_count = 6;
         char counter[1024];
-        sprintf(counter, "[%u/%u]", current_item_count, total_item_count);
+        sprintf(counter, "[%u/%u]", filtered_item_count, total_item_count);
         bm_pango_get_text_extents(cairo, &paint, &result, counter);
         paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 10, vpadding + border_size };
         paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };

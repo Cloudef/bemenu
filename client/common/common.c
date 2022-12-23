@@ -550,6 +550,7 @@ menu_with_options(struct client *client)
     bm_menu_set_border_size(menu, client->border_size);
     bm_menu_set_border_radius(menu, client->border_radius);
     bm_menu_set_total_item_count(menu, client->total_item_count);
+    bm_menu_set_filtered_item_count(menu, client->filtered_item_count);
     bm_menu_set_key_binding(menu, client->key_binding);
 
     if (client->center) {
