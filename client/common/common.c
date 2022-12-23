@@ -549,6 +549,7 @@ menu_with_options(struct client *client)
     bm_menu_set_width(menu, client->hmargin_size, client->width_factor);
     bm_menu_set_border_size(menu, client->border_size);
     bm_menu_set_border_radius(menu, client->border_radius);
+    bm_menu_set_total_item_count(menu, client->total_item_count);
     bm_menu_set_key_binding(menu, client->key_binding);
 
     if (client->center) {
@@ -582,6 +583,8 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     {
     uint32_t total_item_count;
     struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
+
+    bm_menu_set_total_item_count(menu, total_item_count);
 
     if (client->ifne && total_item_count == 0) {
         return BM_RUN_RESULT_CANCEL;

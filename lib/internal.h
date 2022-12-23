@@ -388,6 +388,11 @@ struct bm_menu {
     uint32_t border_radius;
 
     /**
+     * Total amount of items in the menu
+     */
+    uint32_t total_item_count;
+
+    /**
      * Is menu grabbed?
      */
     bool grabbed;

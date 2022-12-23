@@ -375,6 +375,20 @@ bm_menu_get_border_radius(struct bm_menu* menu)
 }
 
 uint32_t
+bm_menu_set_total_item_count(struct bm_menu* menu, uint32_t total_item_count)
+{
+    assert(menu);
+    menu->total_item_count = total_item_count;
+}
+
+uint32_t
+bm_menu_get_total_item_count(struct bm_menu* menu)
+{
+    assert(menu);
+    return menu->total_item_count;
+}
+
+uint32_t
 bm_menu_get_height(struct bm_menu *menu)
 {
     assert(menu);

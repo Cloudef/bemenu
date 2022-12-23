@@ -296,6 +296,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
     uint32_t border_radius = menu->border_radius;
 
+    uint32_t total_item_count = menu->total_item_count;
+
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
 
@@ -469,15 +471,21 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             out_result->displayed += (cl < width);
             out_result->height = fmax(out_result->height, result.height);
         }
-
+        bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
+        bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
         if (menu->wrap || menu->index + 1 < count) {
-            bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
-            bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
             bm_pango_get_text_extents(cairo, &paint, &result, ">");
             paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 2, vpadding + border_size };
             paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }
+        unsigned int current_item_count = 6;
+        char counter[1024];
+        sprintf(counter, "[%u/%u]", current_item_count, total_item_count);
+        bm_pango_get_text_extents(cairo, &paint, &result, counter);
+        paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 10, vpadding + border_size };
+        paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
+        bm_cairo_draw_line(cairo, &paint, &result, counter);
     }
 
     // Draw borders

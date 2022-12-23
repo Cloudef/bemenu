@@ -22,6 +22,7 @@ struct client {
     uint32_t hmargin_size;
     uint32_t border_size;
     uint32_t border_radius;
+    uint32_t total_item_count;
     float width_factor;
     bool bottom;
     bool center;
