@@ -375,34 +375,6 @@ bm_menu_get_border_radius(struct bm_menu* menu)
 }
 
 uint32_t
-bm_menu_set_total_item_count(struct bm_menu* menu, uint32_t total_item_count)
-{
-    assert(menu);
-    menu->total_item_count = total_item_count;
-}
-
-uint32_t
-bm_menu_get_total_item_count(struct bm_menu* menu)
-{
-    assert(menu);
-    return menu->total_item_count;
-}
-
-uint32_t
-bm_menu_set_filtered_item_count(struct bm_menu* menu, uint32_t filtered_item_count)
-{
-    assert(menu);
-    menu->filtered_item_count = filtered_item_count;
-}
-
-uint32_t
-bm_menu_get_filtered_item_count(struct bm_menu* menu)
-{
-    assert(menu);
-    return menu->filtered_item_count;
-}
-
-uint32_t
 bm_menu_get_height(struct bm_menu *menu)
 {
     assert(menu);
@@ -794,15 +766,13 @@ bm_menu_filter(struct bm_menu *menu)
 
     char addition = 0;
     size_t len = (menu->filter ? strlen(menu->filter) : 0);
-    uint32_t count;
 
     if (!len || !menu->items.items || menu->items.count <= 0) {
         list_free_list(&menu->filtered);
         free(menu->old_filter);
         menu->old_filter = NULL;
 
-        count = menu->total_item_count;
-        bm_menu_set_filtered_item_count(menu, count);
+        menu->filtered.count = menu->items.count;
         return;
     }
 
@@ -810,19 +780,17 @@ bm_menu_filter(struct bm_menu *menu)
         size_t oldLen = strlen(menu->old_filter);
         addition = (oldLen < len && !memcmp(menu->old_filter, menu->filter, oldLen));
     }
-    
     if (menu->old_filter && addition && menu->filtered.count <= 0)
         return;
 
     if (menu->old_filter && !strcmp(menu->filter, menu->old_filter))
         return;
 
+    uint32_t count;
     struct bm_item **filtered = filter_func[menu->filter_mode](menu, addition, &count);
 
     list_set_items_no_copy(&menu->filtered, filtered, count);
     bm_menu_set_highlighted_index(menu, 0);
-
-    bm_menu_set_filtered_item_count(menu, count);
 
     free(menu->old_filter);
     menu->old_filter = bm_strdup(menu->filter);

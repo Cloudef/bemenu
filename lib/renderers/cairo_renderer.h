@@ -296,8 +296,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
     uint32_t border_radius = menu->border_radius;
 
-    uint32_t total_item_count = menu->total_item_count;
-    uint32_t filtered_item_count = menu->filtered_item_count;
+    uint32_t total_item_count = menu->items.count;
+    uint32_t filtered_item_count = menu->filtered.count;
 
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
