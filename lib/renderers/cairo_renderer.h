@@ -480,8 +480,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
             paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
             bm_cairo_draw_line(cairo, &paint, &result, ">");
         }
-        char counter[1024];
-        sprintf(counter, "[%u/%u]", filtered_item_count, total_item_count);
+        char counter[128];
+        snprintf(counter, sizeof(counter), "[%u/%u]", filtered_item_count, total_item_count);
         bm_pango_get_text_extents(cairo, &paint, &result, counter);
         paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 10, vpadding + border_size };
         paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
