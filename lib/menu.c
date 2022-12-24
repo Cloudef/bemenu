@@ -771,8 +771,6 @@ bm_menu_filter(struct bm_menu *menu)
         list_free_list(&menu->filtered);
         free(menu->old_filter);
         menu->old_filter = NULL;
-
-        menu->filtered.count = menu->items.count;
         return;
     }
 
