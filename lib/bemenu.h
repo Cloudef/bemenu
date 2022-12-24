@@ -698,6 +698,24 @@ BM_PUBLIC void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mod
 BM_PUBLIC enum bm_scrollbar_mode bm_menu_get_scrollbar(struct bm_menu *menu);
 
 /**
+ * Set the counter display mode.
+ *
+ * @param menu bm_menu to set the counter for.
+ * @param display mode to be set.
+ */
+
+BM_PUBLIC void bm_menu_set_counter(struct bm_menu *menu, bool mode);
+
+/**
+ * Get the counter display mode.
+ *
+ * @param menu bm_menu to get the counter from.
+ * @return current counter display mode
+ */
+
+BM_PUBLIC bool bm_menu_get_counter(struct bm_menu *menu);
+
+/**
  * Set the vertical alignment of the bar.
  *
  * @param menu bm_menu to set alignment for.

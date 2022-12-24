@@ -447,6 +447,18 @@ bm_menu_get_scrollbar(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_counter(struct bm_menu *menu, bool mode)
+{
+    menu->counter = mode;
+}
+
+bool
+bm_menu_get_counter(struct bm_menu *menu)
+{
+    return menu->counter;
+}
+
+void
 bm_menu_set_align(struct bm_menu *menu, enum bm_align align)
 {
     assert(menu);
