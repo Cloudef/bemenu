@@ -183,6 +183,7 @@ usage(FILE *out, const char *name)
           " -K, --no-keyboard     ignore keyboard events.\n"
           " --binding             use alternative key bindings. Available options: vim\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
+          " --counter             display a matched/total items counter. (none (default), always)\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
@@ -271,6 +272,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prefix",       required_argument, 0, 'P' },
         { "password",     no_argument,       0, 'x' },
         { "scrollbar",    required_argument, 0, 0x100 },
+        { "counter",      required_argument, 0, 0x10a },
         { "accept-single",no_argument,       0, 0x11a },
         { "ifne",         no_argument,       0, 0x117 },
         { "fork",         no_argument,       0, 0x118 },
@@ -361,6 +363,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x100:
                 client->scrollbar = (!strcmp(optarg, "none") ? BM_SCROLLBAR_NONE : (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE)));
+                break;
+            case 0x10a:
+                client->counter = (!strcmp(optarg, "always"));
                 break;
             case 0x11a:
                 client->accept_single = true;
@@ -543,6 +548,7 @@ menu_with_options(struct client *client)
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_monitor_name(menu, client->monitor_name);
     bm_menu_set_scrollbar(menu, client->scrollbar);
+    bm_menu_set_counter(menu, client->counter);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);

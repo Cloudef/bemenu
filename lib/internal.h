@@ -358,6 +358,11 @@ struct bm_menu {
     enum bm_scrollbar_mode scrollbar;
 
     /**
+     * Current counter display mode.
+     */
+    bool counter;
+
+    /**
      * Should selection be wrapped?
      */
     bool wrap;
