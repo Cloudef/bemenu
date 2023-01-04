@@ -170,7 +170,7 @@ usage(FILE *out, const char *name)
           " -h, --help            display this help and exit.\n"
           " -v, --version         display version.\n"
           " -i, --ignorecase      match items case insensitively.\n"
-          " -F, --filter          filter entries for a given string.\n"
+          " -F, --filter          filter entries for a given string before showing the menu.\n"
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically with the given number of lines.\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
@@ -596,16 +596,17 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
     bm_menu_set_filter(menu, client->initial_filter);
+    bm_menu_filter(menu);
 
     {
-    uint32_t total_item_count;
-    struct bm_item **items = bm_menu_get_items(menu, &total_item_count);
+    uint32_t item_count;
+    struct bm_item **items = bm_menu_get_filtered_items(menu, &item_count);
 
-    if (client->ifne && total_item_count == 0) {
+    if (client->ifne && item_count == 0) {
         return BM_RUN_RESULT_CANCEL;
     }
 
-    if (client->accept_single && total_item_count == 1) {
+    if (client->accept_single && item_count == 1) {
         item_cb(client, *items);
         return BM_RUN_RESULT_SELECTED;
     }
