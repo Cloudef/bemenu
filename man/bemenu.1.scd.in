@@ -105,6 +105,10 @@ list of executables under PATH and the selected items are executed.
 *-e, --vim-esc-exits*
 	Exit bemenu when pressing escape in normal mode for vim bindings.
 
+*-F, --filter*
+	Filter items for a given string before showing the menu.
+	Affects *--ifne* and *--accept-single*
+
 ## Backend options
 
 These options are only available on backends specified in the parentheses:
