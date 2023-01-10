@@ -297,7 +297,6 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     uint32_t border_radius = menu->border_radius;
 
     uint32_t total_item_count = menu->items.count;
-    //uint32_t filtered_item_count = (menu->filter ? menu->filtered.count : total_item_count);
     uint32_t filtered_item_count;
     bm_menu_get_filtered_items(menu, &filtered_item_count);
 
@@ -403,10 +402,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             }
             
-            char *line_str = "error!";
-            if (i >= count) {
-                line_str = "";
-            } else {
+            char *line_str = "";
+            if (i < count) {
                 line_str = bm_cairo_entry_message(items[i]->text, highlighted, menu->event_feedback, i,  count);
             }
 
