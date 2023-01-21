@@ -33,7 +33,8 @@ wayland: bemenu-renderer-wayland.so
 
 # support non git builds
 .git/index:
-	mkdir -p .git
+	[ -f .git ] && exit; \
+	mkdir -p .git; \
 	touch .git/index
 
 %.a:
