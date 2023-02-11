@@ -36,7 +36,7 @@ list of executables under PATH and the selected items are executed.
 	Print a help message to standard output and exit.
 
 *-C, --no-cursor*
-  Disable all cursor events.
+	Disable all cursor events.
 
 *-I, --index* <_index_>
 	Highlight the item at _index_ at the start. Indices start at 0. By
@@ -46,7 +46,7 @@ list of executables under PATH and the selected items are executed.
 	Filter items case-insensitively.
 
 *-K, --no-keyboard*
-  Disable all keyboard events.
+	Disable all keyboard events.
 
 *-l, --list* <_number_>
 	List items vertically with the given _number_ of lines.
@@ -62,7 +62,7 @@ list of executables under PATH and the selected items are executed.
 	Disable the title spacing on entries.
 
 *-T, --no-touch*
-  Disable all touch events.
+	Disable all touch events.
 
 *-v, --version*
 	Print the *bemenu* version number to standard output and exit.
