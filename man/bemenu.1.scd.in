@@ -6,13 +6,13 @@ bemenu(1)
 
 # SYNOPSIS
 
-*bemenu* [*-hivwx*] [*-I* <_index_>] [*-l* <_lines_>] [*-P* _prefix_]
+*bemenu* [*-hCiKTvwx*] [*-I* <_index_>] [*-l* <_lines_>] [*-P* <_prefix_>]
 	\[*-p* <_prompt_>] [*--ifne*] [*--scrollbar* _none_|_always_|_autohide_]
-	\[_backend_options_]
+	\[*--binding* _vim_] [*--fork*] [_backend_options_]
 
-*bemenu-run* [*-hivwx*] [*-I* <_index_>] [*-l* <_lines_>] [*-P* <_prefix_>]
+*bemenu-run* [*-hCiKTvwx*] [*-I* <_index_>] [*-l* <_lines_>] [*-P* <_prefix_>]
 	\[*-p* <_prompt_>] [*--ifne*] [*--scrollbar* _none_|_always_|_autohide_]
-	\[*--fork*] [*--no-exec*] [_backend-options_]
+	\[*--binding* _vim_] [*--fork*] [*--no-exec*] [_backend-options_]
 
 # DESCRIPTION
 
@@ -35,12 +35,18 @@ list of executables under PATH and the selected items are executed.
 *-h, --help*
 	Print a help message to standard output and exit.
 
+*-C, --no-cursor*
+  Disable all cursor events.
+
 *-I, --index* <_index_>
 	Highlight the item at _index_ at the start. Indices start at 0. By
 	default, the first item is highlighted.
 
 *-i, --ignorecase*
 	Filter items case-insensitively.
+
+*-K, --no-keyboard*
+  Disable all keyboard events.
 
 *-l, --list* <_number_>
 	List items vertically with the given _number_ of lines.
@@ -52,6 +58,12 @@ list of executables under PATH and the selected items are executed.
 	Defines the _prompt_ text to be displayed to the left of the input
 	field. Defaults to ‘bemenu’.
 
+*-s, --no-spacing*
+	Disable the title spacing on entries.
+
+*-T, --no-touch*
+  Disable all touch events.
+
 *-v, --version*
 	Print the *bemenu* version number to standard output and exit.
 
@@ -60,6 +72,9 @@ list of executables under PATH and the selected items are executed.
 
 *-x, --password*
 	Hide filter text.
+
+*--binding*
+	Use alternative key bindings. Available options: vim
 
 *--fork*
 	Always *fork*(2) before executing the selections. Disabled by default
