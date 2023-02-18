@@ -297,7 +297,8 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     uint32_t border_radius = menu->border_radius;
 
     uint32_t total_item_count = menu->items.count;
-    uint32_t filtered_item_count = (menu->filter ? menu->filtered.count : total_item_count);
+    uint32_t filtered_item_count;
+    bm_menu_get_filtered_items(menu, &filtered_item_count);
 
     cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
     cairo_rectangle(cairo->cr, 0, 0, width, height);
@@ -371,8 +372,16 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
 
         uint32_t posy = titleh;
         const uint32_t page = (menu->index / lines) * lines;
-        for (uint32_t l = 0, i = page; l < lines && i < count && posy < max_height; ++i, ++l) {
-            bool highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
+        
+        for (uint32_t l = 0, i = page; l < lines && posy < max_height; ++i, ++l) {
+            if (!menu->fixed_height && i >= count) {
+                continue;
+            }
+
+            bool highlighted = false;
+            if (i < count) {
+                highlighted = (items[i] == bm_menu_get_highlighted_item(menu));
+            }
 
             if (highlighted) {
                 if (menu->event_feedback) {
@@ -382,18 +391,22 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
                     bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_FG, &paint.fg);
                     bm_cairo_color_from_menu_color(menu, BM_COLOR_HIGHLIGHTED_BG, &paint.bg);
                 }
-            } else if (bm_menu_item_is_selected(menu, items[i])) {
+            } else if (i < count && bm_menu_item_is_selected(menu, items[i])) {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_SELECTED_BG, &paint.bg);
-            } else if (i % 2 == 1) {
+            } else if (i < count && i % 2 == 1) {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ALTERNATE_BG, &paint.bg);
             } else {
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_FG, &paint.fg);
                 bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             }
+            
+            char *line_str = "";
+            if (i < count) {
+                line_str = bm_cairo_entry_message(items[i]->text, highlighted, menu->event_feedback, i,  count);
+            }
 
-            char *line_str = bm_cairo_entry_message(items[i]->text, highlighted, menu->event_feedback, i,  count);
             if (menu->prefix && highlighted) {
                 paint.pos = (struct pos){ spacing_x + border_size, posy+vpadding + border_size };
                 paint.box = (struct box){ 4, 0, vpadding, -vpadding, width - paint.pos.x, height };

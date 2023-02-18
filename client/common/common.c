@@ -182,6 +182,7 @@ usage(FILE *out, const char *name)
           " -T, --no-touch        ignore touch events.\n"
           " -K, --no-keyboard     ignore keyboard events.\n"
           " --binding             use alternative key bindings. Available options: vim\n"
+          " --fixed-height        prevent the display from changing height on filter.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --counter             display a matched/total items counter. (none (default), always)\n"
           " --accept-single       immediately return if there is only one item.\n"
@@ -271,6 +272,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "index",        required_argument, 0, 'I' },
         { "prefix",       required_argument, 0, 'P' },
         { "password",     no_argument,       0, 'x' },
+        { "fixed-height", no_argument,       0, 0x090 },
         { "scrollbar",    required_argument, 0, 0x100 },
         { "counter",      required_argument, 0, 0x10a },
         { "accept-single",no_argument,       0, 0x11a },
@@ -360,6 +362,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'I':
                 client->selected = strtol(optarg, NULL, 10);
+                break;
+            case 0x090:
+                client->fixed_height = true;
                 break;
             case 0x100:
                 client->scrollbar = (!strcmp(optarg, "none") ? BM_SCROLLBAR_NONE : (!strcmp(optarg, "always") ? BM_SCROLLBAR_ALWAYS : (!strcmp(optarg, "autohide") ? BM_SCROLLBAR_AUTOHIDE : BM_SCROLLBAR_NONE)));
@@ -547,6 +552,7 @@ menu_with_options(struct client *client)
     bm_menu_set_wrap(menu, client->wrap);
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_monitor_name(menu, client->monitor_name);
+    bm_menu_set_fixed_height(menu, client->fixed_height);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_counter(menu, client->counter);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);

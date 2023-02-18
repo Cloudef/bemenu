@@ -690,6 +690,24 @@ BM_PUBLIC const char* bm_menu_get_color(const struct bm_menu *menu, enum bm_colo
 BM_PUBLIC void bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode);
 
 /**
+ * Set fixed height mode of the bar.
+ *
+ * @param menu bm_menu to set the fixed height for.
+ * @param mode to be set.
+ */
+
+BM_PUBLIC void bm_menu_set_fixed_height(struct bm_menu *menu, bool mode);
+
+/**
+ * Get the fixed height mode of the bar.
+ *
+ * @param menu bm_menu to get the fixed height from.
+ * @return current fixed height mode
+ */
+
+BM_PUBLIC bool bm_menu_get_fixed_height(struct bm_menu *menu);
+
+/**
  * Return current scrollbar display mode.
  *
  * @param menu bm_menu instance where to get scrollbar display state from.

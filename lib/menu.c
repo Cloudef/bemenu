@@ -435,6 +435,18 @@ char* bm_menu_get_color(const struct bm_menu *menu, enum bm_color color)
 }
 
 void
+bm_menu_set_fixed_height(struct bm_menu *menu, bool mode)
+{
+    menu->fixed_height = mode;
+}
+
+bool
+bm_menu_get_fixed_height(struct bm_menu *menu)
+{
+    return menu->fixed_height;
+}
+
+void
 bm_menu_set_scrollbar(struct bm_menu *menu, enum bm_scrollbar_mode mode)
 {
     menu->scrollbar = (mode == BM_SCROLLBAR_LAST ? BM_SCROLLBAR_NONE : mode);

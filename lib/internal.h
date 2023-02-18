@@ -353,6 +353,11 @@ struct bm_menu {
     enum bm_filter_mode filter_mode;
 
     /**
+     * Current fixed height mode.
+     */
+    bool fixed_height;
+
+    /**
      * Current Scrollbar display mode.
      */
     enum bm_scrollbar_mode scrollbar;
