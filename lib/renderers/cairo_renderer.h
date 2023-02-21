@@ -509,9 +509,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     bm_cairo_color_from_menu_color(menu, BM_COLOR_BORDER, &paint.fg);
     cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
     if (!border_radius) {
-        cairo_rectangle(cairo->cr, 0, 0, width + border_size, (height * (page_length + 1)) + (2 * border_size));
+        cairo_rectangle(cairo->cr, 0, 0, (width + border_size)/cairo->scale, (height * (page_length + 1)) + (2 * border_size));
     } else {
-        bm_cairo_draw_rounded_path(cairo->cr, 0, 0, width + border_size, (height * (page_length + 1)) + (2 * border_size), border_radius);
+        bm_cairo_draw_rounded_path(cairo->cr, 0, 0, (width + border_size)/cairo->scale, (height * (page_length + 1)) + (2 * border_size), border_radius);
     }
     cairo_set_line_width(cairo->cr, 2 * menu->border_size);
     cairo_stroke(cairo->cr);
