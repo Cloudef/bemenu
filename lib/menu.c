@@ -677,7 +677,7 @@ bm_menu_set_highlighted_index(struct bm_menu *menu, uint32_t index)
     bm_menu_get_filtered_items(menu, &count);
 
     if (count <= index)
-        return 0;
+        index = (count > 0 ? count - 1 : 0);
 
     if (menu->index != index)
         menu->dirty = true;
