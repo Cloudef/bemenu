@@ -902,12 +902,13 @@ menu_point_select(struct bm_menu *menu, uint32_t posx, uint32_t posy, uint32_t d
     }
     uint32_t selected_line = posy / line_height;
 
-    if (0 == selected_line) { // Mouse over title bar
-        return;
-    }
-
     assert(menu->lines != 0);
     uint16_t current_page_index = menu->index / menu->lines;
+
+    if (0 == selected_line) { // Mouse over title bar
+        bm_menu_set_highlighted_index(menu, current_page_index * menu->lines);
+        return;
+    }
 
     if (selected_line >= displayed) { // This might be useless
         return;
