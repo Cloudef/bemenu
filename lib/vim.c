@@ -212,7 +212,7 @@ enum bm_vim_code bm_vim_key_press(struct bm_menu *menu, enum bm_key key, uint32_
         if(menu->vim_last_key == 0) return vim_on_first_key(menu, unicode, item_count, items_displayed);
         else return vim_on_second_key(menu, unicode, item_count, items_displayed);
     } else if(menu->vim_mode == 'i'){
-        if(key == BM_KEY_ESCAPE && unicode == 0){
+        if(key == BM_KEY_ESCAPE && (unicode == 0 || unicode == 27)){
             menu->vim_mode = 'n';
             return BM_VIM_CONSUME;
         }
