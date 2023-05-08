@@ -608,8 +608,8 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
 
     uint32_t unicode;
     enum bm_key key = BM_KEY_NONE;
-    struct bm_pointer pointer;
-    struct bm_touch touch;
+    struct bm_pointer pointer = {0};
+    struct bm_touch touch = {0};
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
         if (!bm_menu_render(menu)) {
