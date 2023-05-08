@@ -251,11 +251,11 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 
 *M-[1-9]*
 	Print selected items and exit with a custom error code 10 (*M-1*)
-        through 18 (*M-9*), see _EXIT STATUS_.
+	through 18 (*M-9*), see _EXIT STATUS_.
 
 *M-0*
 	Print selected items and exit with the custom error code 19, see _EXIT
-        STATUS_.
+	STATUS_.
 
 # ENVIRONMENT
 
