@@ -73,6 +73,9 @@ list of executables under PATH and the selected items are executed.
 *-x, --password*
 	Hide filter text.
 
+*--fixed-height*
+	Prevent the display from changing height on filter.
+
 *--binding*
 	Use alternative key bindings. Available options: vim
 
