@@ -76,12 +76,18 @@ list of executables under PATH and the selected items are executed.
 *--fixed-height*
 	Prevent the display from changing height on filter.
 
+*--accept-single*
+	Immediately return if there is only one item.
+
 *--binding*
 	Use alternative key bindings. Available options: vim
 
 *--fork*
 	Always *fork*(2) before executing the selections. Disabled by default
 	when using the terminal backend.
+
+*--ifne*
+	Only display menu if there are items.
 
 *--no-exec*
 	Print the selected items to standard output instead of executing them.
@@ -103,11 +109,29 @@ These options are only available on backends specified in the parentheses:
 *-b, --bottom* (Wayland, X11)
 	The list will appear at the bottom of the screen.
 
+*-c, --center* (Wayland, X11)
+	The list will appear at the center of the screen. (wx)
+
 *-f, --grab* (Wayland, X11)
 	Show the *bemenu* window whilst reading the items.
 
+*-B, --border* (Wayland, X11)
+	Specify the width of the border in pixels around the menu.
+
+*--bdr* (Wayland, X11)
+	Specify the border color.
+
+*-R, --border-radius* (Wayland, X11)
+	Specify the radius of the border around the menu (0 = no curved borders).
+
 *-H, --line-height* <_height_> (Wayland, X11)
 	Specify the _height_ in point size to make each entry.
+
+*--ch* (Wayland, X11)
+	Specify the height of the cursor (0 = scales with line height).
+
+*--cw* (Wayland, X11)
+	Specify the width of the cursor.
 
 *-m, --monitor* <_index_> (Wayland, X11)
 	Specify the monitor _index_ where the list should appear. Monitor
@@ -125,6 +149,9 @@ These options are only available on backends specified in the parentheses:
 	Specify the _margin_ (empty space) in pixels to leave between menu and
 	vertical view borders. *bemenu* will reduce it's size to fit in space
 	between gaps.
+
+*--hp* (Wayland, X11)
+	Specify the horizontal padding for the entries in single line mode.
 
 *-W, --width-factor* <_factor_> (Wayland, X11)
 	Specify the relative width factor as a floating point number. It makes
