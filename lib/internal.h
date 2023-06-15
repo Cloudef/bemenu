@@ -363,6 +363,11 @@ struct bm_menu {
     enum bm_scrollbar_mode scrollbar;
 
     /**
+     * Current vim escape exit mode.
+     */
+    bool vim_esc_exits; 
+
+    /**
      * Current counter display mode.
      */
     bool counter;

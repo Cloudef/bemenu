@@ -734,6 +734,24 @@ BM_PUBLIC void bm_menu_set_counter(struct bm_menu *menu, bool mode);
 BM_PUBLIC bool bm_menu_get_counter(struct bm_menu *menu);
 
 /**
+ * Set vim escape exit mode of the bar.
+ *
+ * @param menu bm_menu to set the vim escape exit mode for.
+ * @param mode to be set.
+ */
+
+BM_PUBLIC void bm_menu_set_vim_esc_exits(struct bm_menu *menu, bool mode);
+
+/**
+ * Get the vim escape exit mode of the bar.
+ *
+ * @param menu bm_menu to get the vim escape exit mode from.
+ * @param mode current vim escape exit mode
+ */
+
+BM_PUBLIC bool bm_menu_get_vim_esc_exits(struct bm_menu *menu);
+
+/**
  * Set the vertical alignment of the bar.
  *
  * @param menu bm_menu to set alignment for.

@@ -102,6 +102,9 @@ list of executables under PATH and the selected items are executed.
 :  Only display a scrollbar when the number of items exceeds the number
    of lines.
 
+*-e, --vim-esc-exits*
+	Exit bemenu when pressing escape in normal mode for vim bindings.
+
 ## Backend options
 
 These options are only available on backends specified in the parentheses:
