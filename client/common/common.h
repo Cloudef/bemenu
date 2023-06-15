@@ -29,6 +29,7 @@ struct client {
     bool wrap;
     bool fixed_height; 
     bool counter;
+    bool vim_esc_exits; 
     bool accept_single;
     bool ifne;
     bool no_overlap;

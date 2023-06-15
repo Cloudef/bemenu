@@ -185,6 +185,7 @@ usage(FILE *out, const char *name)
           " --fixed-height        prevent the display from changing height on filter.\n"
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --counter             display a matched/total items counter. (none (default), always)\n"
+          " -e, --vim-esc-exits   exit bemenu when pressing escape in normal mode for vim bindings\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
@@ -275,6 +276,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "fixed-height", no_argument,       0, 0x090 },
         { "scrollbar",    required_argument, 0, 0x100 },
         { "counter",      required_argument, 0, 0x10a },
+        { "vim-esc-exits",no_argument,       0, 'e' },
         { "accept-single",no_argument,       0, 0x11a },
         { "ifne",         no_argument,       0, 0x117 },
         { "fork",         no_argument,       0, 0x118 },
@@ -371,6 +373,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x10a:
                 client->counter = (!strcmp(optarg, "always"));
+                break;
+            case 'e':
+                client->vim_esc_exits = true;
                 break;
             case 0x11a:
                 client->accept_single = true;
@@ -555,6 +560,7 @@ menu_with_options(struct client *client)
     bm_menu_set_fixed_height(menu, client->fixed_height);
     bm_menu_set_scrollbar(menu, client->scrollbar);
     bm_menu_set_counter(menu, client->counter);
+    bm_menu_set_vim_esc_exits(menu, client->vim_esc_exits);
     bm_menu_set_panel_overlap(menu, !client->no_overlap);
     bm_menu_set_spacing(menu, !client->no_spacing);
     bm_menu_set_password(menu, client->password);

@@ -459,6 +459,18 @@ bm_menu_get_scrollbar(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_vim_esc_exits(struct bm_menu *menu, bool mode)
+{
+    menu->vim_esc_exits = mode;
+}
+
+bool
+bm_menu_get_vim_esc_exits(struct bm_menu *menu)
+{
+    return menu->vim_esc_exits;
+}
+
+void
 bm_menu_set_counter(struct bm_menu *menu, bool mode)
 {
     menu->counter = mode;
