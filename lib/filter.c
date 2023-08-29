@@ -113,6 +113,7 @@ filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const cha
     if (!(buffer = tokenize(menu, &tokv, &tokc)))
         goto fail;
 
+    const char *filter = menu->filter ? menu->filter : "";
     size_t len = (tokc ? strlen(tokv[0]) : 0);
     uint32_t i, f, e;
     for (e = f = i = 0; i < count; ++i) {
@@ -127,14 +128,14 @@ filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const cha
                 continue;
         }
 
-        if (tokc && item->text && !fstrncmp(tokv[0], item->text, len + 1)) { /* exact matches */
+        if (tokc && item->text && strlen(filter) == strlen(item->text) && !fstrncmp(filter, item->text, strlen(filter))) { /* exact matches */
             memmove(&filtered[1], filtered, f * sizeof(struct bm_item*));
             filtered[0] = item;
             e++; /* where do exact matches end */
         } else if (tokc && item->text && !fstrncmp(tokv[0], item->text, len)) { /* prefixes */
             memmove(&filtered[e + 1], &filtered[e], (f - e) * sizeof(struct bm_item*));
             filtered[e] = item;
-            e++; /* where do exact matches end */
+            e++; /* where do prefix matches end */
         } else {
             filtered[f] = item;
         }
