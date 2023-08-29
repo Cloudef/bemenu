@@ -63,9 +63,9 @@ PKG_CONFIG_PATH="/usr/local/opt/ncurses/lib/pkgconfig" sh build-osx.sh curses
 
 ### Nix
 
-There is darwin.nix provided in this repo, you can install bemenu with it by running
+There is default.nix provided in this repo, you can install bemenu with it by running
 ```sh
-nix-env -i -f darwin.nix
+nix-env -i -f default.nix
 ```
 
 This installs only the curses backend.
