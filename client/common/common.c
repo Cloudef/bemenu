@@ -619,6 +619,18 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     struct bm_touch touch = {0};
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
+        if(client->accept_single) {
+            uint32_t item_count;
+            bm_menu_get_filtered_items(menu, &item_count);
+            if(item_count == 1) {
+                struct bm_item *highlighted = bm_menu_get_highlighted_item(menu);
+                if (highlighted) {
+                    item_cb(client, highlighted);
+                    return BM_RUN_RESULT_SELECTED;
+                }
+            }
+        }
+
         if (!bm_menu_render(menu)) {
             status = BM_RUN_RESULT_CANCEL;
             break;
