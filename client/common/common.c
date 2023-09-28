@@ -189,7 +189,8 @@ usage(FILE *out, const char *name)
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
           " --fork                always fork. (bemenu-run)\n"
-          " --no-exec             do not execute command. (bemenu-run)\n\n"
+          " --no-exec             do not execute command. (bemenu-run)\n"
+          " --auto-select         when one entry is left, automatically select it\n\n"
 
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
@@ -278,6 +279,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "counter",      required_argument, 0, 0x10a },
         { "vim-esc-exits",no_argument,       0, 'e' },
         { "accept-single",no_argument,       0, 0x11a },
+        { "auto-select",  no_argument,       0, 0x11b },
         { "ifne",         no_argument,       0, 0x117 },
         { "fork",         no_argument,       0, 0x118 },
         { "no-exec",      no_argument,       0, 0x119 },
@@ -379,6 +381,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x11a:
                 client->accept_single = true;
+                break;
+            case 0x11b:
+                client->auto_select = true;
                 break;
             case 0x117:
                 client->ifne = true;
@@ -606,7 +611,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
         return BM_RUN_RESULT_CANCEL;
     }
 
-    if (client->accept_single && item_count == 1) {
+    if ((client->accept_single || client->auto_select) && item_count == 1) {
         item_cb(client, *items);
         return BM_RUN_RESULT_SELECTED;
     }
@@ -619,7 +624,7 @@ run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(cons
     struct bm_touch touch = {0};
     enum bm_run_result status = BM_RUN_RESULT_RUNNING;
     do {
-        if(client->accept_single) {
+        if(client->auto_select) {
             uint32_t item_count;
             bm_menu_get_filtered_items(menu, &item_count);
             if(item_count == 1) {

@@ -31,6 +31,7 @@ struct client {
     bool counter;
     bool vim_esc_exits; 
     bool accept_single;
+    bool auto_select;
     bool ifne;
     bool no_overlap;
     bool no_spacing;
