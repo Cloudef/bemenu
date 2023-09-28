@@ -195,9 +195,9 @@ usage(FILE *out, const char *name)
           "Use BEMENU_BACKEND env variable to force backend:\n"
           " curses               ncurses based terminal backend\n"
           " wayland              wayland backend\n"
-          " x11                  x11 backend\n\n"
+          " x11                  x11 backend\n\n", out);
 
-          "If BEMENU_BACKEND is empty, one of the GUI backends is selected automatically.\n\n"
+    fputs("If BEMENU_BACKEND is empty, one of the GUI backends is selected automatically.\n\n"
 
           "Backend specific options\n"
           "   c = ncurses, w == wayland, x == x11\n"
