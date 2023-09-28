@@ -79,6 +79,9 @@ list of executables under PATH and the selected items are executed.
 *--accept-single*
 	Immediately return if there is only one item.
 
+*--auto-select*
+	When one entry is left, automatically select it.
+
 *--binding*
 	Use alternative key bindings. Available options: vim
 
