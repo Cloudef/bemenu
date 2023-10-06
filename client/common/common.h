@@ -33,6 +33,7 @@ struct client {
     bool accept_single;
     bool auto_select;
     bool ifne;
+    bool single_instance;
     bool no_overlap;
     bool no_spacing;
     bool no_cursor;
