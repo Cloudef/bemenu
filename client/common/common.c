@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <assert.h>
+#include <fcntl.h>
+#include <sys/file.h>
 
 static void
 disco_trap(int sig)
@@ -188,6 +190,7 @@ usage(FILE *out, const char *name)
           " -e, --vim-esc-exits   exit bemenu when pressing escape in normal mode for vim bindings\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
+          " --single-instance     force a single menu instance.\n"
           " --fork                always fork. (bemenu-run)\n"
           " --no-exec             do not execute command. (bemenu-run)\n"
           " --auto-select         when one entry is left, automatically select it\n\n"
@@ -281,6 +284,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "accept-single",no_argument,       0, 0x11a },
         { "auto-select",  no_argument,       0, 0x11b },
         { "ifne",         no_argument,       0, 0x117 },
+        { "single-instance",no_argument,     0, 0x11c},
         { "fork",         no_argument,       0, 0x118 },
         { "no-exec",      no_argument,       0, 0x119 },
         { "bottom",       no_argument,       0, 'b' },
@@ -387,6 +391,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 0x117:
                 client->ifne = true;
+                break;
+            case 0x11c:
+                client->single_instance = true;
                 break;
             case 0x118:
                 client->force_fork = true;
@@ -598,6 +605,20 @@ menu_with_options(struct client *client)
 enum bm_run_result
 run_menu(const struct client *client, struct bm_menu *menu, void (*item_cb)(const struct client *client, struct bm_item *item))
 {
+    if (client->single_instance) {
+        char *xdg_runtime_dir = getenv("XDG_RUNTIME_DIR");
+
+        char buffer[1024];
+        char *bemenu_lock_location = (xdg_runtime_dir == NULL ? "/tmp" : xdg_runtime_dir);
+        snprintf(buffer, sizeof(buffer), "%s/bemenu.lock", bemenu_lock_location);
+        
+        int menu_lock = open(buffer, O_CREAT | O_RDWR | O_CLOEXEC, 0666); // Create a read-write lock file(if not already exists), closes on exec. Creates in tmp due to permissions.
+        if (flock(menu_lock, LOCK_EX | LOCK_NB) == -1) {  // If we cannot set the lock/the lock is already present.
+            fprintf(stderr, "bemenu instance is already running");
+            exit(EXIT_FAILURE);
+        }
+    }
+    
     bm_menu_set_highlighted_index(menu, client->selected);
     bm_menu_grab_keyboard(menu, true);
     bm_menu_set_filter(menu, client->initial_filter);

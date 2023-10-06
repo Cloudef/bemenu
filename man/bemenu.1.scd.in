@@ -92,6 +92,9 @@ list of executables under PATH and the selected items are executed.
 *--ifne*
 	Only display menu if there are items.
 
+*--single-instance*
+	Force a single menu instance.
+
 *--no-exec*
 	Print the selected items to standard output instead of executing them.
 
