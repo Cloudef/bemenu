@@ -70,8 +70,14 @@ list of executables under PATH and the selected items are executed.
 *-w, --wrap*
 	Advancing past the end of the list returns you to the start.
 
-*-x, --password*
-	Hide filter text.
+*-x, --password* _none_|_hide_|_indicator_
+	Specify how the filter text should be displayed:
+[[ *none*
+:< Display the input (the default).
+|  *hide*
+:  Do not display any input.
+|  *indicator*
+:  Replace input with asterisks.
 
 *--fixed-height*
 	Prevent the display from changing height on filter.

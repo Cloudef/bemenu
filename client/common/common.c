@@ -176,7 +176,7 @@ usage(FILE *out, const char *name)
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
-          " -x, --password        hide input.\n"
+          " -x, --password        display/hide/replace input. (none (default), hide, indicator)\n"
           " -s, --no-spacing      disable the title spacing on entries.\n"
           " -C, --no-cursor       ignore cursor events.\n"
           " -T, --no-touch        ignore touch events.\n"
@@ -273,7 +273,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "prompt",       required_argument, 0, 'p' },
         { "index",        required_argument, 0, 'I' },
         { "prefix",       required_argument, 0, 'P' },
-        { "password",     no_argument,       0, 'x' },
+        { "password",     required_argument, 0, 'x' },
         { "fixed-height", no_argument,       0, 0x090 },
         { "scrollbar",    required_argument, 0, 0x100 },
         { "counter",      required_argument, 0, 0x10a },
@@ -332,9 +332,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hviwxcl:I:p:P:I:bfF:m:H:M:W:B:R:nsCTK", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwcl:I:p:P:I:x:bfF:m:H:M:W:B:R:nsCTK", opts, NULL)) < 0)
             break;
-
+        
         switch (opt) {
             case 'h':
                 usage(stdout, *argv[0]);
@@ -342,7 +342,6 @@ do_getopt(struct client *client, int *argc, char **argv[])
             case 'v':
                 version(*argv[0]);
                 break;
-
             case 'i':
                 client->filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
                 break;
@@ -395,9 +394,8 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->no_exec = true;
                 break;
             case 'x':
-                client->password = true;
+                client->password = (!strcmp(optarg, "none") ? BM_PASSWORD_NONE : (!strcmp(optarg, "hide") ? BM_PASSWORD_HIDE : (!strcmp(optarg, "indicator") ? BM_PASSWORD_INDICATOR : BM_PASSWORD_NONE)));
                 break;
-
             case 'b':
                 client->bottom = true;
                 break;

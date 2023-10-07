@@ -40,7 +40,7 @@ struct client {
     bool no_keyboard;
     bool force_fork, fork;
     bool no_exec;
-    bool password;
+    enum bm_password_mode password;
     enum bm_key_binding key_binding;
     char *monitor_name;
 };

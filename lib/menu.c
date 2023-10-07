@@ -616,17 +616,17 @@ bm_menu_set_spacing(struct bm_menu *menu, bool spacing)
 }
 
 void
-bm_menu_set_password(struct bm_menu *menu, bool password)
+bm_menu_set_password(struct bm_menu *menu, enum bm_password_mode mode)
 {
     assert(menu);
 
-    if (menu->password == password)
+    if (menu->password == mode)
         return;
 
-    menu->password = password;
+    menu->password = mode;
 }
 
-bool
+enum bm_password_mode
 bm_menu_get_password(struct bm_menu *menu)
 {
     assert(menu);
