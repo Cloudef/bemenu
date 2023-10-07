@@ -331,9 +331,15 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, const s
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, -vpadding, width - paint.pos.x, height };
 
     const char *filter_text = (menu->filter ? menu->filter : "");
-    if (menu->password) {
+    if (menu->password == BM_PASSWORD_HIDE) {
         bm_cairo_draw_line_str(cairo, &paint, &result, "");
-    } else {
+    } else if (menu->password == BM_PASSWORD_INDICATOR) {
+        char asterisk_print[1024] = "";
+        
+        for (int i = 0; i < (int)(strlen(filter_text)); ++i) asterisk_print[i] = '*';
+        
+        bm_cairo_draw_line(cairo, &paint, &result, "%s", asterisk_print);
+    } else if (menu->password == BM_PASSWORD_NONE) {
         bm_cairo_draw_line(cairo, &paint, &result, "%s", filter_text);
     }
 

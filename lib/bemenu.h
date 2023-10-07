@@ -188,6 +188,19 @@ enum bm_scrollbar_mode {
 };
 
 /**
+ * Password display mode constants for bm_menu instance filter text.
+ *
+ * - @link ::bm_password_mode BM_PASSWORD_NONE @endlink means that filter text displays what the user inputs(default behavior).
+ * - @link ::bm_password_mode BM_PASSWORD_HIDE @endlink means that filter text is not displayed at all.
+ * - @link ::bm_password_mode BM_PASSWORD_INDICATOR @endlink means that filter text is replaced with asterisks.
+ */
+enum bm_password_mode {
+    BM_PASSWORD_NONE,
+    BM_PASSWORD_HIDE,
+    BM_PASSWORD_INDICATOR,
+};
+
+/**
  * Result constants for the menu run functions.
  *
  * - @link ::bm_run_result BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
@@ -846,12 +859,12 @@ BM_PUBLIC bool bm_menu_is_keyboard_grabbed(struct bm_menu *menu);
 BM_PUBLIC void bm_menu_set_panel_overlap(struct bm_menu *menu, bool overlap);
 
 /**
- * Replace input with asterisks.
+ * Set current password mode.
  *
  * @param menu bm_menu instance to set password mode for.
- * @param password true for password mode, false for deafault behavior.
+ * @param password BM_PASSWORD_NONE for default behavior(display what user inputs), BM_PASSWORD_HIDE for no filter text to be displayed, BM_PASSWORD_INDICATOR to replace input with asterisks.
  */
-BM_PUBLIC void bm_menu_set_password(struct bm_menu *menu, bool password);
+BM_PUBLIC void bm_menu_set_password(struct bm_menu *menu, enum bm_password_mode mode);
 
 /**
  * Space entries with title.
@@ -865,9 +878,9 @@ BM_PUBLIC void bm_menu_set_spacing(struct bm_menu *menu, bool spacing);
  * Is password mode activated and input hidden?
  *
  * @param menu bm_menu instance where to get password mode from.
- * @return true if password mode, false otherwise.
+ * @return BM_PASSWORD_NONE is default behavior(display what user inputs), BM_PASSWORD_HIDE is no filter text is being displayed, BM_PASSWORD_INDICATOR is replacing input with asterisks.
  */
-BM_PUBLIC bool bm_menu_get_password(struct bm_menu *menu);
+BM_PUBLIC enum bm_password_mode bm_menu_get_password(struct bm_menu *menu);
 
 
 /**

@@ -413,9 +413,9 @@ struct bm_menu {
     bool overlap;
 
     /**
-     * Should the input be hidden
+     * Should the input be displayed/hidden/replaced
      */
-    bool password;
+    enum bm_password_mode password;
 
     /**
      * Should the entry should follow the title spacing
