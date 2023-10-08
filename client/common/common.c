@@ -224,6 +224,8 @@ usage(FILE *out, const char *name)
           " --tf                  defines the title foreground color. (wx)\n"
           " --fb                  defines the filter background color. (wx)\n"
           " --ff                  defines the filter foreground color. (wx)\n"
+          " --cb                  defines the cursor background color. (wx)\n"
+          " --cf                  defines the cursor foreground color. (wx)\n"
           " --nb                  defines the normal background color. (wx)\n"
           " --nf                  defines the normal foreground color. (wx)\n"
           " --hb                  defines the highlighted background color. (wx)\n"
