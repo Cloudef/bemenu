@@ -132,7 +132,7 @@ struct window {
     bool render_pending;
 
     struct {
-        void (*render)(struct cairo *cairo, uint32_t width, uint32_t max_height, const struct bm_menu *menu, struct cairo_paint_result *result);
+        void (*render)(struct cairo *cairo, uint32_t width, uint32_t max_height, struct bm_menu *menu, struct cairo_paint_result *result);
     } notify;
 };
 
@@ -172,7 +172,7 @@ void bm_wl_repeat(struct wayland *wayland);
 bool bm_wl_registry_register(struct wayland *wayland);
 void bm_wl_registry_destroy(struct wayland *wayland);
 void bm_wl_window_schedule_render(struct window *window);
-void bm_wl_window_render(struct window *window, struct wl_display *display, const struct bm_menu *menu);
+void bm_wl_window_render(struct window *window, struct wl_display *display, struct bm_menu *menu);
 void bm_wl_window_set_width(struct window *window, struct wl_display *display, uint32_t margin, float factor);
 void bm_wl_window_set_align(struct window *window, struct wl_display *display, enum bm_align align);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);

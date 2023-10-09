@@ -212,6 +212,14 @@ set_align(const struct bm_menu *menu, enum bm_align align)
 }
 
 static void
+set_y_offset(const struct bm_menu *menu, int32_t y_offset)
+{
+    struct x11 *x11 = menu->renderer->internal;
+    assert(x11);
+    bm_x11_window_set_y_offset(&x11->window, y_offset);
+}
+
+static void
 set_width(const struct bm_menu *menu, uint32_t margin, float factor)
 {
     struct x11 *x11 = menu->renderer->internal;
@@ -301,6 +309,7 @@ register_renderer(struct render_api *api)
     api->poll_key = poll_key;
     api->render = render;
     api->set_align = set_align;
+    api->set_y_offset = set_y_offset;
     api->set_width = set_width;
     api->set_monitor = set_monitor;
     api->grab_keyboard = grab_keyboard;

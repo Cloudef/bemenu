@@ -232,6 +232,20 @@ bm_menu_get_lines(struct bm_menu *menu)
 }
 
 void
+bm_menu_set_lines_mode(struct bm_menu *menu, enum bm_lines_mode mode)
+{
+    assert(menu);
+    menu->lines_mode = mode;
+}
+
+enum bm_lines_mode
+bm_menu_get_lines_mode(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->lines_mode;
+}
+
+void
 bm_menu_set_wrap(struct bm_menu *menu, bool wrap)
 {
     assert(menu);
@@ -501,6 +515,27 @@ bm_menu_get_align(struct bm_menu *menu)
 {
     assert(menu);
     return menu->align;
+}
+
+void
+bm_menu_set_y_offset(struct bm_menu *menu, int32_t y_offset)
+{
+    assert(menu);
+
+    if(menu->y_offset == y_offset)
+        return;
+
+    menu->y_offset = y_offset;
+
+    if (menu->renderer->api.set_y_offset)
+        menu->renderer->api.set_y_offset(menu, y_offset);
+}
+
+int32_t
+bm_menu_get_y_offset(struct bm_menu *menu)
+{
+    assert(menu);
+    return menu->y_offset;
 }
 
 void
@@ -1041,11 +1076,11 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_UP:
-            menu_prev(menu, count, menu->wrap);
+            (menu->lines_mode == BM_LINES_UP ? menu_next(menu, count, menu->wrap) : menu_prev(menu, count, menu->wrap));
             break;
 
         case BM_KEY_DOWN:
-            menu_next(menu, count, menu->wrap);
+            (menu->lines_mode == BM_LINES_UP ? menu_prev(menu, count, menu->wrap) : menu_next(menu, count, menu->wrap));
             break;
 
         case BM_KEY_PAGE_UP:

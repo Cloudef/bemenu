@@ -78,7 +78,7 @@ get_window_width(struct window *window)
 }
 
 void
-bm_x11_window_render(struct window *window, const struct bm_menu *menu)
+bm_x11_window_render(struct window *window, struct bm_menu *menu)
 {
     assert(window && menu);
     uint32_t oldw = window->width, oldh = window->height;
@@ -115,7 +115,7 @@ bm_x11_window_render(struct window *window, const struct bm_menu *menu)
                 win_y = window->max_height - window->height;
         }
 
-        XMoveResizeWindow(window->display, window->drawable, window->x, win_y, window->width, window->height);
+        XMoveResizeWindow(window->display, window->drawable, window->x, win_y + window->y_offset, window->width, window->height);
     }
 
     if (buffer->created) {
@@ -230,7 +230,7 @@ bm_x11_window_set_monitor(struct window *window, int32_t monitor)
     }
 
     window->monitor = monitor;
-    XMoveResizeWindow(window->display, window->drawable, window->x, window->y, window->width, window->height);
+    XMoveResizeWindow(window->display, window->drawable, window->x, window->y + window->y_offset, window->width, window->height);
     XFlush(window->display);
 }
 
@@ -242,6 +242,16 @@ bm_x11_window_set_align(struct window *window, enum bm_align align)
 
     window->align = align;
     bm_x11_window_set_monitor(window, window->monitor);
+}
+
+void
+bm_x11_window_set_y_offset(struct window *window, int32_t y_offset)
+{
+    if(window->y_offset == y_offset)
+        return;
+
+    window->y_offset = y_offset;
+    XMoveWindow(window->display, window->drawable, window->x, window->y + window->y_offset);
 }
 
 void

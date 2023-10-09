@@ -111,6 +111,11 @@ struct render_api {
     void (*set_align)(const struct bm_menu *menu, enum bm_align align);
 
     /**
+     * Set vertical/y offset of the window.
+     */
+    void (*set_y_offset)(const struct bm_menu *menu, int32_t y_offset);
+
+    /**
      * Set horizontal margin and relative width factor.
      */
     void (*set_width)(const struct bm_menu *menu, uint32_t margin, float factor);
@@ -338,6 +343,11 @@ struct bm_menu {
     uint32_t lines;
 
     /**
+     * Current vertical line mode.
+     */
+    enum bm_lines_mode lines_mode;
+
+    /**
      * Current monitor.
      */
     int32_t monitor;
@@ -381,6 +391,11 @@ struct bm_menu {
      * Vertical alignment.
      */
     enum bm_align align;
+
+    /**
+     * Vertical/y offset.
+     */
+    int32_t y_offset;
 
     /**
      * Horizontal margin.

@@ -17,6 +17,7 @@ struct client {
     uint32_t cursor_width;
     uint32_t hpadding;
     uint32_t lines;
+    enum bm_lines_mode lines_mode;
     uint32_t selected;
     uint32_t monitor;
     uint32_t hmargin_size;
