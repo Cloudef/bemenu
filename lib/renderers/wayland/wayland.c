@@ -14,7 +14,7 @@
 static int efd;
 
 static void
-render_windows_if_pending(const struct bm_menu *menu, struct wayland *wayland) {
+render_windows_if_pending(struct bm_menu *menu, struct wayland *wayland) {
     struct window *window;
     wl_list_for_each(window, &wayland->windows, link) {
         if (window->render_pending)

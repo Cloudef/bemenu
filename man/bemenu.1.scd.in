@@ -48,8 +48,8 @@ list of executables under PATH and the selected items are executed.
 *-K, --no-keyboard*
 	Disable all keyboard events.
 
-*-l, --list* <_number_>
-	List items vertically with the given _number_ of lines.
+*-l, --list* "<_number_> _down_|_up_"
+	List items vertically _down_ or _up_ with the given _number_ of lines.
 
 *-P, --prefix* <_prefix_>
 	Display _prefix_ before the highlighted item in a vertical list.

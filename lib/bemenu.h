@@ -201,6 +201,17 @@ enum bm_password_mode {
 };
 
 /**
+ * Vertical menu display mode constants for bm_menu instance lines.
+ *
+ * - @link ::bm_lines_mode BM_LINES_DOWN @endlink means that the vertical menu lines will go downwards.
+ * - @link ::bm_lines_mode BM_LINES_UP @endlink means that the vertical menu lines will go upwards
+ */
+enum bm_lines_mode {
+    BM_LINES_DOWN,
+    BM_LINES_UP,
+};
+
+/**
  * Result constants for the menu run functions.
  *
  * - @link ::bm_run_result BM_RUN_RESULT_RUNNING @endlink means that menu is running and thus should be still renderer && ran.
@@ -505,6 +516,22 @@ BM_PUBLIC void bm_menu_set_lines(struct bm_menu *menu, uint32_t lines);
 BM_PUBLIC uint32_t bm_menu_get_lines(struct bm_menu *menu);
 
 /**
+ * Set the direction in which lines should go after the filter text.
+ *
+ * @param menu bm_menu instance where to set lines direction.
+ * @param mode bm_lines_mode constant.
+ */
+BM_PUBLIC void bm_menu_set_lines_mode(struct bm_menu *menu, enum bm_lines_mode mode);
+
+/**
+ * Get the direction in which lines should go after the filter text.
+ *
+ * @param menu bm_menu instance where to get the lines direction.
+ * @return bm_lines_mode constant
+ */
+BM_PUBLIC enum bm_lines_mode bm_menu_get_lines_mode(struct bm_menu *menu);
+
+/**
  * Set selection wrapping on/off.
  *
  * @param menu bm_menu instance where to toggle selection wrapping.
@@ -780,6 +807,23 @@ BM_PUBLIC void bm_menu_set_align(struct bm_menu *menu, enum bm_align align);
  */
 
 BM_PUBLIC enum bm_align bm_menu_get_align(struct bm_menu *menu);
+
+/**
+ * Set the vertical/y offset of the window.
+ *
+ * @param menu bm_menu to set offset for.
+ * @param y_offset offset to set.
+ */
+BM_PUBLIC void bm_menu_set_y_offset(struct bm_menu *menu, int32_t y_offset);
+
+/**
+ * Get the vertical/y offset of the window.
+ *
+ * @param menu bm_menu to get y offset from.
+ * @return y offset of the menu.
+ */
+
+BM_PUBLIC int32_t bm_menu_get_y_offset(struct bm_menu *menu);
 
 /**
  * Set the horizontal margin and the relative width factor of the bar.

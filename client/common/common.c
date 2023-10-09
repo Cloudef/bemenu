@@ -174,7 +174,7 @@ usage(FILE *out, const char *name)
           " -i, --ignorecase      match items case insensitively.\n"
           " -F, --filter          filter entries for a given string before showing the menu.\n"
           " -w, --wrap            wraps cursor selection.\n"
-          " -l, --list            list items vertically with the given number of lines.\n"
+          " -l, --list            list items vertically down or up with the given number of lines(number of lines down/up). (down (default), up)\n"
           " -p, --prompt          defines the prompt text to be displayed.\n"
           " -P, --prefix          text to show before highlighted item.\n"
           " -I, --index           select item at index automatically.\n"
@@ -358,8 +358,12 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->wrap = true;
                 break;
             case 'l':
-                client->lines = strtol(optarg, NULL, 10);
+            {
+                char *ptr;
+                client->lines = strtol(optarg, &ptr, 10);
+                client->lines_mode = (!strcmp(ptr + 1, "up") ? BM_LINES_UP : BM_LINES_DOWN);
                 break;
+            }
             case 'c':
                 client->center = true;
                 break;
@@ -566,6 +570,7 @@ menu_with_options(struct client *client)
     bm_menu_set_prefix(menu, client->prefix);
     bm_menu_set_filter_mode(menu, client->filter_mode);
     bm_menu_set_lines(menu, client->lines);
+    bm_menu_set_lines_mode(menu, client->lines_mode);
     bm_menu_set_wrap(menu, client->wrap);
     bm_menu_set_monitor(menu, client->monitor);
     bm_menu_set_monitor_name(menu, client->monitor_name);
