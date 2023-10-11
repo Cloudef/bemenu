@@ -353,6 +353,19 @@ bm_wl_window_set_align(struct window *window, struct wl_display *display, enum b
 }
 
 void
+bm_wl_window_set_y_offset(struct window *window, struct wl_display *display, int32_t y_offset)
+{
+    if(window->y_offset == y_offset)
+        return;
+
+    window->y_offset = y_offset;
+
+    zwlr_layer_surface_v1_set_margin(window->layer_surface, window->y_offset, 0, 0, 0);
+    wl_surface_commit(window->surface);
+    wl_display_roundtrip(display);
+}
+
+void
 bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab)
 {
     zwlr_layer_surface_v1_set_keyboard_interactivity(window->layer_surface, grab);

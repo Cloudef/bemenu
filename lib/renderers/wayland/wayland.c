@@ -398,6 +398,18 @@ set_align(const struct bm_menu *menu, enum bm_align align)
 }
 
 static void
+set_y_offset(const struct bm_menu *menu, int32_t y_offset)
+{
+    struct wayland *wayland = menu->renderer->internal;
+    assert(wayland);
+
+    struct window *window;
+    wl_list_for_each(window, &wayland->windows, link) {
+        bm_wl_window_set_y_offset(window, wayland->display, y_offset);
+    }
+}
+
+static void
 grab_keyboard(const struct bm_menu *menu, bool grab)
 {
     struct wayland *wayland = menu->renderer->internal;
@@ -597,6 +609,7 @@ register_renderer(struct render_api *api)
     api->release_touch = release_touch;
     api->render = render;
     api->set_align = set_align;
+    api->set_y_offset = set_y_offset;
     api->set_width = set_width;
     api->grab_keyboard = grab_keyboard;
     api->set_overlap = set_overlap;
