@@ -314,10 +314,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     uint32_t page_length = 0;
 
     if (menu->lines_mode == BM_LINES_UP && !menu->fixed_height) {
-        struct cairo_result dummy_result;
-        bm_cairo_draw_line_str(cairo, &paint, &dummy_result, "");
-
-        int32_t new_y_offset = (count < lines ? (lines - count) * result.height : 0);
+        int32_t new_y_offset = (count < lines ? (lines - count) * height : 0);
         bm_menu_set_y_offset(menu, new_y_offset);
     }
 
@@ -330,7 +327,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
         enum bm_color title_bg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_TITLE_BG);
         bm_cairo_color_from_menu_color(menu, title_fg, &paint.fg);
         bm_cairo_color_from_menu_color(menu, title_bg, &paint.bg);
-        paint.pos = (struct pos){ result.x_advance + border_size + 4, vpadding + border_size };
+        paint.pos = (struct pos){ border_size + 4, vpadding + border_size };
         paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
         bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
         title_x = result.x_advance;
@@ -528,14 +525,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
         
     }
 
-    struct cairo_paint pre_up_drawing = paint;  // Some behavior may depend on the previous paint.
-
     if (menu->lines_mode == BM_LINES_UP) {
         if (menu->title) {
             bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.fg);
             bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
         
-            paint.pos = (struct pos){ border_size, posy + border_size };
+            paint.pos = (struct pos){ border_size + 4, posy + vpadding + border_size };
             paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
             bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
         }
@@ -570,8 +565,6 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
         posy += (spacing_y ? spacing_y : result.height);
         out_result->height = posy;
         out_result->displayed++;
-
-        paint = pre_up_drawing;
     }
 
     if (menu->counter) {

@@ -128,6 +128,7 @@ struct window {
     uint32_t displayed;
     struct wl_list link;
     enum bm_align align;
+    int32_t y_offset;
     uint32_t align_anchor;
     bool render_pending;
 
@@ -175,6 +176,7 @@ void bm_wl_window_schedule_render(struct window *window);
 void bm_wl_window_render(struct window *window, struct wl_display *display, struct bm_menu *menu);
 void bm_wl_window_set_width(struct window *window, struct wl_display *display, uint32_t margin, float factor);
 void bm_wl_window_set_align(struct window *window, struct wl_display *display, enum bm_align align);
+void bm_wl_window_set_y_offset(struct window *window, struct wl_display *display, int32_t y_offset);
 void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *display, bool grab);
 void bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap);
 bool bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface);

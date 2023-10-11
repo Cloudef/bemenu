@@ -251,7 +251,6 @@ bm_x11_window_set_y_offset(struct window *window, int32_t y_offset)
         return;
 
     window->y_offset = y_offset;
-    XMoveWindow(window->display, window->drawable, window->x, window->y + window->y_offset);
 }
 
 void
