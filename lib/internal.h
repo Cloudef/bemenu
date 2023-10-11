@@ -410,12 +410,12 @@ struct bm_menu {
     /**
      * Border size
      */
-    uint32_t border_size;
+    double border_size;
 
     /**
      * Border radius
      */
-    uint32_t border_radius;
+    double border_radius;
 
     /**
      * Is menu grabbed?

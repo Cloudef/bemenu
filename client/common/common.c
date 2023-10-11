@@ -443,10 +443,10 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 client->width_factor = strtof(optarg, NULL);
                 break;
             case 'B':
-                client->border_size = strtol(optarg, NULL, 10);
+                client->border_size = strtod(optarg, NULL);
                 break;
             case 'R':
-                client->border_radius = strtol(optarg, NULL, 10);
+                client->border_radius = strtod(optarg, NULL);
                 break;
             case 0x120:
                 client->cursor_height = strtol(optarg, NULL, 10);
