@@ -361,13 +361,13 @@ bm_menu_get_hpadding(struct bm_menu *menu)
 }
 
 void
-bm_menu_set_border_size(struct bm_menu* menu, uint32_t border_size)
+bm_menu_set_border_size(struct bm_menu* menu, double border_size)
 {
     assert(menu);
     menu->border_size = border_size;
 }
 
-uint32_t
+double
 bm_menu_get_border_size(struct bm_menu* menu)
 {
     assert(menu);
@@ -375,13 +375,13 @@ bm_menu_get_border_size(struct bm_menu* menu)
 }
 
 void
-bm_menu_set_border_radius(struct bm_menu* menu, uint32_t border_radius)
+bm_menu_set_border_radius(struct bm_menu* menu, double border_radius)
 {
     assert(menu);
     menu->border_radius = border_radius;
 }
 
-uint32_t
+double
 bm_menu_get_border_radius(struct bm_menu* menu)
 {
     assert(menu);

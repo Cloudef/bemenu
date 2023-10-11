@@ -289,12 +289,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     ascii_height = result.height;
     paint.baseline = result.baseline;
 
-    uint32_t border_size = menu->border_size;
+    double border_size = menu->border_size;
     width -= border_size;
     uint32_t height = fmin(fmax(menu->line_height, ascii_height), max_height);
     uint32_t vpadding = (height - ascii_height)/2;
 
-    uint32_t border_radius = menu->border_radius;
+    double border_radius = menu->border_radius;
 
     uint32_t total_item_count = menu->items.count;
     uint32_t filtered_item_count;
@@ -324,24 +324,32 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     memset(&result, 0, sizeof(result));
     uint32_t title_x = 0;
 
-    enum bm_color prompt_text_color = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_TITLE_BG : BM_COLOR_TITLE_FG); // essentially hide the prompt when using upwards list mode.
-    bm_cairo_color_from_menu_color(menu, prompt_text_color, &paint.fg);
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
-    paint.pos = (struct pos){ result.x_advance + border_size + 4, vpadding + border_size };
-    paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
-    bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
-    title_x = result.x_advance;
+    if (menu->title) {
+        /* Essentially hide the title text if we are drawing lines "up". */
+        enum bm_color title_fg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_TITLE_FG);
+        enum bm_color title_bg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_TITLE_BG);
+        bm_cairo_color_from_menu_color(menu, title_fg, &paint.fg);
+        bm_cairo_color_from_menu_color(menu, title_bg, &paint.bg);
+        paint.pos = (struct pos){ result.x_advance + border_size + 4, vpadding + border_size };
+        paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
+        bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
+        title_x = result.x_advance;
+    }
 
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_CURSOR_FG, &paint.cursor_fg);
-    bm_cairo_color_from_menu_color(menu, BM_COLOR_CURSOR_BG, &paint.cursor_bg);
+    enum bm_color filter_fg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_FILTER_FG);
+    enum bm_color filter_bg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_FILTER_BG);
+    enum bm_color cursor_fg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_CURSOR_FG);
+    enum bm_color cursor_bg = (menu->lines_mode == BM_LINES_UP ? BM_COLOR_ITEM_BG : BM_COLOR_CURSOR_BG);
+    bm_cairo_color_from_menu_color(menu, filter_fg, &paint.fg);
+    bm_cairo_color_from_menu_color(menu, filter_bg, &paint.bg);
+    bm_cairo_color_from_menu_color(menu, cursor_fg, &paint.cursor_fg);
+    bm_cairo_color_from_menu_color(menu, cursor_bg, &paint.cursor_bg);
     paint.draw_cursor = true;
     paint.cursor = menu->cursor;
     paint.cursor_height = menu->cursor_height;
     paint.cursor_width = menu->cursor_width;
-    paint.pos = (struct pos){ 2 + result.x_advance + border_size, vpadding + border_size };
-    paint.box = (struct box){ 2, 0, vpadding, -vpadding, width - paint.pos.x, height };
+    paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance + border_size, vpadding + border_size };
+    paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, -vpadding, width - paint.pos.x, height };
 
     if (menu->lines == 0 || menu->lines_mode == BM_LINES_DOWN) {
         const char *filter_text = (menu->filter ? menu->filter : "");
@@ -359,7 +367,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     }
 
     paint.draw_cursor = false;
-    const uint32_t titleh = result.height;
+    uint32_t titleh = (result.height > 0 ? result.height : height);
     out_result->height = titleh;
 
     uint32_t posy = (menu->lines_mode == BM_LINES_UP ? 0 : titleh);
@@ -395,10 +403,12 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
                 continue;
             }
 
+
             uint32_t is_fixed_up = (menu->fixed_height && menu->lines_mode == BM_LINES_UP);
             uint32_t required_empty = (count > lines ? 0 : lines - count);
-            uint32_t last_item_index = (count < lines ? count - 1 : lines - 1);
-            uint32_t display_item_index = (menu->lines_mode == BM_LINES_DOWN ? i : menu->fixed_height ? last_item_index - i + required_empty : last_item_index - i);
+            int32_t last_item_index = (count < lines ? count - 1 + page : lines - 1 + page);
+            int32_t display_item_index = (menu->lines_mode == BM_LINES_DOWN ? i : menu->fixed_height ? last_item_index - i + page + required_empty  : last_item_index - i + page);
+            display_item_index = (display_item_index < 0 ? 0 : display_item_index);
 
             bool highlighted = false;
             if ((i < count && !is_fixed_up) || (is_fixed_up && display_item_index <= last_item_index)) {
@@ -518,13 +528,17 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
         
     }
 
+    struct cairo_paint pre_up_drawing = paint;  // Some behavior may depend on the previous paint.
+
     if (menu->lines_mode == BM_LINES_UP) {
-        bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.fg);
-        bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
+        if (menu->title) {
+            bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_FG, &paint.fg);
+            bm_cairo_color_from_menu_color(menu, BM_COLOR_TITLE_BG, &paint.bg);
         
-        paint.pos = (struct pos){ border_size, posy - border_size };
-        paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
-        bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
+            paint.pos = (struct pos){ border_size, posy + border_size };
+            paint.box = (struct box){ 4, 16, vpadding, -vpadding, 0, height };
+            bm_cairo_draw_line(cairo, &paint, &result, "%s", menu->title);
+        }
 
         bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_FG, &paint.fg);
         bm_cairo_color_from_menu_color(menu, BM_COLOR_FILTER_BG, &paint.bg);
@@ -534,8 +548,9 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
         paint.cursor = menu->cursor;
         paint.cursor_height = menu->cursor_height;
         paint.cursor_width = menu->cursor_width;
-        paint.pos = (struct pos){ 2 + result.x_advance + border_size, posy - border_size };
-        paint.box = (struct box){ 2, 0, vpadding, -vpadding, width - paint.pos.x, height };
+        result.x_advance = (menu->title ? result.x_advance : 0);
+        paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance + border_size, posy + border_size };
+        paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, -vpadding, width - paint.pos.x, height };
 
         const char *filter_text = (menu->filter ? menu->filter : "");
         if (menu->password == BM_PASSWORD_HIDE) {
@@ -550,15 +565,22 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
             bm_cairo_draw_line(cairo, &paint, &result, "%s", filter_text);
         }
 
+        paint.draw_cursor = false;
+
         posy += (spacing_y ? spacing_y : result.height);
         out_result->height = posy;
         out_result->displayed++;
+
+        paint = pre_up_drawing;
     }
 
     if (menu->counter) {
         char counter[128];
         snprintf(counter, sizeof(counter), "[%u/%u]", filtered_item_count, total_item_count);
         bm_pango_get_text_extents(cairo, &paint, &result, "%s", counter);
+        
+        bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_FG, &paint.fg);
+        bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
         paint.pos = (struct pos){ width/cairo->scale - result.x_advance - 10, vpadding + border_size };
         paint.box = (struct box){ 1, 2, vpadding, -vpadding, 0, height };
         bm_cairo_draw_line(cairo, &paint, &result, "%s", counter);
