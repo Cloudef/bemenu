@@ -1117,21 +1117,61 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
 
         case BM_KEY_PASTE:
             {
-                FILE *clipboard;
-                clipboard = popen("wl-paste -t text/plain", "r");
-                if (!clipboard) {
-                    clipboard = popen("xclip -t text/plain -out", "r");
+                char *paster[] = {"wl-paste -t text/plain", "xclip -t text/plain -out"};
+                for (size_t paster_i = 0; paster_i < sizeof paster / sizeof paster[0]; paster_i++) {
+                    FILE *clipboard = popen(paster[paster_i], "r");
+                    if (clipboard == NULL) {
+                        fprintf(stderr, "popen() for '%s' failed: ", paster[paster_i]);
+                        perror(NULL);
+                        continue;
+                    }
+
+                    char *line = NULL;
+                    size_t len = 0;
+                    ssize_t nread;
+
+                    char *pasted_buf = NULL;
+                    size_t pasted_len = 0;
+
+                    /* Buffer all output first. If the child doesn't exit
+                     * with 0, we won't use this output and assume that it
+                     * was garbage. */
+                    while ((nread = getline(&line, &len, clipboard)) != -1) {
+                        pasted_buf = realloc(pasted_buf, pasted_len + (size_t)nread);
+                        if (pasted_buf == NULL) {
+                            fprintf(stderr, "realloc() while reading from paster '%s' failed: ", paster[paster_i]);
+                            perror(NULL);
+                            continue;
+                        }
+
+                        memmove(pasted_buf + pasted_len, line, (size_t)nread);
+                        pasted_len += (size_t)nread;
+                    }
+
+                    free(line);
+
+                    int wstatus = pclose(clipboard);
+                    if (WIFEXITED(wstatus) && WEXITSTATUS(wstatus) == 0) {
+                        for (size_t i = 0; i < pasted_len; i++) {
+                            size_t width;
+                            menu->cursor += bm_unicode_insert(&menu->filter, &menu->filter_size, menu->cursor, pasted_buf[i], &width);
+                            menu->curses_cursor += width;
+                        }
+                        free(pasted_buf);
+                        break;
+                    } else if (wstatus == -1) {
+                        fprintf(stderr, "Waiting for clipboard paste program '%s' failed: ", paster[paster_i]);
+                        perror(NULL);
+                    } else {
+                        if (WIFEXITED(wstatus)) {
+                            fprintf(stderr, "Clipboard paste program '%s' exited with %d, discarding\n", paster[paster_i], WEXITSTATUS(wstatus));
+                        } else {
+                            fprintf(stderr, "Clipboard paste program '%s' died abnormally, discarding\n", paster[paster_i]);
+                        }
+                    }
+
+                    free(pasted_buf);
                 }
-                if (!clipboard) {
-                    break;
-                }
-                int c;
-                while ((c = fgetc(clipboard)) != EOF) {
-                    size_t width;
-                    menu->cursor += bm_unicode_insert(&menu->filter, &menu->filter_size, menu->cursor, c, &width);
-                    menu->curses_cursor += width;
-                }
-                pclose(clipboard);
             }
             break;
 
