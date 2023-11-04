@@ -8,7 +8,6 @@
 #include <linux/input-event-codes.h>
 
 #include "wlr-layer-shell-unstable-v1.h"
-#include "xdg-output-unstable-v1.h"
 #include "renderers/cairo_renderer.h"
 
 struct bm_menu;
@@ -115,6 +114,8 @@ struct buffer {
 };
 
 struct window {
+    struct wayland *wayland;
+    struct wl_list surf_outputs;
     struct wl_surface *surface;
     struct wl_callback *frame_cb;
     struct zwlr_layer_surface_v1 *layer_surface;
@@ -137,11 +138,15 @@ struct window {
 
 struct output {
     struct wl_output *output;
-    struct zxdg_output_v1 *xdg_output;
     struct wl_list link;
-    int height;
+    uint32_t height;
     int scale;
     char *name;
+};
+
+struct surf_output {
+    struct output *output;
+    struct wl_list link;
 };
 
 struct wayland {
@@ -154,12 +159,12 @@ struct wayland {
     struct wl_registry *registry;
     struct wl_compositor *compositor;
     struct wl_list outputs;
+    struct output *selected_output;
     struct wl_seat *seat;
     struct zwlr_layer_shell_v1 *layer_shell;
     struct wl_shm *shm;
     struct input input;
     struct wl_list windows;
-    struct zxdg_output_manager_v1 *xdg_output_manager;
     uint32_t formats;
 };
 
@@ -174,6 +179,9 @@ void bm_wl_window_grab_keyboard(struct window *window, struct wl_display *displa
 void bm_wl_window_set_overlap(struct window *window, struct wl_display *display, bool overlap);
 bool bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface);
 void bm_wl_window_destroy(struct window *window);
+
+void recreate_windows(const struct bm_menu *menu, struct wayland *wayland);
+void window_update_output(struct window *window);
 
 #endif /* _BM_WAYLAND_H_ */
 

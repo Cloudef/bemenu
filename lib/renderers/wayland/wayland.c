@@ -421,6 +421,50 @@ set_overlap(const struct bm_menu *menu, bool overlap)
     }
 }
 
+void
+wl_surface_enter(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output)
+{
+    (void)wl_surface;
+    struct window *window = data;
+    struct wayland *wayland = window->wayland;
+
+    struct output *output;
+    wl_list_for_each(output, &wayland->outputs, link) {
+        if (output->output == wl_output) {
+            struct surf_output *surf_output = calloc(1, sizeof(struct surf_output));
+            surf_output->output = output;
+            wl_list_insert(&window->surf_outputs, &surf_output->link);
+            break;
+        }
+    }
+
+    window_update_output(window);
+}
+
+void
+wl_surface_leave(void *data, struct wl_surface *wl_surface,
+                 struct wl_output *wl_output)
+{
+    (void)wl_surface;
+    struct window *window = data;
+
+    struct surf_output *surf_output;
+    wl_list_for_each(surf_output, &window->surf_outputs, link) {
+        if (surf_output->output->output == wl_output) {
+            wl_list_remove(&surf_output->link);
+            break;
+        }
+    }
+
+    window_update_output(window);
+}
+
+static const struct wl_surface_listener surface_listener = {
+    .enter = wl_surface_enter,
+    .leave = wl_surface_leave,
+};
+
 static void
 destroy_windows(struct wayland *wayland)
 {
@@ -431,57 +475,71 @@ destroy_windows(struct wayland *wayland)
     wl_list_init(&wayland->windows);
 }
 
-static void
+void
+window_update_output(struct window *window)
+{
+    int32_t max_scale = 1;
+    uint32_t max_height = 0;
+
+    struct surf_output *surf_output;
+    wl_list_for_each(surf_output, &window->surf_outputs, link) {
+        if (surf_output->output->scale > max_scale) {
+            max_scale = surf_output->output->scale;
+        }
+        if (max_height == 0 || surf_output->output->height < max_height) {
+            max_height = surf_output->output->height;
+        };
+    }
+
+    const char *scale = getenv("BEMENU_SCALE");
+    if (scale) {
+        max_scale = fmax(strtof(scale, NULL), 1.0f);
+    }
+
+    if (max_height != window->max_height) {
+        window->max_height = max_height;
+    }
+
+    if (max_scale != window->scale) {
+        window->scale = max_scale;
+    }
+}
+
+void
 recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
 {
     destroy_windows(wayland);
 
-    int32_t monitors = 0;
-    struct output *output;
-    wl_list_for_each(output, &wayland->outputs, link)
-        monitors++;
+    struct window *window = calloc(1, sizeof(struct window));
+    wl_list_init(&window->surf_outputs);
+    window->wayland = wayland;
+    window->align = menu->align;
+    window->hmargin_size = menu->hmargin_size;
+    window->width_factor = menu->width_factor;
 
-    int32_t monitor = 0;
-    wl_list_for_each(output, &wayland->outputs, link) {
+    struct wl_surface *surface = NULL;
+    if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+        goto fail;
 
-        if (!menu->monitor_name) {
-            if (menu->monitor > -1) {
-                 if (menu->monitor < monitors && monitor != menu->monitor) {
-                    ++monitor;
-                    continue;
-                }
-            }
-        } else if (strcmp(menu->monitor_name, output->name)) {
-            continue;
-        }
+    wl_surface_add_listener(surface, &surface_listener, window);
 
-        struct wl_surface *surface;
-        if (!(surface = wl_compositor_create_surface(wayland->compositor)))
-            goto fail;
+    struct output *output = NULL;
+    if (wayland->selected_output) {
+        fprintf(stderr, "selected output\n");
+        output = wayland->selected_output;
+    };
 
-        wl_surface_set_buffer_scale(surface, output->scale);
+    struct wl_output *wl_output = NULL;
+    if (output)
+        wl_output = output->output;
 
-        struct window *window = calloc(1, sizeof(struct window));
-        window->align = menu->align;
-        window->hmargin_size = menu->hmargin_size;
-        window->width_factor = menu->width_factor;
+    if (!bm_wl_window_create(window, wayland->display, wayland->shm,
+                             wl_output, wayland->layer_shell, surface))
+        free(window);
 
-        const char *scale = getenv("BEMENU_SCALE");
-        if (scale) {
-            window->scale = fmax(strtof(scale, NULL), 1.0f);
-        } else {
-            window->scale = output->scale;
-        }
-
-        if (!bm_wl_window_create(window, wayland->display, wayland->shm, (menu->monitor == -1) ? NULL : output->output, wayland->layer_shell, surface))
-            free(window);
-
-        window->notify.render = bm_cairo_paint;
-        window->max_height = output->height;
-        window->render_pending = true;
-        wl_list_insert(&wayland->windows, &window->link);
-        if (menu->monitor != -2) break;
-    }
+    window->notify.render = bm_cairo_paint;
+    window->render_pending = true;
+    wl_list_insert(&wayland->windows, &window->link);
 
     set_overlap(menu, menu->overlap);
     grab_keyboard(menu, menu->grabbed);
@@ -508,7 +566,19 @@ set_monitor_name(const struct bm_menu *menu, char *monitor_name)
     (void)monitor_name;
     struct wayland *wayland = menu->renderer->internal;
     assert(wayland);
-    recreate_windows(menu, wayland);
+
+    if (!monitor_name) {
+        return;
+    }
+
+    struct output *output;
+    wl_list_for_each(output, &wayland->outputs, link) {
+        if (0 == strcmp(monitor_name, output->name)) {
+            wayland->selected_output = output;
+            recreate_windows(menu, wayland);
+            return;
+        }
+    }
 }
 
 static void
