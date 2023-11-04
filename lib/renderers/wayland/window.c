@@ -189,6 +189,8 @@ next_buffer(struct window *window)
     if (!buffer->buffer && !create_buffer(window->shm, buffer, window->width * window->scale, window->height * window->scale, WL_SHM_FORMAT_ARGB8888, window->scale))
         return NULL;
 
+    wl_surface_set_buffer_scale(window->surface, window->scale);
+
     return buffer;
 }
 
