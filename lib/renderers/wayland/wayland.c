@@ -479,15 +479,15 @@ void
 window_update_output(struct window *window)
 {
     int32_t max_scale = 1;
-    uint32_t max_height = 0;
+    uint32_t min_max_height = 0;
 
     struct surf_output *surf_output;
     wl_list_for_each(surf_output, &window->surf_outputs, link) {
         if (surf_output->output->scale > max_scale) {
             max_scale = surf_output->output->scale;
         }
-        if (max_height == 0 || surf_output->output->height < max_height) {
-            max_height = surf_output->output->height;
+        if (min_max_height == 0 || surf_output->output->height < min_max_height) {
+            min_max_height = surf_output->output->height;
         };
     }
 
@@ -496,8 +496,8 @@ window_update_output(struct window *window)
         max_scale = fmax(strtof(scale, NULL), 1.0f);
     }
 
-    if (max_height != window->max_height) {
-        window->max_height = max_height;
+    if (min_max_height != window->max_height) {
+        window->max_height = min_max_height;
     }
 
     if (max_scale != window->scale) {
