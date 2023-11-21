@@ -1,3 +1,5 @@
+#include "../client/common/common.h"
+
 /**
  * Default font.
  */
@@ -26,4 +28,22 @@ static const char *default_colors[BM_COLOR_LAST] = {
     "#121212FF", // BM_COLOR_SCROLLBAR_BG
     "#D81860FF", // BM_COLOR_SCROLLBAR_FG
     "#D81860FF", // BM_COLOR_BORDER
+};
+
+/**
+ * Default title/prompt for the bmenu client (Can be changed with `-p` option).
+ */
+static struct client default_bmenu_client = {
+        .filter_mode = BM_FILTER_MODE_DMENU,
+        .title = "bemenu",
+        .monitor = -1,
+};
+
+/**
+ * Default title/prompt for the bmenu-run client (Can be changed with `-p` option).
+ */
+static struct client default_bmenu_run_client = {
+        .filter_mode = BM_FILTER_MODE_DMENU,
+        .title = "bemenu-run",
+        .monitor = -1,
 };
