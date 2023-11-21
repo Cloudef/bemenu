@@ -188,6 +188,7 @@ usage(FILE *out, const char *name)
           " --scrollbar           display scrollbar. (none (default), always, autohide)\n"
           " --counter             display a matched/total items counter. (none (default), always)\n"
           " -e, --vim-esc-exits   exit bemenu when pressing escape in normal mode for vim bindings\n"
+          " -N, --vim-normal-mode start in normal mode for vim bindings\n"
           " --accept-single       immediately return if there is only one item.\n"
           " --ifne                only display menu if there are items.\n"
           " --single-instance     force a single menu instance.\n"
@@ -283,6 +284,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "scrollbar",    required_argument, 0, 0x100 },
         { "counter",      required_argument, 0, 0x10a },
         { "vim-esc-exits",no_argument,       0, 'e' },
+        { "vim-normal-mode",no_argument,     0, 'N'},
         { "accept-single",no_argument,       0, 0x11a },
         { "auto-select",  no_argument,       0, 0x11b },
         { "ifne",         no_argument,       0, 0x117 },
@@ -387,6 +389,9 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'e':
                 client->vim_esc_exits = true;
+                break;
+            case 'N':
+                client->vim_init_mode_normal = true;
                 break;
             case 0x11a:
                 client->accept_single = true;
@@ -558,6 +563,10 @@ menu_with_options(struct client *client)
     struct bm_menu *menu;
     if (!(menu = bm_menu_new(NULL)))
         return NULL;
+
+    if (client->vim_init_mode_normal) {
+        menu->vim_mode = 'n';
+    }
 
     client->fork = (client->force_fork || (bm_renderer_get_priorty(bm_menu_get_renderer(menu)) != BM_PRIO_TERMINAL));
 

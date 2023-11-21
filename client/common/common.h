@@ -31,6 +31,7 @@ struct client {
     bool fixed_height; 
     bool counter;
     bool vim_esc_exits; 
+    bool vim_init_mode_normal;
     bool accept_single;
     bool auto_select;
     bool ifne;
