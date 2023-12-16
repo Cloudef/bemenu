@@ -388,7 +388,8 @@ bm_wl_window_create(struct window *window, struct wl_display *display, struct wl
 {
     assert(window);
 
-    if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, ZWLR_LAYER_SHELL_V1_LAYER_TOP, "menu"))) {
+    enum zwlr_layer_shell_v1_layer layer = ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
+    if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, layer, "menu"))) {
         zwlr_layer_surface_v1_add_listener(window->layer_surface, &layer_surface_listener, window);
         window->align_anchor = get_align_anchor(window->align);
         zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
