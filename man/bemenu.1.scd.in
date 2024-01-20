@@ -271,7 +271,7 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 *S-<carriage-return>, Insert*
 	Print the filter text to standard output and exit.
 
-*C-l, <cursor-left>*
+*C-b, C-l, <cursor-left>*
 	Move cursor left.
 
 *C-f, <cursor-right>*
