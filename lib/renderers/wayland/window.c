@@ -189,8 +189,6 @@ next_buffer(struct window *window)
     if (!buffer->buffer && !create_buffer(window->shm, buffer, window->width * window->scale, window->height * window->scale, WL_SHM_FORMAT_ARGB8888, window->scale))
         return NULL;
 
-    wl_surface_set_buffer_scale(window->surface, window->scale);
-
     return buffer;
 }
 
@@ -266,6 +264,7 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
 
     wl_surface_damage_buffer(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
+    wl_surface_set_buffer_scale(window->surface, window->scale);
     wl_surface_commit(window->surface);
     buffer->busy = true;
     window->render_pending = false;
