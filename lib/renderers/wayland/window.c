@@ -253,10 +253,10 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
         window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
-        if (window->height == (uint32_t) ceil(result.height / window->scale))
+        if (window->height == (uint32_t) ceil(result.height / buffer->cairo.scale))
             break;
 
-        window->height = ceil(result.height / window->scale);
+        window->height = ceil(result.height / buffer->cairo.scale);
         zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
         destroy_buffer(buffer);
     }
