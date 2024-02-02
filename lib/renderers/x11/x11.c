@@ -277,7 +277,7 @@ destructor(struct bm_menu *menu)
 static bool
 constructor(struct bm_menu *menu)
 {
-    if (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET"))
+    if (!getenv("BEMENU_BACKEND") && (getenv("WAYLAND_DISPLAY") || getenv("WAYLAND_SOCKET")))
         return false;
 
     struct x11 *x11;
