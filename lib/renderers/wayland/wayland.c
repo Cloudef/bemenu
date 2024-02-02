@@ -515,7 +515,7 @@ window_update_output(struct window *window)
         window->max_height = min_max_height;
     }
 
-    if (!window->wayland->fractional_scaling && max_scale != window->scale) {
+    if (max_scale != window->scale) {
         window->scale = max_scale;
     }
 }

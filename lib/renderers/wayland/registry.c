@@ -595,10 +595,6 @@ registry_handle_global(void *data, struct wl_registry *registry, uint32_t id, co
         output->output = wl_output;
         wl_list_insert(&wayland->outputs, &output->link);
         wl_output_add_listener(wl_output, &output_listener, output);
-    } else if (strcmp(interface, "wp_fractional_scale_manager_v1") == 0) {
-        wayland->wfs_mgr = wl_registry_bind(registry, id, &wp_fractional_scale_manager_v1_interface, 1);
-    } else if (strcmp(interface, "wp_viewporter") == 0) {
-        wayland->viewporter = wl_registry_bind(registry, id, &wp_viewporter_interface, 1);
     }
 }
 
@@ -663,9 +659,6 @@ bm_wl_registry_register(struct wayland *wayland)
     wl_display_roundtrip(wayland->display); // trip 2, global listeners
     if (!wayland->input.keyboard || !(wayland->formats & (1 << WL_SHM_FORMAT_ARGB8888)))
         return false;
-
-    if (wayland->wfs_mgr && wayland->viewporter)
-        wayland->fractional_scaling = true;
 
     set_repeat_info(&wayland->input, 40, 400);
     return true;
