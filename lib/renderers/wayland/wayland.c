@@ -510,7 +510,10 @@ window_update_output(struct window *window)
         window->max_height = min_max_height;
     }
 
-    if (max_scale != window->scale) {
+    const char *env_scale = getenv("BEMENU_SCALE");
+    if (env_scale) {
+        window->scale = 1;
+    } else if (max_scale != window->scale) {
         window->scale = max_scale;
     }
 }
