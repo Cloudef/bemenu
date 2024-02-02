@@ -664,8 +664,13 @@ bm_wl_registry_register(struct wayland *wayland)
     if (!wayland->input.keyboard || !(wayland->formats & (1 << WL_SHM_FORMAT_ARGB8888)))
         return false;
 
-    if (wayland->wfs_mgr && wayland->viewporter)
-        wayland->fractional_scaling = true;
+    if (wayland->wfs_mgr && wayland->viewporter) {
+        // This feature does not work with some compositors rn so mut be enabled with env var
+        const char *env = getenv("BEMENU_WL_FRACTIONAL_SCALING");
+        if (env && (!strcmp(env, "1") || !strcmp(env, "true"))) {
+            wayland->fractional_scaling = true;
+        }
+    }
 
     set_repeat_info(&wayland->input, 40, 400);
     return true;
