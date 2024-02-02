@@ -237,6 +237,7 @@ bm_wl_window_schedule_render(struct window *window)
 void
 bm_wl_window_render(struct window *window, struct wl_display *display, struct bm_menu *menu)
 {
+    (void)display;
     assert(window && menu);
     struct buffer *buffer;
     for (int tries = 0; tries < 2; ++tries) {
