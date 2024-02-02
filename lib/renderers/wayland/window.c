@@ -258,8 +258,6 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
 
         window->height = ceil(result.height / window->scale);
         zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
-        wl_surface_commit(window->surface);
-        wl_display_roundtrip(display);
         destroy_buffer(buffer);
     }
 
