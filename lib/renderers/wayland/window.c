@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <math.h>
 
 static int
 set_cloexec_or_close(int fd)
@@ -107,7 +108,7 @@ destroy_buffer(struct buffer *buffer)
 }
 
 static bool
-create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format, int32_t scale)
+create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format, double scale)
 {
     int fd = -1;
     struct wl_shm_pool *pool = NULL;
@@ -188,10 +189,10 @@ next_buffer(struct window *window)
     if (!buffer)
         return NULL;
 
-    if (window->width * window->scale != buffer->width || window->height * window->scale != buffer->height)
+    if ((uint32_t) ceil(window->width * window->scale) != buffer->width || (uint32_t) ceil(window->height * window->scale) != buffer->height)
         destroy_buffer(buffer);
 
-    if (!buffer->buffer && !create_buffer(window->shm, buffer, window->width * window->scale, window->height * window->scale, WL_SHM_FORMAT_ARGB8888, window->scale))
+    if (!buffer->buffer && !create_buffer(window->shm, buffer, ceil(window->width * window->scale), ceil(window->height * window->scale), WL_SHM_FORMAT_ARGB8888, window->scale))
         return NULL;
 
     return buffer;
@@ -258,17 +259,24 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
         window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
-        if (window->height == result.height / window->scale)
+        if (window->height == (uint32_t) ceil(result.height / window->scale))
             break;
 
-        window->height = result.height / window->scale;
+        window->height = ceil(result.height / window->scale);
         zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
         destroy_buffer(buffer);
     }
 
-    assert(window->width * window->scale == buffer->width);
-    assert(window->height * window->scale == buffer->height);
-    wl_surface_set_buffer_scale(window->surface, window->scale);
+    assert(ceil(window->width * window->scale) == buffer->width);
+    assert(ceil(window->height * window->scale) == buffer->height);
+
+    if (window->wayland->fractional_scaling) {
+        assert(window->viewport_surface);
+        wp_viewport_set_destination(window->viewport_surface, window->width, window->height);
+    } else {
+        wl_surface_set_buffer_scale(window->surface, window->scale);
+    }
+
     wl_surface_damage_buffer(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
     wl_surface_commit(window->surface);
@@ -322,6 +330,21 @@ get_window_width(struct window *window)
 
     return width;
 }
+
+static void
+fractional_scale_preferred_scale(
+    void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
+    uint32_t scale)
+{
+    (void)wp_fractional_scale_v1;
+    struct window *window = data;
+
+    window->scale = (double)scale / 120;
+}
+
+static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
+    .preferred_scale = fractional_scale_preferred_scale,
+};
 
 static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
     .configure = layer_surface_configure,
@@ -392,6 +415,17 @@ bool
 bm_wl_window_create(struct window *window, struct wl_display *display, struct wl_shm *shm, struct wl_output *output, struct zwlr_layer_shell_v1 *layer_shell, struct wl_surface *surface)
 {
     assert(window);
+
+    struct wayland *wayland = window->wayland;
+
+    if (wayland->fractional_scaling) {
+        assert(wayland->wfs_mgr && wayland->viewporter);
+
+        struct wp_fractional_scale_v1 *wfs_surf = wp_fractional_scale_manager_v1_get_fractional_scale(wayland->wfs_mgr, surface);
+        wp_fractional_scale_v1_add_listener(
+            wfs_surf, &fractional_scale_listener, window);
+        window->viewport_surface = wp_viewporter_get_viewport(wayland->viewporter, surface);
+    }
 
     enum zwlr_layer_shell_v1_layer layer = ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
     if (layer_shell && (window->layer_surface = zwlr_layer_shell_v1_get_layer_surface(layer_shell, surface, output, layer, "menu"))) {
