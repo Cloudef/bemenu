@@ -260,9 +260,11 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
         destroy_buffer(buffer);
     }
 
+    assert(window->width * buffer->cairo.scale == buffer->width);
+    assert(window->height * buffer->cairo.scale == buffer->height);
+    wl_surface_set_buffer_scale(window->surface, buffer->cairo.scale);
     wl_surface_damage_buffer(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
-    wl_surface_set_buffer_scale(window->surface, window->scale);
     wl_surface_commit(window->surface);
     buffer->busy = true;
     window->render_pending = false;
