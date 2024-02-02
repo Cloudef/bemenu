@@ -506,11 +506,6 @@ window_update_output(struct window *window)
         };
     }
 
-    const char *scale = getenv("BEMENU_SCALE");
-    if (scale) {
-        max_scale = fmax(strtof(scale, NULL), 1.0f);
-    }
-
     if (min_max_height != window->max_height) {
         window->max_height = min_max_height;
     }

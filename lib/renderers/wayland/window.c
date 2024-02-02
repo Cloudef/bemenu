@@ -146,7 +146,12 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
     if (!(surf = cairo_image_surface_create_for_data(data, CAIRO_FORMAT_ARGB32, width, height, stride)))
         goto fail;
 
-    buffer->cairo.scale = scale;
+    const char *env_scale = getenv("BEMENU_SCALE");
+    if (env_scale) {
+        buffer->cairo.scale = fmax(strtof(env_scale, NULL), 1.0f);
+    } else {
+        buffer->cairo.scale = scale;
+    }
 
     if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
         cairo_surface_destroy(surf);
@@ -253,17 +258,17 @@ bm_wl_window_render(struct window *window, struct wl_display *display, struct bm
         window->notify.render(&buffer->cairo, buffer->width, window->max_height, menu, &result);
         window->displayed = result.displayed;
 
-        if (window->height == result.height / buffer->cairo.scale)
+        if (window->height == result.height / window->scale)
             break;
 
-        window->height = result.height / buffer->cairo.scale;
+        window->height = result.height / window->scale;
         zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
         destroy_buffer(buffer);
     }
 
-    assert(window->width * buffer->cairo.scale == buffer->width);
-    assert(window->height * buffer->cairo.scale == buffer->height);
-    wl_surface_set_buffer_scale(window->surface, buffer->cairo.scale);
+    assert(window->width * window->scale == buffer->width);
+    assert(window->height * window->scale == buffer->height);
+    wl_surface_set_buffer_scale(window->surface, window->scale);
     wl_surface_damage_buffer(window->surface, 0, 0, buffer->width, buffer->height);
     wl_surface_attach(window->surface, buffer->buffer, 0, 0);
     wl_surface_commit(window->surface);
