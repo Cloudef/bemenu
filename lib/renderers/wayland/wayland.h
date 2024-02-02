@@ -8,6 +8,8 @@
 #include <linux/input-event-codes.h>
 
 #include "wlr-layer-shell-unstable-v1.h"
+#include "fractional-scale-v1.h"
+#include "viewporter.h"
 #include "renderers/cairo_renderer.h"
 
 struct bm_menu;
@@ -119,12 +121,13 @@ struct window {
     struct wl_surface *surface;
     struct wl_callback *frame_cb;
     struct zwlr_layer_surface_v1 *layer_surface;
+    struct wp_viewport *viewport_surface;
     struct wl_shm *shm;
     struct buffer buffers[2];
     uint32_t width, height, max_height;
     uint32_t hmargin_size;
     float width_factor;
-    int32_t scale;
+    double scale;
     uint32_t displayed;
     struct wl_list link;
     enum bm_align align;
@@ -167,6 +170,9 @@ struct wayland {
     struct input input;
     struct wl_list windows;
     uint32_t formats;
+    struct wp_fractional_scale_manager_v1 *wfs_mgr;
+    struct wp_viewporter *viewporter;
+    bool fractional_scaling;
 };
 
 void bm_wl_repeat(struct wayland *wayland);

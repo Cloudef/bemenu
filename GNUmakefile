@@ -85,15 +85,33 @@ lib/renderers/wayland/wlr-layer-shell-unstable-v1.h: lib/renderers/wayland/wlr-l
 lib/renderers/wayland/wlr-layer-shell-unstable-v1.c: lib/renderers/wayland/wlr-layer-shell-unstable-v1.xml
 	wayland-scanner private-code < $^ > $@
 
+lib/renderers/wayland/fractional-scale-v1.h: lib/renderers/wayland/fractional-scale-v1.xml
+	wayland-scanner client-header < $^ > $@
+
+lib/renderers/wayland/fractional-scale-v1.c: lib/renderers/wayland/fractional-scale-v1.xml
+	wayland-scanner private-code < $^ > $@
+
+lib/renderers/wayland/viewporter.h: lib/renderers/wayland/viewporter.xml
+	wayland-scanner client-header < $^ > $@
+
+lib/renderers/wayland/viewporter.c: lib/renderers/wayland/viewporter.xml
+	wayland-scanner private-code < $^ > $@
+
 xdg-shell.a: private override LDFLAGS += -fPIC
 xdg-shell.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
 xdg-shell.a: lib/renderers/wayland/xdg-shell.c
 wlr-layer-shell.a: private override LDFLAGS += -fPIC
 wlr-layer-shell.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
 wlr-layer-shell.a: lib/renderers/wayland/wlr-layer-shell-unstable-v1.c lib/renderers/wayland/wlr-layer-shell-unstable-v1.h
+fractional-scale.a: private override LDFLAGS += -fPIC
+fractional-scale.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
+fractional-scale.a: lib/renderers/wayland/fractional-scale-v1.c lib/renderers/wayland/fractional-scale-v1.h
+viewporter.a: private override LDFLAGS += -fPIC
+viewporter.a: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client)
+viewporter.a: lib/renderers/wayland/viewporter.c lib/renderers/wayland/viewporter.h
 bemenu-renderer-wayland.so: private override LDLIBS += $(shell $(PKG_CONFIG) --libs wayland-client cairo pango pangocairo xkbcommon)
 bemenu-renderer-wayland.so: private override CPPFLAGS += $(shell $(PKG_CONFIG) --cflags-only-I wayland-client cairo pango pangocairo xkbcommon)
-bemenu-renderer-wayland.so: lib/renderers/cairo_renderer.h lib/renderers/wayland/wayland.c lib/renderers/wayland/wayland.h lib/renderers/wayland/registry.c lib/renderers/wayland/window.c xdg-shell.a wlr-layer-shell.a util.a
+bemenu-renderer-wayland.so: lib/renderers/cairo_renderer.h lib/renderers/wayland/wayland.c lib/renderers/wayland/wayland.h lib/renderers/wayland/registry.c lib/renderers/wayland/window.c xdg-shell.a wlr-layer-shell.a fractional-scale.a viewporter.a util.a
 
 common.a: client/common/common.c client/common/common.h
 bemenu: common.a client/bemenu.c
