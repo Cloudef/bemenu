@@ -281,7 +281,7 @@ bm_x11_window_create(struct window *window, Display *display)
 
     XSetWindowAttributes wa = {
         .override_redirect = True,
-        .event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask
+        .event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask | ButtonPressMask
     };
 
     XVisualInfo vinfo;
