@@ -90,9 +90,6 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
     uint32_t mods = wayland->input.modifiers;
     *unicode = xkb_state_key_get_utf32(wayland->input.xkb.state, wayland->input.code);
 
-    if (!*unicode && wayland->input.code == 23 && (mods & MOD_SHIFT))
-        return BM_KEY_SHIFT_TAB;
-
     wayland->input.sym = XKB_KEY_NoSymbol;
     wayland->input.code = 0;
 
@@ -140,6 +137,7 @@ poll_key(const struct bm_menu *menu, unsigned int *unicode)
         case XKB_KEY_Delete:
             return (mods & MOD_SHIFT ? BM_KEY_LINE_DELETE_LEFT : BM_KEY_DELETE);
 
+        case XKB_KEY_ISO_Left_Tab: //shift tab gives this sym
         case XKB_KEY_Tab:
             return (mods & MOD_SHIFT ? BM_KEY_SHIFT_TAB : BM_KEY_TAB);
 
