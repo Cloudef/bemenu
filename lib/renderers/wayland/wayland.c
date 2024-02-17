@@ -547,8 +547,10 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
         wl_output = output->output;
 
     if (!bm_wl_window_create(window, wayland->display, wayland->shm,
-                             wl_output, wayland->layer_shell, surface))
+                             wl_output, wayland->layer_shell, surface)) {
         free(window);
+        goto fail;
+    }
 
     window->notify.render = bm_cairo_paint;
     window->render_pending = true;
