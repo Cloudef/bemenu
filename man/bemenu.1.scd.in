@@ -309,6 +309,123 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 	Print selected items and exit with the custom error code 19, see _EXIT
 	STATUS_.
 
+## Vim bindings
+
+*bemenu* uses vim-like modal entry if invoked with *--binding vim*.
+These bindings roughly emulate insert and normal vim modes.
+The initial mode is insert mode, unless *--vim-normal-mode* is specified.
+
+In insert mode, all keys function as described above except for the following:
+
+*<escape>*
+	Switch to normal mode.
+
+In normal mode, only the following keys have meaning:
+
+*q*
+	Terminate *bemenu* without printing items.
+
+*i*
+	Enter insert mode.
+
+*I*
+	Enter insert mode after moving the cursor to the start.
+
+*a*
+	Enter insert mode after moving the cursor right.
+
+*A*
+	Enter insert mode after moving the cursor to the end.
+
+*cc*
+	Enter insert mode after clearing the filter.
+
+*cw*
+	Enter insert mode after removing all characters between the cursor and
+	the start of the next word.
+
+*cb*
+	Enter insert mode after removing all characters between the start of
+	the word and the cursor.
+
+*c$*
+	Enter insert mode after removing all characters after the cursor.
+
+*c0*
+	Enter insert mode after removing all characters before the cursor.
+
+*n*, *j*
+	Highlight the next item.
+
+*p*, *k*
+	Highlight the previous item.
+
+*gg*
+	Highlight the first item in the list.
+
+*G*
+	Highlight the last item in the list.
+
+*H*
+	Highlight the first visible item.
+
+*M*
+	Highlight the middle-most visible item.
+
+*L*
+	Highlight the last visible item.
+
+*v*
+	Select or deselect the higlighted item.
+
+*F*
+	Show the next page of items.
+
+*B*
+	Show the previous page of items.
+
+*h*
+	Move cursor left.
+
+*l*
+	Move cursor right.
+
+*0*
+	Move cursor to the start.
+
+*$*
+	Move cursor to the end.
+
+*w*
+	Move cursor forward to the start of a word.
+
+*b*
+	Move cursor backward to the start of a word.
+
+*e*
+	Move cursor forward to the end of a word.
+
+*x*
+	Remove character at the cursor.
+
+*X*
+	Remove character before the cursor.
+
+*dw*
+	Remove all characters between the cursor and start of the next word.
+
+*db*
+	Remove all characters between the start of the word and the cursor.
+
+*d$*
+	Remove all characters after the cursor.
+
+*d0*
+	Remove all characters before the cursor.
+
+*dd*
+	Clear the filter.
+
 # ENVIRONMENT
 
 [[ *BEMENU_OPTS*
