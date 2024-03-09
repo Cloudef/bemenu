@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <assert.h>
@@ -132,6 +133,14 @@ static inline void ignore_ret(int useless, ...) { (void)useless; }
 static void
 launch(const struct client *client, const char *bin)
 {
+    struct sigaction action = {
+        .sa_handler = SIG_DFL,
+        .sa_flags = SA_NOCLDWAIT
+    };
+
+    // do not care about childs
+    sigaction(SIGCHLD, &action, NULL);
+
     if (!bin)
         return;
 
