@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <assert.h>
@@ -166,14 +165,6 @@ item_cb(const struct client *client, struct bm_item *item)
 int
 main(int argc, char **argv)
 {
-    struct sigaction action = {
-        .sa_handler = SIG_DFL,
-        .sa_flags = SA_NOCLDWAIT
-    };
-
-    // do not care about childs
-    sigaction(SIGCHLD, &action, NULL);
-
     if (!bm_init())
         return EXIT_FAILURE;
 
