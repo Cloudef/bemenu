@@ -4,11 +4,6 @@
 #include <assert.h>
 #include "common/common.h"
 
-static struct client client = {
-    .filter_mode = BM_FILTER_MODE_DMENU,
-    .title = "bemenu",
-    .monitor = -1,
-};
 
 static void
 read_items_to_menu_from_stdin(struct bm_menu *menu)
@@ -46,20 +41,23 @@ item_cb(const struct client *client, struct bm_item *item)
     printf("%s\n", (text ? text : ""));
 }
 
+#include "../lib/config.h"
+
 int
 main(int argc, char **argv)
 {
+
     if (!bm_init())
         return EXIT_FAILURE;
 
-    parse_args(&client, &argc, &argv);
+    parse_args(&default_bmenu_client, &argc, &argv);
 
     struct bm_menu *menu;
-    if (!(menu = menu_with_options(&client)))
+    if (!(menu = menu_with_options(&default_bmenu_client)))
         return EXIT_FAILURE;
 
     read_items_to_menu_from_stdin(menu);
-    const enum bm_run_result status = run_menu(&client, menu, item_cb);
+    const enum bm_run_result status = run_menu(&default_bmenu_client, menu, item_cb);
     bm_menu_free(menu);
     switch (status) {
         case BM_RUN_RESULT_SELECTED:
