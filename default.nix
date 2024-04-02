@@ -19,10 +19,13 @@ with builtins;
 with lib;
 
 let
-  src = ./.;
-  version = readFile "${src}/VERSION";
+  version = readFile ./VERSION;
 in stdenv.mkDerivation {
-  inherit src version;
+  src = with fileset; toSource {
+    root = ./.;
+    fileset = unions [ ./VERSION ./GNUmakefile ./bemenu.pc.in ./scripts ./lib ./man ./client ];
+  };
+  inherit version;
   pname = "bemenu";
 
   strictDeps = true;
@@ -62,6 +65,11 @@ in stdenv.mkDerivation {
     for f in "$out/bin/"*; do
         install_name_tool -change "$(basename $so)" "$so" $f
     done
+  '';
+
+  doCheck = stdenv.isLinux;
+  checkPhase = ''
+    make check-symbols
   '';
 
   meta = {
