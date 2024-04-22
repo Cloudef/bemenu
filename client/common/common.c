@@ -542,8 +542,10 @@ do_getopt(struct client *client, int *argc, char **argv[])
         }
     }
 
-    *argc -= optind;
-    *argv += optind;
+    if (*argc > optind) {
+        fprintf(stderr, "%s: Unexpected argument '%s'\n", (*argv)[0], (*argv)[optind]);
+        exit(EXIT_FAILURE);
+    }
 }
 
 void
