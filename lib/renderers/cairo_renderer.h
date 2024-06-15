@@ -302,9 +302,6 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     uint32_t filtered_item_count;
     bm_menu_get_filtered_items(menu, &filtered_item_count);
 
-    cairo_set_source_rgba(cairo->cr, 0, 0, 0, 0);
-    cairo_rectangle(cairo->cr, 0, 0, width, height);
-
     cairo_save(cairo->cr);
     cairo_set_operator(cairo->cr, CAIRO_OPERATOR_CLEAR);
     cairo_paint(cairo->cr);
@@ -347,7 +344,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     paint.cursor = menu->cursor;
     paint.cursor_height = menu->cursor_height;
     paint.cursor_width = menu->cursor_width;
-    paint.pos = (struct pos){ (menu->title ? 2 : 0) + result.x_advance + border_size, vpadding + border_size };
+    paint.pos = (struct pos){ (menu->title ? 6 : 0) + result.x_advance + border_size, vpadding + border_size };
     paint.box = (struct box){ (menu->title ? 2 : 4), 0, vpadding, -vpadding, width - paint.pos.x, height };
 
     if (menu->lines == 0 || menu->lines_mode == BM_LINES_DOWN) {
