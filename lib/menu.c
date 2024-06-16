@@ -1150,9 +1150,18 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             }
             break;
 
-        case BM_KEY_PASTE:
+        case BM_KEY_PASTE_PRIMARY:
+        case BM_KEY_PASTE_CLIPBOARD:
             {
-                char *paster[] = {"wl-paste -t text/plain", "xclip -t text/plain -out"};
+                char *paster[2] = {NULL, NULL};
+                if (key == BM_KEY_PASTE_PRIMARY) {
+                    paster[0] = "wl-paste -t text/plain -p";
+                    paster[1] = "xclip -t text/plain -out";
+                } else {
+                    paster[0] = "wl-paste -t text/plain";
+                    paster[1] = "xclip -t text/plain -out -selection clipboard";
+                }
+
                 for (size_t paster_i = 0; paster_i < sizeof paster / sizeof paster[0]; paster_i++) {
                     FILE *clipboard = popen(paster[paster_i], "r");
                     if (clipboard == NULL) {
