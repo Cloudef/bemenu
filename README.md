@@ -85,7 +85,7 @@ All dependencies below are searched with `pkg-config`
 | x11      | x11, xinerama, cairo, pango, pangocairo                                |
 | Wayland  | wayland-client, wayland-protocols, cairo, pango, pangocairo, xkbcommon |
 
-Currently, pasting from clipboard is done at runtime with `wl-paste -t text/plain` and `xclip -t text/plain -out`, attempted in that order.
+Currently, pasting from clipboard is done at runtime with `wl-paste` and `xclip`, attempted in that order.
 
 ### Installing the dependencies
 

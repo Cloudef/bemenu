@@ -298,8 +298,8 @@ In the following examples, *C-x* means *<control-x>*, *M-x* means *<alt-x>* and
 *C-w*
 	Clear the filter.
 
-*C-y*
-	Paste the clipboard.
+*C-y, C-Y*
+	Paste selection (*C-y* for "clipboard", *C-Y* for "primary").
 
 *M-[1-9]*
 	Print selected items and exit with a custom error code 10 (*M-1*)
