@@ -8,35 +8,7 @@
 
 #include "vim.h"
 
-/**
- * Default font.
- */
-static const char *default_font = "monospace 10";
-
-/**
- * Default hexadecimal colors.
- */
-static const char *default_colors[BM_COLOR_LAST] = {
-    "#121212FF", // BM_COLOR_TITLE_BG
-    "#D81860FF", // BM_COLOR_TITLE_FG
-    "#121212FF", // BM_COLOR_FILTER_BG
-    "#CACACAFF", // BM_COLOR_FILTER_FG
-    "#121212FF", // BM_COLOR_CURSOR_BG
-    "#CACACAFF", // BM_COLOR_CURSOR_FG
-    "#121212FF", // BM_COLOR_ITEM_BG
-    "#CACACAFF", // BM_COLOR_ITEM_FG
-    "#121212FF", // BM_COLOR_HIGHLIGHTED_BG
-    "#D81860FF", // BM_COLOR_HIGHLIGHTED_FG
-    "#D81860FF", // BM_COLOR_FEEDBACK_BG
-    "#121212FF", // BM_COLOR_FEEDBACK_FG
-    "#121212FF", // BM_COLOR_SELECTED_BG
-    "#D81860FF", // BM_COLOR_SELECTED_FG
-    "#121212FF", // BM_COLOR_ALTERNATE_BG
-    "#CACACAFF", // BM_COLOR_ALTERNATE_FG
-    "#121212FF", // BM_COLOR_SCROLLBAR_BG
-    "#D81860FF", // BM_COLOR_SCROLLBAR_FG
-    "#D81860FF", // BM_COLOR_BORDER
-};
+#include "config.h"
 
 /**
  * Filter function map.
