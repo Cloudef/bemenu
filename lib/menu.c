@@ -1399,7 +1399,6 @@ bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch)
     }
 
     if (count_down == 2) {
-        int16_t scroll_count = 0;
         int16_t scroll_directions[2];
         int16_t distance_trigger = displayed * bm_menu_get_line_height(menu) / 4;
         for (size_t i = 0; i < 2; ++i) {
@@ -1410,7 +1409,6 @@ bm_menu_run_with_touch(struct bm_menu *menu, struct bm_touch touch)
             int32_t movement_y = point.pos_y - point.start_y;
             if (abs(movement_y) > distance_trigger) {
                 scroll_directions[i] = movement_y / abs(movement_y);
-                scroll_count++;
             }
         }
 
