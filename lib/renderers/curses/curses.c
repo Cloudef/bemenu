@@ -238,7 +238,6 @@ render(struct bm_menu *menu)
     uint32_t count, cl = 0;
     const uint32_t lines = fmax(getmaxy(curses.stdscreen), 1) - 1;
     if (lines > 1) {
-        uint32_t displayed = 0;
         struct bm_item **items = bm_menu_get_filtered_items(menu, &count);
         const bool scrollbar = (menu->scrollbar > BM_SCROLLBAR_NONE && (menu->scrollbar != BM_SCROLLBAR_AUTOHIDE || count > lines) ? true : false);
         const int32_t offset_x = title_len + (scrollbar && 2 > title_len ? 2 - title_len : 0);
@@ -255,7 +254,6 @@ render(struct bm_menu *menu)
                 draw_line(color, 1 + cl++, "%*s%s%s", offset_x + prefix_x, "", (menu->prefix ? " " : ""), (items[i]->text ? items[i]->text : ""));
             }
 
-            ++displayed;
         }
 
         if (scrollbar) {
