@@ -132,6 +132,7 @@ bm_pango_get_text_extents(struct cairo *cairo, struct cairo_paint *paint, struct
 static inline bool
 bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct cairo_result *result, const char *buffer)
 {
+    cairo_save(cairo->cr);
     PangoLayout *layout = bm_pango_get_layout(cairo, paint, buffer);
     pango_cairo_update_layout(cairo->cr, layout);
 
@@ -190,6 +191,7 @@ bm_cairo_draw_line_str(struct cairo *cairo, struct cairo_paint *paint, struct ca
     result->height = line_height;
 
     cairo_identity_matrix(cairo->cr);
+    cairo_restore(cairo->cr);
     return true;
 }
 
@@ -264,14 +266,16 @@ bm_cairo_entry_message(char *entry_text, bool highlighted, uint32_t event_feedba
 static inline void
 bm_cairo_draw_rounded_path(cairo_t *cr, double x, double y, double width, double height, double radius)
 {
+    double ajusted_radius = MIN(MIN(radius, height*0.5), width*0.5); /* Prevent border from intersecting itself. */
     double degrees = M_PI / 180;
     cairo_new_sub_path(cr);
-    cairo_arc(cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
-    cairo_arc(cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
-    cairo_arc(cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
-    cairo_arc(cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+    cairo_arc(cr, x + width - ajusted_radius, y + ajusted_radius, ajusted_radius, -90 * degrees, 0 * degrees);
+    cairo_arc(cr, x + width - ajusted_radius, y + height - ajusted_radius, ajusted_radius, 0 * degrees, 90 * degrees);
+    cairo_arc(cr, x + ajusted_radius, y + height - ajusted_radius, ajusted_radius, 90 * degrees, 180 * degrees);
+    cairo_arc(cr, x + ajusted_radius, y + ajusted_radius, ajusted_radius, 180 * degrees, 270 * degrees);
     cairo_close_path(cr);
 }
+
 
 static inline void
 bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct bm_menu *menu, struct cairo_paint_result *out_result)
@@ -306,6 +310,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
 
     cairo_save(cairo->cr);
     cairo_set_operator(cairo->cr, CAIRO_OPERATOR_CLEAR);
+    cairo_reset_clip(cairo->cr);
     cairo_paint(cairo->cr);
     cairo_restore(cairo->cr);
 
@@ -321,6 +326,16 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
 
     memset(&result, 0, sizeof(result));
     uint32_t title_x = 0;
+
+    uint32_t total_height=menu->lines*height; /*Total height of the full menu*/
+    if (!menu->fixed_height){
+        total_height = MIN(count*height, total_height);
+    }
+    total_height += height+border_size*2;
+    total_height = MIN(total_height, max_height);
+
+    bm_cairo_draw_rounded_path(cairo->cr, 1, 1, ((width + border_size)/cairo->scale)-2, total_height-2, border_radius);
+    cairo_clip(cairo->cr);
 
     if (menu->title) {
         /* Essentially hide the title text if we are drawing lines "up". */
@@ -586,7 +601,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     if (!border_radius) {
         cairo_rectangle(cairo->cr, 0, 0, (width + border_size)/cairo->scale, (height * (page_length + 1)) + (2 * border_size));
     } else {
-        bm_cairo_draw_rounded_path(cairo->cr, 0, 0, (width + border_size)/cairo->scale, (height * (page_length + 1)) + (2 * border_size), border_radius);
+        bm_cairo_draw_rounded_path(cairo->cr, 1, 1, ((width + border_size)/cairo->scale)-2, total_height-2, border_radius);
     }
     cairo_set_line_width(cairo->cr, 2 * menu->border_size);
     
@@ -594,6 +609,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
 
     out_result->height += 2 * border_size;
     out_result->height *= cairo->scale;
+    cairo_reset_clip(cairo->cr);
 }
 
 #endif /* _BM_CAIRO_H */
