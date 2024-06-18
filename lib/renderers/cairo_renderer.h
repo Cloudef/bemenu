@@ -597,7 +597,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     bm_cairo_color_from_menu_color(menu, BM_COLOR_BORDER, &paint.fg);
     cairo_set_source_rgba(cairo->cr, paint.fg.r, paint.fg.b, paint.fg.g, paint.fg.a);
     if (!border_radius) {
-        cairo_rectangle(cairo->cr, 0, 0, (width + border_size)/cairo->scale, (height * (page_length + 1)) + (2 * border_size));
+        cairo_rectangle(cairo->cr, 0, 0, (width + border_size)/cairo->scale, total_height);
     } else {
         bm_cairo_rounded_path(cairo->cr, 1, 1, ((width + border_size)/cairo->scale)-2, total_height-2, border_radius);
     }
