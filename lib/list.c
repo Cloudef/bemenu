@@ -64,7 +64,7 @@ list_set_items(struct list *list, const void *items, uint32_t nmemb, list_free_f
     }
 
     void *new_items;
-    if (!(new_items = calloc(sizeof(void*), nmemb)))
+    if (!(new_items = calloc(nmemb, sizeof(void*))))
         return false;
 
     memcpy(new_items, items, sizeof(void*) * nmemb);
