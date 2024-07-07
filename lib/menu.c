@@ -767,7 +767,7 @@ bm_menu_set_selected_items(struct bm_menu *menu, struct bm_item **items, uint32_
     assert(menu);
 
     struct bm_item **new_items;
-    if (!(new_items = calloc(sizeof(struct bm_item*), nmemb)))
+    if (!(new_items = calloc(nmemb, sizeof(struct bm_item*))))
         return 0;
 
     memcpy(new_items, items, sizeof(struct bm_item*) * nmemb);
