@@ -297,6 +297,12 @@ bm_wl_window_destroy(struct window *window)
 
     if (window->surface)
         wl_surface_destroy(window->surface);
+
+    struct surf_output *surf_output, *surf_output_tmp;
+    wl_list_for_each_safe(surf_output, surf_output_tmp, &window->surf_outputs, link) {
+        wl_list_remove(&surf_output->link);
+        free(surf_output);
+    }
 }
 
 static void

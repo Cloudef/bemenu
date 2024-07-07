@@ -465,10 +465,11 @@ wl_surface_leave(void *data, struct wl_surface *wl_surface,
     (void)wl_surface;
     struct window *window = data;
 
-    struct surf_output *surf_output;
-    wl_list_for_each(surf_output, &window->surf_outputs, link) {
+    struct surf_output *surf_output, *surf_output_tmp;
+    wl_list_for_each_safe(surf_output, surf_output_tmp, &window->surf_outputs, link) {
         if (surf_output->output->output == wl_output) {
             wl_list_remove(&surf_output->link);
+            free(surf_output);
             break;
         }
     }
@@ -484,11 +485,12 @@ static const struct wl_surface_listener surface_listener = {
 static void
 destroy_windows(struct wayland *wayland)
 {
-    struct window *window;
-    wl_list_for_each(window, &wayland->windows, link) {
+    struct window *window, *window_tmp;
+    wl_list_for_each_safe(window, window_tmp, &wayland->windows, link) {
+        wl_list_remove(&window->link);
         bm_wl_window_destroy(window);
+        free(window);
     }
-    wl_list_init(&wayland->windows);
 }
 
 void
