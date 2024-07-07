@@ -85,6 +85,8 @@ bm_cairo_destroy(struct cairo *cairo)
 {
     if (cairo->cr)
         cairo_destroy(cairo->cr);
+    if (cairo->pango)
+        g_object_unref(cairo->pango);
     if (cairo->surface)
         cairo_surface_destroy(cairo->surface);
 }
