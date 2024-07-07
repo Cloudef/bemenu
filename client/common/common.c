@@ -363,7 +363,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
             {
                 char *ptr;
                 client->lines = strtol(optarg, &ptr, 10);
-                client->lines_mode = (!strcmp(ptr + 1, "up") ? BM_LINES_UP : BM_LINES_DOWN);
+                client->lines_mode = (*ptr && !strcmp(ptr + 1, "up") ? BM_LINES_UP : BM_LINES_DOWN);
                 break;
             }
             case 'c':
