@@ -477,30 +477,27 @@ seat_handle_capabilities(void *data, struct wl_seat *seat, enum wl_seat_capabili
 {
     struct input *input = data;
 
-    if (!input->seat) {
-        input->seat = seat;
-    }
-
-    if (caps & WL_SEAT_CAPABILITY_KEYBOARD) {
+    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !input->keyboard) {
         input->keyboard = wl_seat_get_keyboard(seat);
         wl_keyboard_add_listener(input->keyboard, &keyboard_listener, data);
+    } else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && input->keyboard) {
+        wl_keyboard_destroy(input->keyboard);
+        input->keyboard = NULL;
     }
 
-    if (caps & WL_SEAT_CAPABILITY_POINTER) {
+    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !input->pointer) {
         input->pointer = wl_seat_get_pointer(seat);
         wl_pointer_add_listener(input->pointer, &pointer_listener, data);
+    } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && input->pointer) {
+        wl_pointer_destroy(input->pointer);
+        input->pointer = NULL;
     }
 
-    if (caps & WL_SEAT_CAPABILITY_TOUCH) {
+    if ((caps & WL_SEAT_CAPABILITY_TOUCH) && !input->touch) {
         input->touch = wl_seat_get_touch(seat);
         wl_touch_add_listener(input->touch, &wl_touch_listener, data);
-    }
-
-    if (seat == input->seat && !(caps & WL_SEAT_CAPABILITY_KEYBOARD) && !(caps & WL_SEAT_CAPABILITY_POINTER)) {
-        wl_keyboard_destroy(input->keyboard);
-        input->seat = NULL;
-        input->keyboard = NULL;
-        input->pointer = NULL;
+    } else if (!(caps & WL_SEAT_CAPABILITY_TOUCH) && input->touch) {
+        wl_touch_destroy(input->touch);
         input->touch = NULL;
     }
 }
@@ -630,6 +627,15 @@ void
 bm_wl_registry_destroy(struct wayland *wayland)
 {
     assert(wayland);
+
+    if (wayland->input.keyboard)
+        wl_keyboard_destroy(wayland->input.keyboard);
+
+    if (wayland->input.pointer)
+        wl_pointer_destroy(wayland->input.pointer);
+
+    if (wayland->input.touch)
+        wl_touch_destroy(wayland->input.touch);
 
     if (wayland->viewporter)
         wp_viewporter_destroy(wayland->viewporter);

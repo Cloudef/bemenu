@@ -81,7 +81,6 @@ struct touch_event {
 struct input {
     int *repeat_fd;
 
-    struct wl_seat *seat;
     struct wl_keyboard *keyboard;
     struct wl_pointer *pointer;
     struct wl_touch *touch;
