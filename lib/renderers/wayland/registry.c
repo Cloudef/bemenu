@@ -631,8 +631,25 @@ bm_wl_registry_destroy(struct wayland *wayland)
 {
     assert(wayland);
 
+    if (wayland->viewporter)
+        wp_viewporter_destroy(wayland->viewporter);
+
+    if (wayland->wfs_mgr)
+        wp_fractional_scale_manager_v1_destroy(wayland->wfs_mgr);
+
+    struct output *output, *output_tmp;
+    wl_list_for_each_safe(output, output_tmp, &wayland->outputs, link) {
+        wl_list_remove(&output->link);
+        wl_output_destroy(output->output);
+        free(output->name);
+        free(output);
+    }
+
     if (wayland->shm)
         wl_shm_destroy(wayland->shm);
+
+    if (wayland->seat)
+        wl_seat_destroy(wayland->seat);
 
     if (wayland->layer_shell)
         zwlr_layer_shell_v1_destroy(wayland->layer_shell);
