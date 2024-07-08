@@ -13,6 +13,7 @@ struct cairo {
     cairo_surface_t *surface;
     PangoContext *pango;
     double scale;
+    bool antialiasing;
 };
 
 struct cairo_color {
@@ -67,7 +68,8 @@ bm_cairo_create_for_surface(struct cairo *cairo, cairo_surface_t *surface)
     if (!(cairo->pango = pango_cairo_create_context(cairo->cr)))
         goto fail;
 
-    cairo_set_antialias(cairo->cr, CAIRO_ANTIALIAS_DEFAULT);
+    if (!cairo->antialiasing)
+        cairo_set_antialias(cairo->cr, CAIRO_ANTIALIAS_NONE);
 
     cairo->surface = surface;
     assert(cairo->scale > 0);

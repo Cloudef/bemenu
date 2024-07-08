@@ -29,6 +29,8 @@ create_buffer(struct window *window, struct buffer *buffer, int32_t width, int32
         buffer->cairo.scale = 1;
     }
 
+    buffer->cairo.antialiasing = true;
+
     if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
         cairo_surface_destroy(surf);
         goto fail;

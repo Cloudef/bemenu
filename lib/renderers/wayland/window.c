@@ -108,7 +108,7 @@ destroy_buffer(struct buffer *buffer)
 }
 
 static bool
-create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format, double scale)
+create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t height, uint32_t format, double scale, bool antialiasing)
 {
     int fd = -1;
     struct wl_shm_pool *pool = NULL;
@@ -154,6 +154,12 @@ create_buffer(struct wl_shm *shm, struct buffer *buffer, int32_t width, int32_t 
         buffer->cairo.scale = scale;
     }
 
+    if (antialiasing) {
+        buffer->cairo.antialiasing = true;
+    } else {
+        buffer->cairo.antialiasing = false;
+    }
+
     if (!bm_cairo_create_for_surface(&buffer->cairo, surf)) {
         cairo_surface_destroy(surf);
         goto fail;
@@ -192,7 +198,7 @@ next_buffer(struct window *window)
     if ((uint32_t) ceil(window->width * window->scale) != buffer->width || (uint32_t) ceil(window->height * window->scale) != buffer->height)
         destroy_buffer(buffer);
 
-    if (!buffer->buffer && !create_buffer(window->shm, buffer, ceil(window->width * window->scale), ceil(window->height * window->scale), WL_SHM_FORMAT_ARGB8888, window->scale))
+    if (!buffer->buffer && !create_buffer(window->shm, buffer, ceil(window->width * window->scale), ceil(window->height * window->scale), WL_SHM_FORMAT_ARGB8888, window->scale, !window->wayland->fractional_scaling))
         return NULL;
 
     return buffer;
