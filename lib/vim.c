@@ -148,9 +148,8 @@ static void delete_char_back(struct bm_menu *menu){
 static void delete_word(struct bm_menu *menu){
     if(!menu->filter) return;
 
-    size_t filter_length = strlen(menu->filter);
-    while (menu->cursor < filter_length && !isspace(menu->filter[menu->cursor])) delete_char(menu);
-    while (menu->cursor < filter_length && isspace(menu->filter[menu->cursor])) delete_char(menu);
+    while (menu->cursor < strlen(menu->filter) && !isspace(menu->filter[menu->cursor])) delete_char(menu);
+    while (menu->cursor < strlen(menu->filter) && isspace(menu->filter[menu->cursor])) delete_char(menu);
 }
 
 static void delete_word_back(struct bm_menu *menu){
