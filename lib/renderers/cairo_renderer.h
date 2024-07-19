@@ -416,9 +416,10 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
 
             uint32_t is_fixed_up = (menu->fixed_height && menu->lines_mode == BM_LINES_UP);
             uint32_t required_empty = (count > lines ? 0 : lines - count);
-            int32_t last_item_index = (count < lines ? count - 1 + page : lines - 1 + page);
-            int32_t display_item_index = (menu->lines_mode == BM_LINES_DOWN ? i : menu->fixed_height ? last_item_index - i + page + required_empty  : last_item_index - i + page);
-            display_item_index = (display_item_index < 0 ? 0 : display_item_index);
+            uint32_t last_item_index = (count < lines ? count - 1 + page : lines - 1 + page);
+            last_item_index = MAX(MIN(last_item_index, count - 1), 0);
+            uint32_t display_item_index = (menu->lines_mode == BM_LINES_DOWN ? i : menu->fixed_height ? last_item_index - i + page + required_empty  : last_item_index - i + page);
+            display_item_index = MAX(MIN(display_item_index, count - 1), 0);
 
             bool highlighted = false;
             if ((i < count && !is_fixed_up) || (is_fixed_up && display_item_index <= last_item_index)) {
