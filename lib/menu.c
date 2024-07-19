@@ -1084,19 +1084,35 @@ bm_menu_run_with_key(struct bm_menu *menu, enum bm_key key, uint32_t unicode)
             break;
 
         case BM_KEY_PAGE_UP:
-            bm_menu_set_highlighted_index(menu, (menu->index < displayed ? 0 : menu->index - (displayed - 1)));
+            if (menu->lines_mode == BM_LINES_UP) {
+                bm_menu_set_highlighted_index(menu, (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1)));
+            } else {
+                bm_menu_set_highlighted_index(menu, (menu->index < displayed ? 0 : menu->index - (displayed - 1)));
+            }
             break;
 
         case BM_KEY_PAGE_DOWN:
-            bm_menu_set_highlighted_index(menu, (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1)));
+            if (menu->lines_mode == BM_LINES_UP) {
+                bm_menu_set_highlighted_index(menu, (menu->index < displayed ? 0 : menu->index - (displayed - 1)));
+            } else {
+                bm_menu_set_highlighted_index(menu, (menu->index + displayed >= count ? count - 1 : menu->index + (displayed - 1)));
+            }
             break;
 
         case BM_KEY_SHIFT_PAGE_UP:
-            bm_menu_set_highlighted_index(menu, 0);
+            if (menu->lines_mode == BM_LINES_UP) {
+                bm_menu_set_highlighted_index(menu, count - 1);
+            } else {
+                bm_menu_set_highlighted_index(menu, 0);
+            }
             break;
 
         case BM_KEY_SHIFT_PAGE_DOWN:
-            bm_menu_set_highlighted_index(menu, count - 1);
+            if (menu->lines_mode == BM_LINES_UP) {
+                bm_menu_set_highlighted_index(menu, 0);
+            } else {
+                bm_menu_set_highlighted_index(menu, count - 1);
+            }
             break;
 
         case BM_KEY_BACKSPACE:
