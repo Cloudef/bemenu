@@ -334,8 +334,10 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
     total_height += height +border_size * 2;
     total_height = MIN(total_height, (max_height / height) * height);
 
-    bm_cairo_rounded_path(cairo->cr, 1, 1, ((width + border_size) / cairo->scale) - 2, total_height - 2, border_radius);
-    cairo_clip(cairo->cr);
+    if (border_radius) {
+        bm_cairo_rounded_path(cairo->cr, 1, 1, ((width + border_size) / cairo->scale) - 2, total_height - 2, border_radius);
+        cairo_clip(cairo->cr);
+    }
 
     if (menu->title) {
         /* Essentially hide the title text if we are drawing lines "up". */
