@@ -117,7 +117,7 @@ bm_x11_window_render(struct window *window, struct bm_menu *menu)
                 win_y = window->max_height - window->height;
         }
 
-        XMoveResizeWindow(window->display, window->drawable, window->x, win_y + window->y_offset, window->width, window->height);
+        XMoveResizeWindow(window->display, window->drawable, window->x, window->y + win_y + window->y_offset, window->width, window->height);
     }
 
     if (buffer->created) {
