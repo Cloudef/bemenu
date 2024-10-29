@@ -530,10 +530,19 @@ recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
     window->hmargin_size = menu->hmargin_size;
     window->width_factor = menu->width_factor;
 
+    uint32_t min_height = 0;
+    struct output *output_tmp = NULL;
+    wl_list_for_each(output_tmp, &wayland->outputs, link) {
+        if (0 == min_height || output_tmp->height < min_height)
+            min_height = output_tmp->height;
+    };
+    if (0 == min_height)
+        min_height = 640;
+
     // TODO: this should not be necessary, but Sway 1.8.1 does not trigger event
     // surface.enter before we actually need to render the first frame.
     window->scale = 1;
-    window->max_height = 640;
+    window->max_height = min_height;
 
     struct wl_surface *surface = NULL;
     if (!(surface = wl_compositor_create_surface(wayland->compositor)))
