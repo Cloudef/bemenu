@@ -46,6 +46,7 @@ struct client {
     enum bm_password_mode password;
     enum bm_key_binding key_binding;
     char *monitor_name;
+    bool fuzzy;
 };
 
 char* cstrcopy(const char *str, size_t size);
