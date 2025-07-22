@@ -226,7 +226,7 @@ get_align_anchor(enum bm_align align)
     if(align == BM_ALIGN_TOP) {
         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
     } else if(align == BM_ALIGN_CENTER) {
-        anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP | ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+        anchor = 0;
     } else {
         anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
     }
