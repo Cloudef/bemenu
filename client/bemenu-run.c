@@ -5,13 +5,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <assert.h>
-#include "common/common.h"
-
-static struct client client = {
-    .filter_mode = BM_FILTER_MODE_DMENU,
-    .title = "bemenu-run",
-    .monitor = -1,
-};
+#include "../lib/config.h"
 
 struct paths {
    char *path;
@@ -177,14 +171,14 @@ main(int argc, char **argv)
     if (!bm_init())
         return EXIT_FAILURE;
 
-    parse_args(&client, &argc, &argv);
+    parse_args(&default_bmenu_run_client, &argc, &argv);
 
     struct bm_menu *menu;
-    if (!(menu = menu_with_options(&client)))
+    if (!(menu = menu_with_options(&default_bmenu_run_client)))
         return EXIT_FAILURE;
 
     read_items_to_menu_from_path(menu);
-    const enum bm_run_result status = run_menu(&client, menu, item_cb);
+    const enum bm_run_result status = run_menu(&default_bmenu_run_client, menu, item_cb);
     bm_menu_free(menu);
     return (status == BM_RUN_RESULT_SELECTED ? EXIT_SUCCESS : EXIT_FAILURE);
 }
