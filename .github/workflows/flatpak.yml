@@ -19,12 +19,12 @@ jobs:
            run: |
               sed -i 's|branch: master|branch: ${{ github.ref }}|' pw.cloudef.bemenu.yml
               sed -i 's|branch: master|branch: ${{ github.ref }}|' pw.cloudef.bemenu-run.yml
-         - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
+         - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v6
            with:
              bundle: pw.cloudef.bemenu.flatpak
              manifest-path: pw.cloudef.bemenu.yml
              cache-key: flatpak-builder-bemenu-${{ github.sha }}
-         - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
+         - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v6
            with:
              bundle: pw.cloudef.bemenu-run.flatpak
              manifest-path: pw.cloudef.bemenu-run.yml
