@@ -934,14 +934,6 @@ BM_PUBLIC enum bm_password_mode bm_menu_get_password(struct bm_menu *menu);
  */
 BM_PUBLIC void bm_menu_set_key_binding(struct bm_menu *menu, enum bm_key_binding);
 
-/**
- * Specify whether fuzzy matching should be used.
- *
- * @param menu bm_menu instance to set the fuzzy mode on.
- * @param fuzzy true to enable fuzzy matching.
- */
-BM_PUBLIC void bm_menu_set_fuzzy_mode(struct bm_menu *menu, bool fuzzy);
-
 
 /**  @} Properties */
 

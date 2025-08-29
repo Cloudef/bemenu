@@ -172,7 +172,6 @@ usage(FILE *out, const char *name)
           " -h, --help            display this help and exit.\n"
           " -v, --version         display version.\n"
           " -i, --ignorecase      match items case insensitively.\n"
-          " -z, --fuzzy           enable fuzzy matching.\n"
           " -F, --filter          filter entries for a given string before showing the menu.\n"
           " -w, --wrap            wraps cursor selection.\n"
           " -l, --list            list items vertically down or up with the given number of lines(number of lines down/up). (down (default), up)\n"
@@ -273,7 +272,6 @@ do_getopt(struct client *client, int *argc, char **argv[])
         { "version",      no_argument,       0, 'v' },
 
         { "ignorecase",   no_argument,       0, 'i' },
-        { "fuzzy",        no_argument,       0, 'z' },
         { "filter",       required_argument, 0, 'F' },
         { "wrap",         no_argument,       0, 'w' },
         { "list",         required_argument, 0, 'l' },
@@ -342,7 +340,7 @@ do_getopt(struct client *client, int *argc, char **argv[])
     for (optind = 0;;) {
         int32_t opt;
 
-        if ((opt = getopt_long(*argc, *argv, "hvizwcl:I:p:P:I:x:bfF:m:H:M:W:B:R:nsCTK", opts, NULL)) < 0)
+        if ((opt = getopt_long(*argc, *argv, "hviwcl:I:p:P:I:x:bfF:m:H:M:W:B:R:nsCTK", opts, NULL)) < 0)
             break;
         
         switch (opt) {
@@ -354,9 +352,6 @@ do_getopt(struct client *client, int *argc, char **argv[])
                 break;
             case 'i':
                 client->filter_mode = BM_FILTER_MODE_DMENU_CASE_INSENSITIVE;
-                break;
-            case 'z':
-                client->fuzzy = true;
                 break;
             case 'F':
                 client->initial_filter = optarg;
@@ -599,8 +594,6 @@ menu_with_options(struct client *client)
     bm_menu_set_border_size(menu, client->border_size);
     bm_menu_set_border_radius(menu, client->border_radius);
     bm_menu_set_key_binding(menu, client->key_binding);
-    bm_menu_set_fuzzy_mode(menu, client->fuzzy);
-
 
     if (client->center) {
         bm_menu_set_align(menu, BM_ALIGN_CENTER);

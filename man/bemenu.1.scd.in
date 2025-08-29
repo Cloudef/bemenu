@@ -45,9 +45,6 @@ list of executables under PATH and the selected items are executed.
 *-i, --ignorecase*
 	Filter items case-insensitively.
 
-*-z, --fuzzy*
-	Filter items fuzzily.
-
 *-K, --no-keyboard*
 	Disable all keyboard events.
 

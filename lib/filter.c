@@ -79,32 +79,17 @@ fail:
     return NULL;
 }
 
-struct fuzzy_match {
-    struct bm_item *item;
-    int distance;
-};
-
-static int fuzzy_match_comparator(const void *a, const void *b) {
-    const struct fuzzy_match *fa = (const struct fuzzy_match *)a;
-    const struct fuzzy_match *fb = (const struct fuzzy_match *)b;
-
-    return fa->distance - fb->distance;
-}
-
-
 /**
- * Dmenu filterer that accepts substring function or fuzzy match.
+ * Dmenu filterer that accepts substring function.
  *
  * @param menu bm_menu instance to filter.
  * @param addition This will be 1, if filter is same as previous filter with something appended.
  * @param fstrstr Substring function used to match items.
- * @param fstrncmp String comparison function for exact matches.
  * @param out_nmemb uint32_t reference to filtered items count.
- * @param fuzzy Boolean flag to toggle fuzzy matching.
  * @return Pointer to array of bm_item pointers.
  */
 static struct bm_item**
-filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), uint32_t *out_nmemb, bool fuzzy)
+filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const char *a, const char *b), int (*fstrncmp)(const char *a, const char *b, size_t len), uint32_t *out_nmemb)
 {
     assert(menu && fstrstr && fstrncmp && out_nmemb);
     *out_nmemb = 0;
@@ -129,47 +114,12 @@ filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const cha
         goto fail;
 
     const char *filter = menu->filter ? menu->filter : "";
-    if (strlen(filter) == 0) {
-        goto fail;
-    }
     size_t len = (tokc ? strlen(tokv[0]) : 0);
     uint32_t i, f, e;
-    f = e = 0;
-
-    struct fuzzy_match *fuzzy_matches = NULL;
-
-    int fuzzy_match_count = 0;
-
-    if (fuzzy && !(fuzzy_matches = calloc(count, sizeof(*fuzzy_matches))))
-        goto fail;
-
-    for (i = 0; i < count; ++i) {
+    for (e = f = i = 0; i < count; ++i) {
         struct bm_item *item = items[i];
         if (!item->text && tokc != 0)
             continue;
-
-        if (fuzzy && tokc && item->text) {
-            const char *text = item->text;
-            int sidx = -1, eidx = -1, pidx = 0, text_len = strlen(text), distance = 0;
-            for (int j = 0; j < text_len && text[j]; ++j) {
-                if (!fstrncmp(&text[j], &filter[pidx], 1)) {
-                    if (sidx == -1)
-                        sidx = j;
-                    pidx++;
-                    if (pidx == strlen(filter)) {
-                        eidx = j;
-                        break;
-                    }
-                }
-            }
-            if (eidx != -1) {
-                distance = eidx - sidx + (text_len - eidx + sidx) / 3;
-                fuzzy_matches[fuzzy_match_count++] = (struct fuzzy_match){ item, distance };
-                continue;
-            }
-        }
-
-        if (fuzzy) continue;
 
         if (tokc && item->text) {
             uint32_t t;
@@ -192,23 +142,12 @@ filter_dmenu_fun(struct bm_menu *menu, char addition, char* (*fstrstr)(const cha
         f++; /* where do all matches end */
     }
 
-    if (fuzzy && fuzzy_match_count > 0) {
-        qsort(fuzzy_matches, fuzzy_match_count, sizeof(struct fuzzy_match), fuzzy_match_comparator);
-
-        for (int j = 0; j < fuzzy_match_count; ++j) {
-            filtered[f++] = fuzzy_matches[j].item;
-        }
-
-        free(fuzzy_matches);
-    }
-
     free(buffer);
     free(tokv);
     return shrink_list(&filtered, menu->items.count, (*out_nmemb = f));
 
 fail:
     free(filtered);
-    free(fuzzy_matches);
     free(buffer);
     return NULL;
 }
@@ -224,7 +163,7 @@ fail:
 struct bm_item**
 bm_filter_dmenu(struct bm_menu *menu, bool addition, uint32_t *out_nmemb)
 {
-    return filter_dmenu_fun(menu, addition, strstr, strncmp, out_nmemb, menu->fuzzy);
+    return filter_dmenu_fun(menu, addition, strstr, strncmp, out_nmemb);
 }
 
 /**
@@ -238,7 +177,7 @@ bm_filter_dmenu(struct bm_menu *menu, bool addition, uint32_t *out_nmemb)
 struct bm_item**
 bm_filter_dmenu_case_insensitive(struct bm_menu *menu, bool addition, uint32_t *out_nmemb)
 {
-    return filter_dmenu_fun(menu, addition, bm_strupstr, bm_strnupcmp, out_nmemb, menu->fuzzy);
+    return filter_dmenu_fun(menu, addition, bm_strupstr, bm_strnupcmp, out_nmemb);
 }
 
 /* vim: set ts=8 sw=4 tw=0 :*/

@@ -457,11 +457,6 @@ struct bm_menu {
      */
     char vim_mode;
     uint32_t vim_last_key;
-
-    /**
-     * Should fuzzy matching be used?
-     */
-    bool fuzzy;
 };
 
 /* library.c */
