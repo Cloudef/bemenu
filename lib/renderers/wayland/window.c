@@ -303,12 +303,6 @@ bm_wl_window_destroy(struct window *window)
 
     if (window->surface)
         wl_surface_destroy(window->surface);
-
-    struct surf_output *surf_output, *surf_output_tmp;
-    wl_list_for_each_safe(surf_output, surf_output_tmp, &window->surf_outputs, link) {
-        wl_list_remove(&surf_output->link);
-        free(surf_output);
-    }
 }
 
 static void
@@ -342,21 +336,6 @@ get_window_width(struct window *window)
 
     return width;
 }
-
-static void
-fractional_scale_preferred_scale(
-    void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
-    uint32_t scale)
-{
-    (void)wp_fractional_scale_v1;
-    struct window *window = data;
-
-    window->scale = (double)scale / 120;
-}
-
-static const struct wp_fractional_scale_v1_listener fractional_scale_listener = {
-    .preferred_scale = fractional_scale_preferred_scale,
-};
 
 static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
     .configure = layer_surface_configure,
@@ -433,9 +412,6 @@ bm_wl_window_create(struct window *window, struct wl_display *display, struct wl
     if (wayland->fractional_scaling) {
         assert(wayland->wfs_mgr && wayland->viewporter);
 
-        struct wp_fractional_scale_v1 *wfs_surf = wp_fractional_scale_manager_v1_get_fractional_scale(wayland->wfs_mgr, surface);
-        wp_fractional_scale_v1_add_listener(
-            wfs_surf, &fractional_scale_listener, window);
         window->viewport_surface = wp_viewporter_get_viewport(wayland->viewporter, surface);
     }
 
