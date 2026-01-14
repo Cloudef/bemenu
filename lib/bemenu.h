@@ -401,7 +401,7 @@ enum bm_key_binding {
  * @param renderer Name of renderer to be used for this instance, pass **NULL** for auto-detection.
  * @return bm_menu for new menu instance, **NULL** if creation failed.
  */
-BM_PUBLIC struct bm_menu* bm_menu_new(const char *renderer);
+BM_PUBLIC struct bm_menu* bm_menu_new(const char *renderer, bool overlap);
 
 /**
  * Release bm_menu instance.

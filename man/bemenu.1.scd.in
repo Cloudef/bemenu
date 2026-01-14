@@ -168,7 +168,7 @@ These options are only available on backends specified in the parentheses:
 	should appear on all monitors.
 
 *-n, --no-overlap* (Wayland)
-	Set the *bemenu* window to be on top of any other panels.
+	Make the *bemenu* window to not overlap any other panels.
 
 *-M, --margin* <_margin_> (Wayland, X11)
 	Specify the _margin_ (empty space) in pixels to leave between menu and

@@ -116,17 +116,16 @@ struct buffer {
 
 struct window {
     struct wayland *wayland;
-    struct wl_list surf_outputs;
     struct wl_surface *surface;
     struct wl_callback *frame_cb;
     struct zwlr_layer_surface_v1 *layer_surface;
     struct wp_viewport *viewport_surface;
     struct wl_shm *shm;
     struct buffer buffers[2];
-    uint32_t width, height, max_height;
+    uint32_t width, height, max_height, max_width;
     uint32_t hmargin_size;
     float width_factor;
-    double scale;
+    double scale, pref_fractional_scale, pref_scale;
     uint32_t displayed;
     struct wl_list link;
     enum bm_align align;

@@ -438,49 +438,141 @@ set_overlap(const struct bm_menu *menu, bool overlap)
 }
 
 void
-wl_surface_enter(void *data, struct wl_surface *wl_surface,
+gather_surface_enter(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output)
 {
-    (void)wl_surface;
-    struct window *window = data;
-    struct wayland *wayland = window->wayland;
-
-    struct output *output;
-    wl_list_for_each(output, &wayland->outputs, link) {
-        if (output->output == wl_output) {
-            struct surf_output *surf_output = calloc(1, sizeof(struct surf_output));
-            surf_output->output = output;
-            wl_list_insert(&window->surf_outputs, &surf_output->link);
-            break;
-        }
-    }
-
-    window_update_output(window);
+    (void)data, (void)wl_surface, (void)wl_output;
 }
 
 void
-wl_surface_leave(void *data, struct wl_surface *wl_surface,
+gather_surface_leave(void *data, struct wl_surface *wl_surface,
                  struct wl_output *wl_output)
+{
+    (void)data, (void)wl_surface, (void)wl_output;
+}
+
+void
+gather_preferred_buffer_scale(void *data, struct wl_surface *wl_surface,
+                          int scale)
 {
     (void)wl_surface;
     struct window *window = data;
 
-    struct surf_output *surf_output, *surf_output_tmp;
-    wl_list_for_each_safe(surf_output, surf_output_tmp, &window->surf_outputs, link) {
-        if (surf_output->output->output == wl_output) {
-            wl_list_remove(&surf_output->link);
-            free(surf_output);
-            break;
-        }
-    }
-
-    window_update_output(window);
+    window->pref_scale = scale;
 }
 
-static const struct wl_surface_listener surface_listener = {
-    .enter = wl_surface_enter,
-    .leave = wl_surface_leave,
+void
+gather_preferred_buffer_transform(void *data, struct wl_surface *wl_surface,
+                              uint32_t transform)
+{
+    (void)data, (void)wl_surface, (void)transform;
+}
+
+static const struct wl_surface_listener gather_surface_listener = {
+    .enter = gather_surface_enter,
+    .leave = gather_surface_leave,
+    .preferred_buffer_scale = gather_preferred_buffer_scale,
+    .preferred_buffer_transform = gather_preferred_buffer_transform,
 };
+
+static void
+gather_fractional_preferred_scale(
+    void *data, struct wp_fractional_scale_v1 *wp_fractional_scale_v1,
+    uint32_t scale)
+{
+    (void)wp_fractional_scale_v1;
+    struct window *window = data;
+
+    window->pref_fractional_scale = (double)scale / 120;
+}
+
+static const struct wp_fractional_scale_v1_listener gather_fractional_listener = {
+    .preferred_scale = gather_fractional_preferred_scale,
+};
+
+void
+gather_shell_configure(void *data, struct zwlr_layer_surface_v1 *surface,
+                   uint32_t serial, uint32_t w, uint32_t h)
+{
+    struct window *window = data;
+    window->max_width = w;
+    window->max_height = h;
+    zwlr_layer_surface_v1_ack_configure(surface, serial);
+}
+
+void
+gather_shell_closed(void *data, struct zwlr_layer_surface_v1 *surface)
+{
+    (void)data, (void)surface;
+}
+
+static const struct zwlr_layer_surface_v1_listener gather_shell_listener = {
+    .configure = gather_shell_configure,
+    .closed = gather_shell_closed,
+};
+
+bool
+gather_context(struct window *window, struct output *output, struct wayland *wayland, bool overlap)
+{
+    struct wl_surface *surface = NULL;
+    if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+        return false;
+
+    wl_surface_add_listener(surface, &gather_surface_listener, window);
+
+    if (wayland->fractional_scaling) {
+        assert(wayland->wfs_mgr && wayland->viewporter);
+
+        struct wp_fractional_scale_v1 *wfs_surf = wp_fractional_scale_manager_v1_get_fractional_scale(wayland->wfs_mgr, surface);
+        wp_fractional_scale_v1_add_listener(
+            wfs_surf, &gather_fractional_listener, window);
+    }
+
+    struct wl_output *wl_output = NULL;
+    if (output)
+        wl_output = output->output;
+
+    struct zwlr_layer_surface_v1 *layer_surface = NULL;
+    enum zwlr_layer_shell_v1_layer layer = ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY;
+    if (!(layer_surface = zwlr_layer_shell_v1_get_layer_surface(wayland->layer_shell, surface,
+                                                                wl_output, layer, "menu")))
+        return false;
+
+    zwlr_layer_surface_v1_set_anchor(layer_surface,
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+                                     ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+    zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, overlap ? -1 : 0);
+
+    window->scale = 0;
+    window->pref_scale = 0;
+    window->pref_fractional_scale = 0;
+    window->max_width = 0;
+    window->max_height = 0;
+
+    zwlr_layer_surface_v1_add_listener(layer_surface, &gather_shell_listener, window);
+    wl_surface_commit(surface);
+    wl_display_roundtrip(wayland->display);
+
+    zwlr_layer_surface_v1_destroy(layer_surface);
+    wl_surface_destroy(surface);
+    wl_display_roundtrip(wayland->display);
+
+    if (0 != window->pref_fractional_scale) {
+        window->scale = window->pref_fractional_scale;
+    } else {
+        window->scale = window->pref_scale;
+    }
+
+    if (!(window->scale && window->max_width && window->max_height))
+        return false;
+
+    window->max_width *= window->scale;
+    window->max_height *= window->scale;
+
+    return true;
+}
 
 static void
 destroy_windows(struct wayland *wayland)
@@ -494,58 +586,28 @@ destroy_windows(struct wayland *wayland)
 }
 
 void
-window_update_output(struct window *window)
-{
-    int32_t max_scale = 1;
-    uint32_t min_max_height = 0;
-
-    struct surf_output *surf_output;
-    wl_list_for_each(surf_output, &window->surf_outputs, link) {
-        if (surf_output->output->scale > max_scale) {
-            max_scale = surf_output->output->scale;
-        }
-        if (min_max_height == 0 || surf_output->output->height < min_max_height) {
-            min_max_height = surf_output->output->height;
-        };
-    }
-
-    if (min_max_height != window->max_height) {
-        window->max_height = min_max_height;
-    }
-
-    if (max_scale != window->scale) {
-        window->scale = max_scale;
-    }
-}
-
-void
 recreate_windows(const struct bm_menu *menu, struct wayland *wayland)
 {
     destroy_windows(wayland);
 
     struct window *window = calloc(1, sizeof(struct window));
-    wl_list_init(&window->surf_outputs);
     window->wayland = wayland;
     window->align = menu->align;
     window->hmargin_size = menu->hmargin_size;
     window->width_factor = menu->width_factor;
-
-    // TODO: this should not be necessary, but Sway 1.8.1 does not trigger event
-    // surface.enter before we actually need to render the first frame.
-    window->scale = 1;
-    window->max_height = 640;
-
-    struct wl_surface *surface = NULL;
-    if (!(surface = wl_compositor_create_surface(wayland->compositor)))
-        goto fail;
-
-    wl_surface_add_listener(surface, &surface_listener, window);
 
     struct output *output = NULL;
     if (wayland->selected_output) {
         fprintf(stderr, "selected output\n");
         output = wayland->selected_output;
     };
+
+    if (!gather_context(window, output, wayland, menu->overlap))
+        goto fail;
+
+    struct wl_surface *surface = NULL;
+    if (!(surface = wl_compositor_create_surface(wayland->compositor)))
+        goto fail;
 
     struct wl_output *wl_output = NULL;
     if (output)
