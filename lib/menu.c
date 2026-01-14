@@ -47,7 +47,7 @@ static struct bm_item** (*filter_func[BM_FILTER_MODE_LAST])(struct bm_menu *menu
 };
 
 struct bm_menu*
-bm_menu_new(const char *renderer)
+bm_menu_new(const char *renderer, bool overlap)
 {
     struct bm_menu *menu;
     if (!(menu = calloc(1, sizeof(struct bm_menu))))
@@ -58,6 +58,7 @@ bm_menu_new(const char *renderer)
     menu->key_binding = BM_KEY_BINDING_DEFAULT;
     menu->vim_mode = 'i';
     menu->vim_last_key = 0;
+    menu->overlap = overlap;
 
     uint32_t count;
     const struct bm_renderer **renderers = bm_get_renderers(&count);

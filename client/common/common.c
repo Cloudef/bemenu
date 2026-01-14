@@ -561,7 +561,7 @@ struct bm_menu*
 menu_with_options(struct client *client)
 {
     struct bm_menu *menu;
-    if (!(menu = bm_menu_new(NULL)))
+    if (!(menu = bm_menu_new(NULL, !client->no_overlap)))
         return NULL;
 
     if (client->vim_init_mode_normal) {
