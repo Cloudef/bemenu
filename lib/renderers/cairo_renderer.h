@@ -472,7 +472,7 @@ bm_cairo_paint(struct cairo *cairo, uint32_t width, uint32_t max_height, struct 
             bm_cairo_color_from_menu_color(menu, BM_COLOR_ITEM_BG, &paint.bg);
             const uint32_t sheight = out_result->height - titleh;
             cairo_set_source_rgba(cairo->cr, paint.bg.r, paint.bg.b, paint.bg.g, paint.bg.a);
-            cairo_rectangle(cairo->cr, scrollbar_w + border_size, titleh + border_size, spacing_x - scrollbar_w, sheight);
+            cairo_rectangle(cairo->cr, scrollbar_w + border_size, titleh + border_size, spacing_x - scrollbar_w - 4, sheight);
             cairo_fill(cairo->cr);
         }
 
