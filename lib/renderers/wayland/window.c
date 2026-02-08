@@ -371,9 +371,10 @@ bm_wl_window_set_width(struct window *window, struct wl_display *display, uint32
 
     window->hmargin_size = margin;
     window->width_factor = factor;
+    window->width = get_window_width(window);
 
     zwlr_layer_surface_v1_set_anchor(window->layer_surface, window->align_anchor);
-    zwlr_layer_surface_v1_set_size(window->layer_surface, get_window_width(window), window->height);
+    zwlr_layer_surface_v1_set_size(window->layer_surface, window->width, window->height);
 
     wl_surface_commit(window->surface);
     wl_display_roundtrip(display);
